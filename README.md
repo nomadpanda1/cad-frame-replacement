@@ -229,3 +229,33 @@ cp -r cad-frame-replacement <你的项目>/.workbuddy/skills/cad-frame-replaceme
   调用 `run_skill.py` / `run_multiframe.py` 等入口，按本仓库流程处理。
 - 给**其他用户 / 其他机器**用：把仓库 clone 到他们的 skills 目录即可，无需改任何代码。
 - 公司图框模板变化时，只需替换 `templates/` 下文件并重跑，skill 逻辑零改动。
+
+---
+
+## 9. 测试与持续集成（CI 回归保护）
+
+改 `lib/`、`run_*.py` 或在真实图纸上修 bug 时，**务必先跑测试**，避免误删 / 误判被悄悄带上线。
+
+### 本地跑测试
+```bash
+# 1) 装开发依赖（含 pytest；ezdxf 已在 requirements.txt）
+pip install -r requirements.txt
+
+# 2) 运行（仓库根目录，pytest.ini 已配好）
+pytest -q
+```
+- 17 个用例，全部纯函数、内存构造最小 DXF，**不依赖任何外部图纸 / 模板**，秒级跑完。
+- 覆盖重点回归点：
+  - `delete_title_strip` 白名单——**绝不误删尺寸线 / 几何 / 长格线**（最早出过 bug 的地方）；
+  - `detect_frames_hierarchical` 多图框层级检测（单框 / 拼贴含子框 / 并排多框）；
+  - `extract_frame_fields` 与字段抽取路由（比例 / 材料 / 图号 / 重量 / 图名高置信识别）。
+
+### CI 自动回归
+`.github/workflows/test.yml` 在 **push / 开 PR 时自动触发**，于 ubuntu + Python 3.13 跑 `pytest`。
+任何让测试变红的提交都会被立刻拦下，等于给「修 bug」上了回归保护。
+
+### 装包提示（环境）
+本机 pip 全局镜像（清华源）个别时段不可用，装包请改用官方源：
+```bash
+pip install -r requirements.txt -i https://pypi.org/simple
+```
