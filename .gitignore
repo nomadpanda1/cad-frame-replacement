@@ -5,6 +5,7 @@ __pycache__/
 # CAD temp / lock files
 *.dwl
 *.dwl2
+_asm_tmp.dxf
 ._asm_tmp.dxf
 *.bak
 
