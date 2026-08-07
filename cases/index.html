@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>CAD 图框批量置换 — 案例集总览</title>
+<style>
+body { font-family: "Microsoft YaHei","SimHei",sans-serif; background:#1e1e1e; color:#ddd; margin:40px; }
+h1 { color:#fff; border-bottom:2px solid #4a9eff; padding-bottom:12px; }
+a { color:#4a9eff; text-decoration:none; } a:hover { text-decoration:underline; }
+.card { background:#252526; border:1px solid #3c3c3c; border-radius:8px; padding:16px; margin:14px 0; }
+.tag { display:inline-block; background:#0e639c; color:#fff; padding:2px 8px; border-radius:4px; font-size:12px; margin-right:6px; }
+li { line-height:1.9; }
+</style>
+</head>
+<body>
+<h1>CAD 图框批量置换 — 案例集总览</h1>
+
+<div class="card">
+  <h3>📊 综合效果对比报告（推荐先看这个）</h3>
+  <ul>
+    <li><a href="report.html">report.html</a> — 含使用说明 + 全部 7 套案例前后对比图（图片为链接，需本仓库 PNG 才能显示）</li>
+    <li><a href="showcase.html">showcase.html</a> — 与上面同源，但<b>图片已 base64 内嵌</b>，单文件、可离线/单独发送</li>
+  </ul>
+</div>
+
+<div class="card">
+  <h3>🗂 各案例输入 / 输出</h3>
+  <ul>
+    <li><span class="tag">案例一</span> <a href="01_SW_parts/inputs/">输入 DXF</a> · <a href="01_SW_parts/outputs/">输出（前后对比图 + 成品）</a></li>
+    <li><span class="tag">案例二</span> <a href="02_CNG_electrical/inputs/">输入 DWG</a> · <a href="02_CNG_electrical/outputs/">输出（成品 DWG）</a></li>
+    <li><span class="tag">案例三</span> <a href="03_ESS_cad/inputs/">输入 DXF</a> · <a href="03_ESS_cad/outputs/">输出</a></li>
+    <li><span class="tag">案例四</span> <a href="04_assembly/inputs/">输入 DWG</a> · <a href="04_assembly/outputs/">输出</a></li>
+    <li><span class="tag">案例六</span> <a href="06_synth/inputs/">合成输入</a> · <a href="06_synth/outputs/">输出 + 结论(results.json)</a></li>
+    <li><span class="tag">案例七</span> <a href="07_multiframe/inputs/">合成输入</a> · <a href="07_multiframe/outputs/">输出 + 结论(results.json)</a></li>
+  </ul>
+</div>
+
+<div class="card">
+  <h3>📘 文档</h3>
+  <ul>
+    <li><a href="../README.md">README.md</a> — 项目说明与运行方式</li>
+    <li><a href="../MANUAL.md">MANUAL.md</a> — 使用手册（各策略 / 异常处理）</li>
+    <li><a href="../requirements.txt">requirements.txt</a></li>
+  </ul>
+</div>
+</body>
+</html>
