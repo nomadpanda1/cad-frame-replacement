@@ -99,3 +99,10 @@ python run_skill.py --template templates/公司图框.dxf --dry-run  samples/*.d
   用 `--fit max` 满填（横向可能略溢出进上方电路，约 2% 形变，可接受）。
 - ATTRIB 是 INSERT 的嵌套子实体，不会出现在 modelspace 顶层迭代里；校验请用
   `insert.attribs` 读取，不要用 `msp` 遍历计数。
+
+---
+
+## 7. 本分发版包含 / 不包含（打包说明）
+- **包含**：核心 `lib/`、公司图框 `templates/`、两个**完全合成、可安全外发**的演示案例 `cases/06_synth`（异常样本：多图框/嵌套标题块/缺字体/会签栏）与 `cases/07_multiframe`（多图框逐框替换），以及全部 `run_*.py`/`gen_*.py`/`make_*.py` 入口脚本与 `requirements.txt`、`.gitignore`。
+- **不包含（出于保密）**：真实图纸案例 `cases/01~04`、CNG 电气案例，以及 `input_real/`、`output_real/`、CNG 相关输入。这些用到真实设计图纸，仅适合内部使用，请勿上传到公开仓库。
+- **想跑自己的图**：把你公司的旧图纸（DXF）和图框模板放到任意目录，参照 §3 用 `run_skill.py --template <模板> <图纸...>` 运行即可。多图框逐框替换见 `run_multiframe.py`，异常样本重生成见 `gen_synth.py` / `gen_mf_samples.py`。
