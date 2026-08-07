@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.pyc
+
+# CAD temp / lock files
+*.dwl
+*.dwl2
+._asm_tmp.dxf
+*.bak
+
+# Excluded real-data & scratch (kept out of distribution)
+input_real/
+output_real/
+input_cng/
+output_cng/
+output_cng_acad/
+dxf_cng/
+samples/
+._trash/
+tpl_dwgs/
+tpl_ac1032.dxf
+test_copy_input.*
+
+# Debug / scratch scripts
+dbg_*.py
+test_*.py
+diagnose.py
+dump_tb.py
+probe_asm_out.py
+recover_dxf.py
+test_open_dxf.py
+test_sw_open.py
+generate_demo.py
+conv_dwg.py
+convert_to_dwg.py
+dwg2dxf.py
+check_tpl.py
+
+# Regenerable case outputs
+cases/**/*_HH.dxf

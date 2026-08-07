@@ -1,0 +1,21 @@
+<html><head><meta charset='utf-8'><style>body{font-family:sans-serif;background:#1e1e1e;color:#ddd}img{max-width:31%;border:1px solid #444;margin:3px;vertical-align:top}h1{color:#fff}.k{color:#9cd}table{border-collapse:collapse;margin:6px 0}td{border:1px solid #444;padding:4px 8px;font-size:13px}th{background:#333;color:#fff}</style></head><body>
+<h1>案例七 · 多图框逐框替换（生成前 / 公司模板 / 生成后）</h1>
+<p class='k'>检测多图框 → 逐框插入公司图框(HH_FRAME) → 逐框回填字段。07a 含整图纸框(只换子框)；07b 并排多框无整图纸框(全换)。</p>
+<h2>07a_tiled.dxf —— A1 整图含 3 个子图框（含整图纸框）</h2>
+<p class='k'>整图纸框(纸边): [np.float64(0.0), np.float64(0.0), np.float64(841.0), np.float64(594.0)] | 替换图框数: 3</p>
+<img src='07a_tiled_before.png'><img src='07a_tiled_template.png'><img src='07a_tiled_HH.png'>
+<table><tr><th>帧</th><th>尺寸</th><th>抽取字段</th><th>写回</th><th>删边框</th><th>删标题栏</th></tr>
+<tr><td>1</td><td>A1</td><td>{'TITLE': 'A3 零件图-减速器箱体', 'DWG_NO': 'JX-001-A3', 'SCALE': '1:2', 'STAGE': '施工图'}</td><td>['TITLE', 'DWG_NO', 'SCALE', 'STAGE']</td><td>1</td><td>12</td></tr>
+<tr><td>2</td><td>A1</td><td>{'TITLE': 'A4 明细表-螺栓清单', 'DWG_NO': 'JX-001-A4', 'SCALE': 'NTS', 'STAGE': '施工图'}</td><td>['TITLE', 'DWG_NO', 'SCALE', 'STAGE']</td><td>1</td><td>12</td></tr>
+<tr><td>3</td><td>A1</td><td>{'TITLE': 'A1 总图-管线布置(缩)', 'DWG_NO': 'JX-001-A1', 'SCALE': '1:50', 'STAGE': '初步设计'}</td><td>['TITLE', 'DWG_NO', 'SCALE', 'STAGE']</td><td>1</td><td>12</td></tr>
+</table>
+<h2>07b_side_by_side.dxf —— 4 个并排 A3 图框（无整图纸框，CNG 简化版）</h2>
+<p class='k'>整图纸框(纸边): None | 替换图框数: 4</p>
+<img src='07b_side_by_side_before.png'><img src='07b_side_by_side_template.png'><img src='07b_side_by_side_HH.png'>
+<table><tr><th>帧</th><th>尺寸</th><th>抽取字段</th><th>写回</th><th>删边框</th><th>删标题栏</th></tr>
+<tr><td>1</td><td>A4</td><td>{'TITLE': '基础平面图-区一', 'DWG_NO': 'CNG-0501/01', 'SCALE': '1:100', 'STAGE': '初步设计'}</td><td>['TITLE', 'DWG_NO', 'SCALE', 'STAGE']</td><td>1</td><td>12</td></tr>
+<tr><td>2</td><td>A4</td><td>{'TITLE': '基础平面图-区二', 'DWG_NO': 'CNG-0501/02', 'SCALE': '1:100', 'STAGE': '初步设计'}</td><td>['TITLE', 'DWG_NO', 'SCALE', 'STAGE']</td><td>1</td><td>12</td></tr>
+<tr><td>3</td><td>A4</td><td>{'TITLE': '工艺流程图-区一', 'DWG_NO': 'CNG-0501/03', 'SCALE': 'NTS', 'STAGE': '施工图'}</td><td>['TITLE', 'DWG_NO', 'SCALE', 'STAGE']</td><td>1</td><td>12</td></tr>
+<tr><td>4</td><td>A4</td><td>{'TITLE': '平面布置图-区二', 'DWG_NO': 'CNG-0501/04', 'SCALE': '1:100', 'STAGE': '建筑室'}</td><td>['TITLE', 'DWG_NO', 'SCALE', 'STAGE']</td><td>1</td><td>12</td></tr>
+</table>
+</body></html>

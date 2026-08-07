@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>CAD 图框批量置换 — 案例集</title>
+<style>
+body { font-family: "Microsoft YaHei", "SimHei", sans-serif; background: #1e1e1e; color: #ddd; margin: 40px; }
+h1 { color: #fff; border-bottom: 2px solid #4a9eff; padding-bottom: 12px; }
+h2 { color: #4a9eff; margin-top: 36px; }
+.card { background: #252526; border: 1px solid #3c3c3c; border-radius: 8px; padding: 20px; margin: 16px 0; }
+a { color: #4a9eff; text-decoration: none; }
+a:hover { text-decoration: underline; }
+.tag { display: inline-block; background: #0e639c; color: #fff; padding: 2px 8px; border-radius: 4px; font-size: 12px; margin-right: 6px; }
+ul { line-height: 1.8; }
+</style>
+</head>
+<body>
+<h1>CAD 图框批量置换 — 案例集</h1>
+<p>本页面汇总了图框自动替换流程的实测案例，每个案例均包含：原图输入、公司标准模板、生成结果、字段回填说明。</p>
+
+<div class="card">
+<h2>📊 效果对比报告（生成前 / 模板 / 生成后）</h2>
+<p><span class="tag">9 张零件图</span><span class="tag">4 图框电气图</span><span class="tag">4 张储能 ESS</span><span class="tag">1 张装配体</span><span class="tag">before/template/after</span></p>
+<p>一张页面聚合四套案例的对比效果图，含加密 DWG 修复与"无图框"鲁棒性说明。</p>
+<p><a href="report.html">👉 打开效果对比报告 report.html</a></p>
+</div>
+
+<div class="card">
+<h2>案例一：SolidWorks 导出零件图 / 装配图</h2>
+<p><span class="tag">9 张图纸</span><span class="tag">A3/A4</span><span class="tag">标准标题栏</span></p>
+<p>来源：SolidWorks 工程图导出的 DXF，图框为打散 LINE/LWPOLYLINE，标题栏为右下角 TEXT/MTEXT 网格。</p>
+<ul>
+  <li><a href="01_SW_parts/outputs/index.html">查看生成前 / 模板 / 生成后对比</a></li>
+  <li><a href="01_SW_parts/inputs/">原始 DXF 输入文件</a></li>
+  <li><a href="01_SW_parts/outputs/">生成结果（DXF + PNG）</a></li>
+</ul>
+<p>关键回填字段示例：</p>
+<ul>
+  <li>法兰(2)：图名=法兰 / 材料=PLA / 比例=2:1 / 版本=0.001</li>
+  <li>圆柱齿轮13×1(2)：图名=“圆柱齿轮” / 材料=亚克力 / 比例=2:1</li>
+  <li>龙门架：图名=龙门架 / 材料=ABS</li>
+</ul>
+</div>
+
+<div class="card">
+<h2>案例二：CNG 电气系统图（设计院图纸）</h2>
+<p><span class="tag">1 张 DWG</span><span class="tag">4 个图框</span><span class="tag">A3_WIDE / A1</span><span class="tag">会签栏</span></p>
+<p>来源：设计院电气系统图，DWG 格式，modelspace 内 4 张大坐标图框（左侧 3 个 A3_WIDE 加长、右侧 1 个 A1），右下角为会签栏。图纸含加密/代理实体，ezdxf 写回后 AutoCAD 无法打开，因此采用 AutoCAD COM 直接处理原 DWG。</p>
+<ul>
+  <li><a href="02_CNG_electrical/outputs/index.html">查看生成前 / 模板 / 生成后对比</a></li>
+  <li><a href="02_CNG_electrical/inputs/">原始 DWG/DXF 输入文件</a></li>
+  <li><a href="02_CNG_electrical/outputs/">生成结果（DWG + PNG）</a></li>
+</ul>
+<p>关键回填字段示例：</p>
+<ul>
+  <li>图框 1：低压配电系统图二 / CNG-0501/17 / 初步设计 / 建筑室</li>
+  <li>图框 2：低压配电系统图一 / CNG-0501/16 / 初步设计 / 建筑室</li>
+  <li>图框 3：10kV主接线图 / CNG-0501/15 / 初步设计 / 建筑室</li>
+  <li>图框 4：平面布置图 / CNG-0501/14 / 初步设计 / 建筑室</li>
+</ul>
+</div>
+
+<div class="card">
+<h2>案例三：储能(ESS) CAD 成果包</h2>
+<p><span class="tag">4 张 DXF</span><span class="tag">A1 幅面</span><span class="tag">标题栏右下角小条</span><span class="tag">策略一</span></p>
+<p>来源：储能 CAD 成果包（一次设备表 / 二次系统信号表 / 二次系统柜体表 / 简化主接线图）。外框为单个闭合 LWPOLYLINE（≈A1），标题栏为右下角小条含 4 个字段（图名/图号/比例/阶段），无日期/设计/审核等。走纯 ezdxf 策略一，字段自动提取并回填。</p>
+<ul>
+  <li><a href="03_ESS_cad/outputs/index.html">查看生成前 / 模板 / 生成后对比</a></li>
+  <li><a href="03_ESS_cad/inputs/">原始 DXF 输入文件</a></li>
+  <li><a href="03_ESS_cad/outputs/">生成结果（DXF + PNG）</a></li>
+</ul>
+<p>关键回填字段示例：</p>
+<ul>
+  <li>一次设备表：图名=16MW/32MWh 储能电站 一次设备表 / 图号=BESS-LST-001 / 比例=NTS / 阶段=学习/概念设计</li>
+  <li>二次系统信号表：图号=BESS-LST-003</li>
+  <li>二次系统柜体表：图号=BESS-LST-002</li>
+  <li>简化主接线图：图名=16MW/32MWh 储能电站 简化主接线图 / 图号=BESS-SLD-001</li>
+</ul>
+</div>
+
+<div class="card">
+<h2>案例四：装配体图纸（无图框 / 无标题栏）</h2>
+<p><span class="tag">1 张 DWG</span><span class="tag">A3 横放</span><span class="tag">无 TEXT 标题栏</span><span class="tag">无外框矩形</span><span class="tag">策略二</span></p>
+<p>来源：装配体图纸，二进制 DWG 无代理实体。AutoCAD COM 转 DXF 后，因原图无图框/标题栏，采用"清标题栏占位 + 插公司 A3 图框"：先删右下角 63 个零散标注，再插入 HH_FRAME_A3（14 字段均为可编辑空占位）。这是"无图框"异常场景的鲁棒性验证。</p>
+<ul>
+  <li><a href="04_assembly/outputs/index.html">查看生成前 / 模板 / 生成后对比</a></li>
+  <li><a href="04_assembly/inputs/">原始 DWG 输入文件</a></li>
+  <li><a href="04_assembly/outputs/">生成结果（DXF + PNG）</a></li>
+</ul>
+</div>
+
+<div class="card">
+<h2>案例六：合成异常样本（多图框 / 嵌套块 / 缺字体 / 会签栏差异）</h2>
+<p><span class="tag">4 个合成 DXF</span><span class="tag">程序化生成</span><span class="tag">可控可复现</span></p>
+<p>用 ezdxf 程序化生成四类异常图，验证工具鲁棒性：<b>06a 多图框混排</b>（A3/A4/A1 同图，暴露"整图幅替换、不逐框"局限）、<b>06b 嵌套块标题栏</b>（learn_template 正确穿透到含 ATTDEF 子块 ✅）、<b>06c 缺字体 SHX</b>（文字串照常抽取、渲染不崩溃 ✅）、<b>06d 会签栏差异</b>（多出"会签"列不影响 图名/图号/比例/阶段 抽取 ✅）。加密类见案例二。</p>
+<ul>
+  <li><a href="06_synth/outputs/index.html">查看生成前 / 生成后对比</a></li>
+  <li><a href="06_synth/inputs/">合成 DXF 输入（gen_synth.py 可复现）</a></li>
+  <li><a href="06_synth/outputs/results.json">各异常场景处理结论（JSON）</a></li>
+</ul>
+</div>
+
+<div class="card">
+<h2>案例七：多图框逐框替换（检测多图框 → 逐框插公司图框）</h2>
+<p><span class="tag">2 个合成 DXF</span><span class="tag">平铺多框</span><span class="tag">并排多框</span><span class="tag">逐框回填</span></p>
+<p>新开发项成果。在 <code>lib/finder.py</code> 新增 <code>detect_frames_hierarchical</code>（识别"整图纸框"为纸边、其余为替换目标；并排多框无整图纸框则全部替换），在 <code>lib/block_replace.py</code> 新增 <code>delete_frame_border</code>/<code>delete_title_strip</code>（外科手术式删除，只删该帧旧边框+右下角旧标题栏，保留图内几何）。逐框选模板尺寸 → 抽字段 → 删旧框线+标题栏 → 插公司图框(fit=max) → 回填。</p>
+<ul>
+  <li><a href="07_multiframe/outputs/index.html">查看生成前 / 模板 / 生成后对比</a></li>
+  <li><a href="07_multiframe/inputs/">合成 DXF 输入（gen_mf_samples.py 可复现）</a></li>
+  <li><a href="07_multiframe/outputs/results.json">逐框检测/抽取/回填/删除结论（JSON）</a></li>
+</ul>
+<p>关键结果：</p>
+<ul>
+  <li>07a 平铺多框：识别整图纸框(0,0)-(841,594)为纸边，3 个子图框逐框替换，字段 图名/图号/比例/阶段 全部正确回填 ✅</li>
+  <li>07b 并排多框：无整图纸框（CNG 简化版），4 个 A3 图框逐框替换，全部成功 ✅</li>
+</ul>
+</div>
+
+</body>
+</html>

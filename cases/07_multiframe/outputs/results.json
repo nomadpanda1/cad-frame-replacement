@@ -1,0 +1,182 @@
+{
+  "07a_tiled.dxf": {
+    "说明": "A1 整图含 3 个子图框（含整图纸框）",
+    "整图纸框(纸边)": [
+      0.0,
+      0.0,
+      841.0,
+      594.0
+    ],
+    "检测到需替换的图框数": 3,
+    "逐框结果": [
+      {
+        "frame": [
+          20.0,
+          300.0,
+          440.0,
+          570.0
+        ],
+        "size": "A1",
+        "fields": {
+          "TITLE": "A3 零件图-减速器箱体",
+          "DWG_NO": "JX-001-A3",
+          "SCALE": "1:2",
+          "STAGE": "施工图"
+        },
+        "written": [
+          "TITLE",
+          "DWG_NO",
+          "SCALE",
+          "STAGE"
+        ],
+        "del_border": 1,
+        "del_strip": 12
+      },
+      {
+        "frame": [
+          460.0,
+          300.0,
+          757.0,
+          510.0
+        ],
+        "size": "A1",
+        "fields": {
+          "TITLE": "A4 明细表-螺栓清单",
+          "DWG_NO": "JX-001-A4",
+          "SCALE": "NTS",
+          "STAGE": "施工图"
+        },
+        "written": [
+          "TITLE",
+          "DWG_NO",
+          "SCALE",
+          "STAGE"
+        ],
+        "del_border": 1,
+        "del_strip": 12
+      },
+      {
+        "frame": [
+          20.0,
+          20.0,
+          420.0,
+          280.0
+        ],
+        "size": "A1",
+        "fields": {
+          "TITLE": "A1 总图-管线布置(缩)",
+          "DWG_NO": "JX-001-A1",
+          "SCALE": "1:50",
+          "STAGE": "初步设计"
+        },
+        "written": [
+          "TITLE",
+          "DWG_NO",
+          "SCALE",
+          "STAGE"
+        ],
+        "del_border": 1,
+        "del_strip": 12
+      }
+    ]
+  },
+  "07b_side_by_side.dxf": {
+    "说明": "4 个并排 A3 图框（无整图纸框，CNG 简化版）",
+    "整图纸框(纸边)": null,
+    "检测到需替换的图框数": 4,
+    "逐框结果": [
+      {
+        "frame": [
+          20.0,
+          320.0,
+          420.0,
+          620.0
+        ],
+        "size": "A4",
+        "fields": {
+          "TITLE": "基础平面图-区一",
+          "DWG_NO": "CNG-0501/01",
+          "SCALE": "1:100",
+          "STAGE": "初步设计"
+        },
+        "written": [
+          "TITLE",
+          "DWG_NO",
+          "SCALE",
+          "STAGE"
+        ],
+        "del_border": 1,
+        "del_strip": 12
+      },
+      {
+        "frame": [
+          440.0,
+          320.0,
+          840.0,
+          620.0
+        ],
+        "size": "A4",
+        "fields": {
+          "TITLE": "基础平面图-区二",
+          "DWG_NO": "CNG-0501/02",
+          "SCALE": "1:100",
+          "STAGE": "初步设计"
+        },
+        "written": [
+          "TITLE",
+          "DWG_NO",
+          "SCALE",
+          "STAGE"
+        ],
+        "del_border": 1,
+        "del_strip": 12
+      },
+      {
+        "frame": [
+          20.0,
+          20.0,
+          420.0,
+          320.0
+        ],
+        "size": "A4",
+        "fields": {
+          "TITLE": "工艺流程图-区一",
+          "DWG_NO": "CNG-0501/03",
+          "SCALE": "NTS",
+          "STAGE": "施工图"
+        },
+        "written": [
+          "TITLE",
+          "DWG_NO",
+          "SCALE",
+          "STAGE"
+        ],
+        "del_border": 1,
+        "del_strip": 12
+      },
+      {
+        "frame": [
+          440.0,
+          20.0,
+          840.0,
+          320.0
+        ],
+        "size": "A4",
+        "fields": {
+          "TITLE": "平面布置图-区二",
+          "DWG_NO": "CNG-0501/04",
+          "SCALE": "1:100",
+          "STAGE": "建筑室"
+        },
+        "written": [
+          "TITLE",
+          "DWG_NO",
+          "SCALE",
+          "STAGE"
+        ],
+        "del_border": 1,
+        "del_strip": 12
+      }
+    ]
+  }
+}
