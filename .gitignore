@@ -38,3 +38,6 @@ check_tpl.py
 
 # Regenerable case outputs
 cases/**/*_HH.dxf
+
+# leftover untracked (excluded from distribution)
+cases/02_CNG_electrical/
