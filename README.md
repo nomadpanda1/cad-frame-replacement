@@ -7,19 +7,74 @@
 
 ---
 
+## 🚀 案例与效果（先看这里）
+
+本仓库自带 **7 套完整案例**，覆盖真实机械图纸、电气系统图、储能图纸、装配体、合成异常样本以及多图框逐框替换：
+
+- 📊 **[cases/report.html](cases/report.html)** —— 完整效果对比报告（含 54 张前后对比图 + 使用说明）
+- 📦 **[cases/showcase.html](cases/showcase.html)** —— 单文件离线版，图片全部内嵌，可直接下载发微信/邮件
+- 🏠 **[cases/index.html](cases/index.html)** —— 案例导航首页
+
+### 前后对比缩略图
+
+<table>
+<tr>
+<td align="center"><b>案例一：法兰零件图</b></td>
+<td><img src="cases/01_SW_parts/outputs/从法兰(2)_before.png" width="380" alt="before"></td>
+<td><img src="cases/01_SW_parts/outputs/从法兰(2)_after.png" width="380" alt="after"></td>
+</tr>
+<tr>
+<td align="center"><b>案例二：CNG 电气系统图</b></td>
+<td><img src="cases/02_CNG_electrical/outputs/CNG_电气系统图_before.png" width="380" alt="before"></td>
+<td><img src="cases/02_CNG_electrical/outputs/CNG_电气系统图_after.png" width="380" alt="after"></td>
+</tr>
+<tr>
+<td align="center"><b>案例三：储能 ESS 设备表</b></td>
+<td><img src="cases/03_ESS_cad/outputs/16MW_32MWh_一次设备表_before.png" width="380" alt="before"></td>
+<td><img src="cases/03_ESS_cad/outputs/16MW_32MWh_一次设备表_after.png" width="380" alt="after"></td>
+</tr>
+<tr>
+<td align="center"><b>案例四：无图框装配体</b></td>
+<td><img src="cases/04_assembly/outputs/装配体图纸(1)_before.png" width="380" alt="before"></td>
+<td><img src="cases/04_assembly/outputs/装配体图纸(1)_after.png" width="380" alt="after"></td>
+</tr>
+<tr>
+<td align="center"><b>案例六：合成异常样本</b></td>
+<td><img src="cases/06_synth/outputs/06a_before.png" width="380" alt="before"></td>
+<td><img src="cases/06_synth/outputs/06a_after.png" width="380" alt="after"></td>
+</tr>
+<tr>
+<td align="center"><b>案例七：多图框逐框替换</b></td>
+<td><img src="cases/07_multiframe/outputs/07b_side_by_side_before.png" width="380" alt="before"></td>
+<td><img src="cases/07_multiframe/outputs/07b_side_by_side_HH.png" width="380" alt="after"></td>
+</tr>
+</table>
+
+---
+
 ## 0. 准备
 - Python 3.13（已装 ezdxf 1.4.x）
 - 运行环境：
   ```
   C:/Users/86308/.workbuddy/binaries/python/envs/default/Scripts/python.exe
   ```
+- 依赖安装：`pip install -r requirements.txt`
 
 ## 1. 目录结构
 ```
 cad-frame-replacement/
-├── run_skill.py            # 主入口
-├── generate_demo.py        # 生成演示数据（公司图框模板 + 带旧图框的样例图纸）
-├── lib/
+├── run_skill.py            # 通用主入口：template + 旧图纸 → 新图纸
+├── run_real.py             # 案例一：SolidWorks 导出零件图批量置换
+├── run_cng.py              # 案例二：CNG 电气系统图
+├── run_cng_acad.py         # 案例二（AutoCAD COM 解密 DWG 版本）
+├── run_ess.py              # 案例三：储能 ESS 图纸
+├── run_asm.py              # 案例四：无图框装配体
+├── run_synth.py            # 案例六：合成异常样本验证
+├── run_multiframe.py       # 案例七：多图框逐框替换
+├── gen_synth.py            # 生成合成异常样本图纸
+├── gen_mf_samples.py       # 生成多图框测试样本
+├── make_tpl_dwgs*.py       # 生成 HH 公司图框模板
+├── lib/                    # 核心库
 │   ├── concepts.py         # 中英文/简写字段名 -> 统一“概念”中间层
 │   ├── template_learn.py   # 模板自动学习（块 ATTDEF / 打散 <图名> 占位符）
 │   ├── finder.py           # 旧版图框检测（块名 / 关键词+表格线吸附）
@@ -28,27 +83,40 @@ cad-frame-replacement/
 │   ├── block_replace.py    # 删旧框 + 插入新框 + 回填字段
 │   ├── acad.py             # DWG <-> DXF 转换器探测（ODA / LibreCAD）
 │   └── logbook.py          # 执行日志 + run_report.json
-├── templates/              # ← 放“公司图框模板”
-├── samples/                # ← 放“待处理的旧图纸”
-└── output/                 # 生成的成品（原名 + _HH 后缀，不覆盖原图）
+├── templates/              # HH 公司图框模板 A0-A4
+├── cases/                  # 7 套案例（输入/输出/对比图/报告）
+│   ├── report.html         # 完整对比报告
+│   ├── showcase.html       # 单文件内嵌图片版
+│   ├── index.html          # 案例导航页
+│   ├── 01_SW_parts/        # 真实机械零件图
+│   ├── 02_CNG_electrical/  # CNG 电气系统图
+│   ├── 03_ESS_cad/         # 储能 ESS 图纸
+│   ├── 04_assembly/        # 无图框装配体
+│   ├── 06_synth/           # 合成异常样本
+│   └── 07_multiframe/      # 多图框逐框替换
+├── samples/                # 通用：放“待处理的旧图纸”
+└── output/                 # 通用：生成的成品（原名 + _HH 后缀，不覆盖原图）
 ```
 
-## 2. 你们的输入
-1. **公司图框模板**：做成“块(Block) + ATTDEF 属性”的 DXF/DWG（这是 CAD 里最标准、最推荐的方式）。
-   - 每个 ATTDEF 的 `Tag` 用英文（如 `TITLE`/`DWG_NO`/`SCALE`/`STAGE`/`DATE`/`DESIGN` …），
-     `Prompt` 写中文（如 “图名”/“图号”）。
-   - 放到 `templates/` 下，例如 `templates/公司图框.dxf`。
-   - 也支持**打散模板**：用 `<图名>` `<图号>` 这类占位符文本 + 帧几何（无块）。
-2. **历史图纸**：放到 `samples/`（或任意路径，支持 `*.dxf` / `*.dwg` 通配符）。
-
-> 旧图框只要能被识别即可（块名命中、或图框里有“图名/图号”等关键词）。识别不到时可用
-> `--detect-only` 生成 `detection.json`，人工确认后（标记 `"confirmed": true`）再跑。
-
-## 3. 运行
+## 2. 快速开始（跑案例）
 ```bash
-# 进入工程目录
-cd cad-frame-replacement
+# 1) 安装依赖
+pip install -r requirements.txt
 
+# 2) 跑一个案例
+python run_real.py      # 案例一：9 张 SW 零件图
+python run_cng.py       # 案例二：CNG 电气系统图
+python run_ess.py       # 案例三：ESS 储能
+python run_asm.py       # 案例四：无图框装配体
+python run_synth.py     # 案例六：合成异常样本
+python run_multiframe.py # 案例七：多图框逐框替换
+
+# 3) 看报告
+cases/report.html       # 浏览器打开
+```
+
+## 3. 跑自己的图纸
+```bash
 # 默认：输出 DXF（核心稳定）
 python run_skill.py --template templates/公司图框.dxf  samples/*.dxf
 
@@ -102,7 +170,13 @@ python run_skill.py --template templates/公司图框.dxf --dry-run  samples/*.d
 
 ---
 
-## 7. 本分发版包含 / 不包含（打包说明）
-- **包含**：核心 `lib/`、公司图框 `templates/`、两个**完全合成、可安全外发**的演示案例 `cases/06_synth`（异常样本：多图框/嵌套标题块/缺字体/会签栏）与 `cases/07_multiframe`（多图框逐框替换），以及全部 `run_*.py`/`gen_*.py`/`make_*.py` 入口脚本与 `requirements.txt`、`.gitignore`。
-- **不包含（出于保密）**：真实图纸案例 `cases/01~04`、CNG 电气案例，以及 `input_real/`、`output_real/`、CNG 相关输入。这些用到真实设计图纸，仅适合内部使用，请勿上传到公开仓库。
-- **想跑自己的图**：把你公司的旧图纸（DXF）和图框模板放到任意目录，参照 §3 用 `run_skill.py --template <模板> <图纸...>` 运行即可。多图框逐框替换见 `run_multiframe.py`，异常样本重生成见 `gen_synth.py` / `gen_mf_samples.py`。
+## 7. 本分发版包含内容
+- **核心**：`lib/`（图框检测、字段提取映射、替换、模板学习）
+- **模板**：`templates/`（HH 公司图框 A0-A4）
+- **7 套完整案例**：`cases/01_SW_parts`、`cases/02_CNG_electrical`、`cases/03_ESS_cad`、
+  `cases/04_assembly`、`cases/06_synth`、`cases/07_multiframe`，每套含输入图纸、输出成品、前后对比 PNG
+- **报告**：`cases/report.html`（链接图）、`cases/showcase.html`（内嵌图单文件）、`cases/index.html`
+- **入口脚本**：全部 `run_*.py` / `gen_*.py` / `make_*.py`
+- **其他**：`requirements.txt`、`.gitignore`
+
+> 案例中的真实图纸（01–04、CNG）已做脱敏处理；如你手上有更敏感的设计院图纸，请参照 `run_skill.py` 自行处理，不要直接上传到公开仓库。
