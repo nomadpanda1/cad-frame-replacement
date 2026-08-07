@@ -50,27 +50,101 @@ def dwg_to_dxf(src_dwg, dst_dxf):
 
 
 def clear_title_block_zone(doc, zone, pad=2.0):
-    """装配体这类'无图框/无标题栏'图纸：原图在标题栏区域仅有零散标注/尺寸文本，
-    插入公司标题栏前，先把该矩形内的原始实体清掉，避免与公司标题栏重叠。"""
+    """装配体这类'无图框但有标题栏/明细表'图纸：插入公司图框前，只清理旧标题栏
+    文字与旧标题框闭合矩形。绝不碰线/几何/尺寸/BOM 表（避免误删真实数据）。
+
+    白名单策略：
+      - TEXT/MTEXT/ATTDEF（标题文字）：删
+      - 闭合矩形 LWPOLYLINE/POLYLINE（旧标题框）：删
+      - 线/弧/圆/填充/块/尺寸标注 等其它一切：全部保留
+    """
     msp = doc.modelspace()
     zx0, zy0, zx1, zy1 = zone
     zx0 -= pad; zy0 -= pad; zx1 += pad; zy1 += pad
+
+    def _fully_in(b):
+        return (b.extmin.x >= zx0 - 1 and b.extmax.x <= zx1 + 1 and
+                b.extmin.y >= zy0 - 1 and b.extmax.y <= zy1 + 1)
+
+    def _closed(e):
+        try:
+            if e.dxftype() == "LWPOLYLINE":
+                return bool(e.closed)
+            if e.dxftype() == "POLYLINE":
+                return bool(e.is_closed)
+        except Exception:
+            return False
+        return False
+
     n = 0
     for e in list(msp):
         dt = e.dxftype()
-        if dt not in ("LINE", "LWPOLYLINE", "POLYLINE", "ARC", "CIRCLE",
-                     "TEXT", "MTEXT", "INSERT", "ATTDEF", "DIMENSION"):
+        if dt in ("TEXT", "MTEXT", "ATTDEF"):
+            try:
+                b = bbox_mod.extents([e])
+            except Exception:
+                continue
+            if b and b.has_data and _fully_in(b):
+                msp.delete_entity(e); n += 1
+            continue
+        if dt in ("LWPOLYLINE", "POLYLINE") and _closed(e):
+            try:
+                b = bbox_mod.extents([e])
+            except Exception:
+                continue
+            if b and b.has_data and _fully_in(b):
+                msp.delete_entity(e); n += 1
+            continue
+        # 其它（LINE/ARC/CIRCLE/DIMENSION/INSERT/...）：全部保留
+    return n
+
+
+def insert_frame_only(doc, tpl_path, sheet_bbox):
+    """只插公司图框的'外框'，不插标题栏——用于图纸已有标题栏/明细表时，
+    保留原标题栏内容，只补一圈公司框边界。"""
+    # 用稳定落地的 .bak 占位（safe-delete shim 会直接删掉 tempfile 的临时文件，
+    # 导致后续 learn_template 读取时文件已消失）；删除失败则忽略，不影响流程。
+    tmp = os.path.join(HERE, "_frame_only.bak")
+    tdoc = ezdxf.readfile(tpl_path)
+    tmsp = tdoc.modelspace()
+    # 模板坐标下标题栏大致区域（A3 约 x∈[200,420] y∈[0,70]），删掉标题栏实体
+    for e in list(tmsp):
+        try:
+            b = bbox_mod.extents([e])
+        except Exception:
+            continue
+        if b and b.has_data and b.extmin.x >= 195 and b.extmax.x <= 425 \
+                and b.extmin.y >= 0 and b.extmax.y <= 72:
+            tmsp.delete_entity(e)
+    tdoc.saveas(tmp)
+    template = template_learn.learn_template(tmp)
+    try:
+        os.remove(tmp)
+    except OSError:
+        pass  # safe-delete shim 拦截时忽略（占位文件）
+    region = {"bbox": sheet_bbox, "confidence": 1.0, "method": "frame",
+              "source": "sheet", "entity": None}
+    ins, written = block_replace.insert_template(doc, template, region, {}, fit="max")
+    return ins, written
+
+
+def title_zone_has_content(doc, zone, pad=2.0):
+    """统计标题区内实体数，判断是否已存在标题栏/明细表（避免清掉真实内容）。"""
+    zx0, zy0, zx1, zy1 = zone
+    zx0 -= pad; zy0 -= pad; zx1 += pad; zy1 += pad
+    n = 0
+    for e in doc.modelspace():
+        if e.dxftype() not in ("TEXT", "MTEXT", "ATTDEF", "LWPOLYLINE",
+                               "POLYLINE", "LINE", "INSERT"):
             continue
         try:
             b = bbox_mod.extents([e])
         except Exception:
             continue
-        if not b or not b.has_data:
+        if not (b and b.has_data):
             continue
-        eb = (b.extmin.x, b.extmin.y, b.extmax.x, b.extmax.y)
-        # 实体与标题栏矩形相交即删除
-        if eb[2] >= zx0 and eb[0] <= zx1 and eb[3] >= zy0 and eb[1] <= zy1:
-            msp.delete_entity(e)
+        if (b.extmin.x >= zx0 - 1 and b.extmax.x <= zx1 + 1 and
+                b.extmin.y >= zy0 - 1 and b.extmax.y <= zy1 + 1):
             n += 1
     return n
 
@@ -133,13 +207,21 @@ def main():
         tblk = (235, 6, 415, 62)  # 兜底：HH A3 标题栏默认范围
     print("title-block zone (template coords):", [round(v, 1) for v in tblk])
 
-    n = clear_title_block_zone(doc, tblk)
-    print("cleared title-block-zone entities:", n)
-
-    # 插公司图框
-    region = {"bbox": sheet, "confidence": 1.0, "method": "frame", "source": "sheet", "entity": None}
-    ins, written = block_replace.insert_template(doc, template, region, {}, fit="max")
-    print("inserted", ins, "written", written)
+    n_zone = title_zone_has_content(doc, tblk)
+    print("title-zone entity count:", n_zone)
+    if n_zone > 6:
+        # 标题区已有标题栏/明细表 -> 只加外框，保留原标题栏（不丢数据）
+        ins, written = insert_frame_only(doc, TPL, sheet)
+        mode = "只加外框(保留原标题栏)"
+    else:
+        # 真空白 -> 白名单清区后插整框
+        n = clear_title_block_zone(doc, tblk)
+        print("cleared title-block-zone entities:", n)
+        region = {"bbox": sheet, "confidence": 1.0, "method": "frame",
+                  "source": "sheet", "entity": None}
+        ins, written = block_replace.insert_template(doc, template, region, {}, fit="max")
+        mode = "清空+整框插入"
+    print("inserted", ins, "written", written, "| mode:", mode)
 
     out_dxf = os.path.join(OUT_DIR, base + "_HH.dxf")
     doc.saveas(out_dxf)

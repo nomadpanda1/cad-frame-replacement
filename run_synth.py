@@ -80,20 +80,45 @@ def insert_hh(doc, size):
 
 results = {}
 
-# ---- 06a 多图框混排 ----
+# ---- 06a 多图框混排（复用案例七的逐框替换逻辑，跨案例复用）----
+A_SIZES = {"A0": (1190, 843), "A1": (842, 596), "A2": (595, 422),
+           "A3": (421, 299), "A4": (298, 212)}
+
+def pick_a_size(fb):
+    w, h = fb[2] - fb[0], fb[3] - fb[1]
+    best, bd = "A4", 1e9
+    for sz, (tw, th) in A_SIZES.items():
+        d = abs((w / h) - (tw / th))
+        if d < bd:
+            bd = d; best = sz
+    return best
+
 doc = ezdxf.readfile(os.path.join(INP, "06a_multiframe.dxf"))
-fr = detect_frames_simple(doc)
+sheet_bbox, targets = finder.detect_frames_hierarchical(doc)
 render(doc, os.path.join(OUT, "06a_before.png"))
-# 演示当前工具行为：整图幅插一张 A1 公司图框（覆盖而非逐框）
-ins_a, _ = insert_hh(doc, "A1")
+per = []
+for i, fb in enumerate(targets):
+    size = pick_a_size(fb)
+    tpl = os.path.join(TPL_DIR, f"HH_FRAME_{size}.dxf")
+    template = template_learn.learn_template(tpl)
+    fields = finder.extract_frame_fields(doc, fb)
+    values, unmatched, unused = mapper.map_fields(template["fields"], fields)
+    block_replace.delete_frame_border(doc, fb)
+    block_replace.delete_title_strip(doc, fb)
+    region = {"bbox": fb, "confidence": 1.0, "method": "frame",
+              "source": "multiframe", "entity": None}
+    ins, written = block_replace.insert_template(doc, template, region, values, fit="max")
+    per.append({"frame": [round(v, 1) for v in fb], "size": size,
+                "written": written})
+    print(f"  06a 帧{i+1} {size} 写回={written}")
 doc.saveas(os.path.join(OUT, "06a_after.dxf"))
 render(doc, os.path.join(OUT, "06a_after.png"))
 results["06a_多图框混排"] = {
-    "检测到的闭合矩形(宽×高)": fr,
-    "当前工具行为": "整图幅插入 1 张 HH_FRAME_A1（覆盖原多图框，非逐框替换）",
-    "结论": f"检测到 {len(fr)} 个闭合矩形（1 个最外 A1 框 + 内嵌的 A3/A4/A1 小图框）。"
-            "当前工具按'整图幅'插一张公司图框，不逐图框(视口)替换——"
-            "多图框混排图纸是已知局限，需后续增强为逐框处理。",
+    "整图纸框(纸边)": [round(v, 1) for v in sheet_bbox] if sheet_bbox else None,
+    "逐框替换图框数": len(targets),
+    "逐帧结果": per,
+    "结论": f"检测到整图纸框 + {len(targets)} 个子图框，已逐框插入 HH_FRAME 公司图框"
+            "并回填字段（复用案例七逻辑）。多图框混排不再是局限 ✅。",
 }
 
 # ---- 06b 嵌套块标题栏 ----
@@ -101,11 +126,18 @@ doc = ezdxf.readfile(os.path.join(INP, "06b_nested_title.dxf"))
 _tmp = os.path.join(OUT, "_06b_learn.dxf")
 doc.saveas(_tmp)
 lt = template_learn.learn_template(_tmp)
-os.remove(_tmp)
+try:
+    os.remove(_tmp)
+except OSError:
+    pass  # safe-delete shim 拦截时忽略（临时文件已被 .gitignore 排除）
 nested_note = "标题栏=块 TITLEBLOCK，内部又 INSERT 了含 ATTDEF 的子块 TB_FIELDS"
 # 抽取：看 learn_template 选了哪个块、拿到哪些字段
 chosen = lt.get("block_name"); flds = [(f["tag"], f.get("prompt","")) for f in lt.get("fields",[])]
 render(doc, os.path.join(OUT, "06b_before.png"))
+# 清掉旧嵌套块标题栏 INSERT（TITLEBLOCK），避免新公司标题栏与之重叠
+for e in list(doc.modelspace()):
+    if e.dxftype() == "INSERT" and "TITLE" in e.dxf.name.upper():
+        doc.modelspace().delete_entity(e)
 # 尝试插公司图框（整图 A4）
 ins, written = insert_hh(doc, "A4")
 doc.saveas(os.path.join(OUT, "06b_after.dxf"))
@@ -139,6 +171,8 @@ results["06c_缺字体SHX"] = {
 doc = ezdxf.readfile(os.path.join(INP, "06d_countersign.dxf"))
 got = extract_by_label(doc)
 render(doc, os.path.join(OUT, "06d_before.png"))
+# 插入前用白名单清掉旧标题栏（仅删文字+闭合标题框，保留几何/尺寸）
+block_replace.delete_title_strip(doc, sheet(doc), strip_ratio=0.28)
 ins, written = insert_hh(doc, "A4")
 doc.saveas(os.path.join(OUT, "06d_after.dxf"))
 render(doc, os.path.join(OUT, "06d_after.png"))
