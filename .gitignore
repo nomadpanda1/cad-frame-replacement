@@ -44,3 +44,7 @@ cases/**/*_HH.dxf
 # 脚本临时占位文件
 _frame_only.bak
 _06b_learn.dxf
+
+# 上面的 test_*.py 仅用于排除仓库根目录的调试脚本；tests/ 下的正式单测需纳入版本控制
+!tests/
+!tests/**/test_*.py

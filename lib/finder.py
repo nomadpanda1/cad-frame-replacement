@@ -267,7 +267,7 @@ def extract_frame_fields(doc, frame_bbox, concepts=("TITLE", "DWG_NO", "SCALE", 
             for cx, cy, raw in items:
                 n = _norm(raw)
                 if al in n and (":" in raw or "：" in raw):
-                    val = re.split(r"[:：]", raw, 1)[-1].strip()
+                    val = re.split(r"[:：]", raw, maxsplit=1)[-1].strip()
                     if val:
                         fields[concept] = val
                         matched = True
