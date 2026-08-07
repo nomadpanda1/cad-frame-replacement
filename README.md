@@ -192,3 +192,40 @@ python run_skill.py --template templates/公司图框.dxf --dry-run  samples/*.d
 - **其他**：`requirements.txt`、`.gitignore`
 
 > 案例中的真实图纸（01–04、CNG）已做脱敏处理；如你手上有更敏感的设计院图纸，请参照 `run_skill.py` 自行处理，不要直接上传到公开仓库。
+
+---
+
+## 8. 把这个仓库当作 WorkBuddy Skill 装载（给他人 / 其他智能体用）
+
+本仓库根目录已包含 `SKILL.md`，因此**克隆到本地后即可被 WorkBuddy 当作 skill 直接调用**
+（对话里说"帮我换图框""图框置换"会自动触发）。
+
+> ⚠️ GitHub 仓库**不能**被 WorkBuddy 直接"装载"——它只是源码托管。必须先把仓库放到
+> WorkBuddy 的 skills 目录下，或使用"文件夹导入"。
+
+### 方式 A：放到 skills 目录（推荐）
+
+```bash
+# 1) 克隆（或下载 ZIP 解压）
+git clone https://github.com/nomadpanda1/cad-frame-replacement.git
+
+# 2) 放到以下任一目录（目录名即 skill 名，可保持原名）
+#    个人全局（所有项目可用）：
+cp -r cad-frame-replacement ~/.workbuddy/skills/cad-frame-replacement
+#    或仅当前项目（团队协作）：
+cp -r cad-frame-replacement <你的项目>/.workbuddy/skills/cad-frame-replacement
+
+# 3) 重启 WorkBuddy（或刷新），即可在对话中调用
+```
+
+### 方式 B：文件夹导入
+
+打开 WorkBuddy 左侧「技能中心 / Skills」→ 添加技能 → 文件夹导入 → 选择克隆下来的
+`cad-frame-replacement` 文件夹 → 确认。
+
+### 装载后效果
+
+- 对话中输入"把这套旧图纸换成公司图框""批量换图框"等，WorkBuddy 会读取 `SKILL.md` 并
+  调用 `run_skill.py` / `run_multiframe.py` 等入口，按本仓库流程处理。
+- 给**其他用户 / 其他机器**用：把仓库 clone 到他们的 skills 目录即可，无需改任何代码。
+- 公司图框模板变化时，只需替换 `templates/` 下文件并重跑，skill 逻辑零改动。
