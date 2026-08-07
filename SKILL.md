@@ -7,7 +7,7 @@ agent_created: true
 # CAD 图框批量置换
 
 把历史 CAD 图纸上的旧图框换成公司标准图框，并无损迁移标题栏字段。支持批量处理、模板可换
-（重跑即换、零改码）、多图框逐框替换、无图框装配体、合成异常样本。纯 ezdxf 离线核心，
+（重跑即换、零改码）、多图框逐框替换（已用真实图纸拼接验证）、无图框装配体、合成异常样本。纯 ezdxf 离线核心，
 不依赖 AutoCAD。
 
 ## 何时使用
@@ -47,6 +47,7 @@ python run_skill.py --template templates/[公司图框].dxf [旧图纸...]
 | `run_asm.py` | 案例四：无图框装配体（白名单保护，保留原 BOM / 标题栏） |
 | `run_synth.py` | 案例六：合成异常样本（多图框 / 嵌套块 / 缺字体 / 会签栏） |
 | `run_multiframe.py` | 案例七：多图框逐框检测 → 逐框插公司框 → 逐框回填 |
+| `gen_real_mf.py` + `run_real_mf.py` | 案例八：4 张真实 ESS A1 拼成 2×2 多图框，跑真实内容端到端验证 |
 
 ## 核心库（lib/）
 
@@ -62,7 +63,11 @@ python run_skill.py --template templates/[公司图框].dxf [旧图纸...]
   检测到标题区已有内容时只加外框、保留原内容（案例四已验证零数据丢失）。
 - `--fit max` 满填约 2% 形变；默认 `min` 保比例居中。
 - 多图框图纸用 `run_multiframe.py` 逐框处理；整图幅插框会遗漏子图框。
+- `extract_frame_fields` 的标题区必须**四边有界**（`fx0+0.45W ≤ cx ≤ fx1` 且 `fy0 ≤ cy ≤ fy0+0.60H`）。
+  只卡左 / 上两边会变成无限象限，多图框时把邻框标题吸进来造成字段串框（案例八发现并修复，已有回归单测）。
 - ATTRIB 是 INSERT 的嵌套子实体，校验请用 `insert.attribs` 读取，勿用 modelspace 顶层遍历计数。
+- ezdxf 的 `DXFGraphic.translate(dx, dy, dz)` 三个参数都必填，少传 `dz` 会 `TypeError`；
+  批量搬移实体时别用裸 `try/except pass` 包住，否则失败被静默吞掉、图形原地不动。
 
 ## 参考文档
 
