@@ -62,7 +62,8 @@ python run_skill.py --template templates/[公司图框].dxf [旧图纸...]
 - 标题栏清理用白名单：仅删除文字与旧标题框闭合矩形，绝不触碰 DIMENSION / 线 / 几何 / BOM。
   检测到标题区已有内容时只加外框、保留原内容（案例四已验证零数据丢失）。
 - `--fit max` 满填约 2% 形变；默认 `min` 保比例居中。
-- 多图框图纸用 `run_multiframe.py` 逐框处理；整图幅插框会遗漏子图框。
+- 多图框图纸用通用入口 `run_skill.py --mode multi`（或默认 `--mode auto`，检出 ≥2 框即自动逐框）逐框处理；
+  整图幅插一张框会遗漏子图框。`run_multiframe.py` 是案例七的传统入口，效果等价。
 - `extract_frame_fields` 的标题区必须**四边有界**（`fx0+0.45W ≤ cx ≤ fx1` 且 `fy0 ≤ cy ≤ fy0+0.60H`）。
   只卡左 / 上两边会变成无限象限，多图框时把邻框标题吸进来造成字段串框（案例八发现并修复，已有回归单测）。
 - ATTRIB 是 INSERT 的嵌套子实体，校验请用 `insert.attribs` 读取，勿用 modelspace 顶层遍历计数。

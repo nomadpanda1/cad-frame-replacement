@@ -50,6 +50,45 @@ def ezdxf_read(p):
     return ezdxf.readfile(p)
 
 
+def _plan_frames(doc, mode):
+    """决定这张图走单框还是多图框逐框替换。
+
+    返回 (use_multi, sheet_bbox, targets)。auto 模式下只有检出 >= 2 个图框才走多框分支，
+    单框图纸继续走原来的 find_titleblocks 逻辑，保证向后兼容。
+    """
+    if mode == "single":
+        return False, None, []
+    sheet, targets = finder.detect_frames_hierarchical(doc)
+    if mode == "multi":
+        return bool(targets), sheet, targets
+    return len(targets) >= 2, sheet, targets
+
+
+def _process_multiframe(doc, template, targets, override, fit):
+    """逐框替换：每个图框各自提取字段、删旧边框与旧标题栏、插入公司图框并回填。
+
+    与整图幅插一张框的老路径相比，这条路径才能正确处理一个 DXF 里排布多个图框的图纸。
+    """
+    mappings = []
+    all_written = []
+    total_del = 0
+    for i, fb in enumerate(targets):
+        fields = finder.extract_frame_fields(doc, fb)
+        values, unmatched, unused = mapper.map_fields(template["fields"], fields, override)
+        ndel = block_replace.delete_frame_border(doc, fb)
+        ndel += block_replace.delete_title_strip(doc, fb)
+        total_del += ndel
+        region = {"bbox": fb, "confidence": 1.0, "method": "frame",
+                  "source": "multiframe", "entity": None}
+        _, written = block_replace.insert_template(doc, template, region, values, fit=fit)
+        all_written += written
+        mappings.append({"region": [round(v, 1) for v in fb], "extracted": fields,
+                         "unmatched": unmatched, "unused": unused, "written": written})
+        print("   帧%d bbox=%s 字段=%s 回填=%s 删 %d 旧实体" % (
+            i + 1, [float(round(v, 1)) for v in fb], fields, written, ndel))
+    return mappings, all_written, total_del
+
+
 def main():
     ap = argparse.ArgumentParser(description="CAD 图框批量置换")
     ap.add_argument("inputs", nargs="+", help="源图纸（支持 *.dxf / *.dwg 或通配符）")
@@ -63,6 +102,8 @@ def main():
                     help="新框缩放方式：min 保比例居中(默认) / max 满填 / width 按宽 / height 按高")
     ap.add_argument("--margin", type=float, default=5.0, help="打散图框删除边距")
     ap.add_argument("--override", default="", help="字段映射覆盖 JSON，如 {\"TITLE\":\"OLD_TITLE\"}")
+    ap.add_argument("--mode", default="auto", choices=["auto", "single", "multi"],
+                    help="auto 自动判断单框/多图框(默认) / single 强制整图幅一张框 / multi 强制逐框替换")
     args = ap.parse_args()
 
     os.makedirs(args.out, exist_ok=True)
@@ -103,19 +144,34 @@ def main():
         try:
             doc, work_path, is_dwg_in = _load_doc(src, conv_info)
             before = _count_entities(doc)
-            regions = finder.find_titleblocks(doc)
-            rec["found"] = len(regions)
-            print("   检测到标题栏: %d 个" % len(regions))
-            for i, r in enumerate(regions):
-                print("     [%d] 置信度 %.2f 方法=%s 源=%s bbox=%s" % (
-                    i, r["confidence"], r["method"], r["source"], [round(x, 1) for x in r["bbox"]]))
+
+            use_multi, sheet_bbox, targets = _plan_frames(doc, args.mode)
+            rec["mode"] = "multi" if use_multi else "single"
+            if use_multi:
+                regions = [{"bbox": fb, "confidence": 1.0, "method": "frame",
+                            "source": "multiframe"} for fb in targets]
+                rec["found"] = len(targets)
+                rec["sheet"] = [round(v, 1) for v in sheet_bbox] if sheet_bbox else None
+                print("   多图框模式：检测到 %d 个图框%s" % (
+                    len(targets), "（另有整图纸边，不替换）" if sheet_bbox else ""))
+                for i, fb in enumerate(targets):
+                    print("     [%d] bbox=%s" % (i, [float(round(x, 1)) for x in fb]))
+            else:
+                regions = finder.find_titleblocks(doc)
+                rec["found"] = len(regions)
+                print("   检测到标题栏: %d 个" % len(regions))
+                for i, r in enumerate(regions):
+                    print("     [%d] 置信度 %.2f 方法=%s 源=%s bbox=%s" % (
+                        i, r["confidence"], r["method"], r["source"], [round(x, 1) for x in r["bbox"]]))
 
             if args.detect_only:
                 det_path = os.path.join(args.out, os.path.splitext(os.path.basename(src))[0] + "_detection.json")
                 with open(det_path, "w", encoding="utf-8") as f:
-                    json.dump([{"bbox": r["bbox"], "confidence": r["confidence"],
-                                "method": r["method"], "source": r["source"],
-                                "confirmed": False} for r in regions], f, ensure_ascii=False, indent=2)
+                    json.dump({"mode": rec["mode"], "sheet": rec.get("sheet"),
+                               "frames": [{"bbox": r["bbox"], "confidence": r["confidence"],
+                                           "method": r["method"], "source": r["source"],
+                                           "confirmed": False} for r in regions]},
+                              f, ensure_ascii=False, indent=2)
                 rec["status"] = "detected"
                 rec["out"] = os.path.basename(det_path)
                 logbook.log(lb, src, "detected", len(regions), 0, [], det_path, "仅检测")
@@ -126,6 +182,21 @@ def main():
             all_written = []
             total_del = 0
             mappings = []
+
+            if use_multi:
+                if args.dry_run:
+                    for fb in targets:
+                        fields = finder.extract_frame_fields(doc, fb)
+                        values, unmatched, unused = mapper.map_fields(
+                            template["fields"], fields, override)
+                        mappings.append({"region": [round(v, 1) for v in fb],
+                                         "extracted": fields,
+                                         "unmatched": unmatched, "unused": unused})
+                else:
+                    mappings, all_written, total_del = _process_multiframe(
+                        doc, template, targets, override, args.fit)
+                regions = []
+
             for r in regions:
                 old = extract.extract_fields(doc, r)
                 values, unmatched, unused = mapper.map_fields(template["fields"], old, override)

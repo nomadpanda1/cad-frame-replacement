@@ -84,7 +84,7 @@
 ## 1. 目录结构
 ```
 cad-frame-replacement/
-├── run_skill.py            # 通用主入口：template + 旧图纸 → 新图纸
+├── run_skill.py            # 通用主入口：template + 旧图纸 → 新图纸（auto 单框/多图框）
 ├── run_real.py             # 案例一：SolidWorks 导出零件图批量置换
 ├── run_cng.py              # 案例二：CNG 电气系统图
 ├── run_cng_acad.py         # 案例二（AutoCAD COM 解密 DWG 版本）
@@ -100,7 +100,7 @@ cad-frame-replacement/
 ├── lib/                    # 核心库
 │   ├── concepts.py         # 中英文/简写字段名 -> 统一“概念”中间层
 │   ├── template_learn.py   # 模板自动学习（块 ATTDEF / 打散 <图名> 占位符）
-│   ├── finder.py           # 旧版图框检测（块名 / 关键词+表格线吸附）
+│   ├── finder.py           # 旧版图框检测（块名 / 关键词+表格线）+ 多图框层级检测
 │   ├── extract.py          # 旧图属性提取（ATTRIB / TEXT 键值对）
 │   ├── mapper.py           # 概念级字段映射
 │   ├── block_replace.py    # 删旧框 + 插入新框 + 回填字段
@@ -133,8 +133,12 @@ python run_cng.py       # 案例二：CNG 电气系统图
 python run_ess.py       # 案例三：ESS 储能
 python run_asm.py       # 案例四：无图框装配体
 python run_synth.py     # 案例六：合成异常样本
-python run_multiframe.py # 案例七：多图框逐框替换
+python run_multiframe.py # 案例七：多图框逐框替换（也可直接用 `run_skill.py --mode multi`）
 python gen_real_mf.py && python run_real_mf.py  # 案例八：真实 4×A1 拼接多图框
+
+# 通用入口也能直接处理多图框：auto 自动判断单/多框，multi 强制逐框替换
+python run_skill.py --template templates/HH_FRAME_A1.dxf --mode auto  cases/07_multiframe/inputs/*.dxf
+python run_skill.py --template templates/HH_FRAME_A1.dxf --mode multi  cases/08_real_mf/inputs/*.dxf
 
 # 3) 看报告
 cases/report.html       # 浏览器打开
@@ -168,6 +172,7 @@ python run_skill.py --template templates/公司图框.dxf --dry-run  samples/*.d
 | `--fit` | 新框缩放：`min` 保比例居中(默认) / `max` 满填 / `width` / `height` |
 | `--margin` | 打散图框删除边距 |
 | `--override` | 字段映射覆盖，如 `{"TITLE":"OLD_TITLE"}` |
+| `--mode` | 单框/多图框判定：`auto` 自动(默认，≥2 框走逐框替换) / `single` 强制整图幅一张框 / `multi` 强制逐框替换 |
 | `--detect-only` / `--dry-run` | 分阶段调试 |
 
 ## 4. 公司图框“随时会变”怎么办
@@ -192,10 +197,16 @@ python run_skill.py --template templates/公司图框.dxf --dry-run  samples/*.d
   用 `--fit max` 满填（横向可能略溢出进上方电路，约 2% 形变，可接受）。
 - ATTRIB 是 INSERT 的嵌套子实体，不会出现在 modelspace 顶层迭代里；校验请用
   `insert.attribs` 读取，不要用 `msp` 遍历计数。
-- **多图框已用真实内容验证（案例八）**：手上暂无「一个 DXF 里天然有多个图框」的真实图纸，
-  故用 4 张真实 ESS A1 图拼成 2×2 多图框（标题栏/图号/比例均为真实内容，仅排布是合成的）跑通全流程；
-  这次验证同时暴露并修复了「邻框标题文字串框」的真实 bug。若你手上有天然多图框的图纸，
-  建议先 `--detect-only` 看一下识别出的框数是否符合预期。
+- **多图框已用真实内容验证（案例八）**：一个 DXF 里排布多个图框的图纸，通用入口
+  `run_skill.py` 在 `--mode auto`（默认）下会自动走逐框替换（复用案例七/八逻辑），不再
+  锁在案例脚本里。若图纸检出 ≥2 个闭合矩形框，即逐框各自提取字段、删旧边框与旧标题栏、
+  插公司图框并回填；只有 1 个框时退化为整图幅一张框（兼容旧行为）。
+- **多图框误检治理**：电气图里大量端子/符号/表格单元都是闭合矩形，早期检测会把它们全当成
+  “图框”（CNG 电气系统图曾误检 61 个）。现用“面积占比下限(0.15) + 双线去重”两级过滤压到
+  真实框数（CNG 实测 4 个）。注意**不能**用“长宽比接近 √2”筛——加长图幅在电气图里很常见
+  （CNG 左侧三个真图框长宽比就是 2.00），按标准图幅比例会误杀真框。
+- 双线图框（外框+内框两条矩形）会被去重为外框，替换时一并清理内框残线，避免新框上压一圈旧线。
+- 若你手上有天然多图框的图纸，建议先 `--detect-only` 看一下识别出的框数是否符合预期。
 
 ---
 

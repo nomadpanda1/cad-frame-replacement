@@ -182,7 +182,38 @@ def _rect_from_entity(e):
     return (min(xs), min(ys), max(xs), max(ys))
 
 
-def detect_frames_hierarchical(doc, min_side=80, min_area=5000):
+def _bbox_area(r):
+    return (r[2] - r[0]) * (r[3] - r[1])
+
+
+def _bbox_contains(big, small, tol=2.0):
+    return (big[0] <= small[0] + tol and big[1] <= small[1] + tol and
+            big[2] >= small[2] - tol and big[3] >= small[3] - tol)
+
+
+def dedup_double_border(frames, dedup_ratio=0.8):
+    """合并"外框 + 内框"双线图框，只保留外框。
+
+    工程图框普遍画成两条矩形：外面一圈纸边、里面一圈图框线（如 CNG 图 84100×59400
+    外框套 80600×57400 内框，面积比 0.93）。二者是同一个图框，不该当成两个替换目标。
+    按面积从大到小遍历，若已保留的外框 A 包含当前框 B 且 area(B)/area(A) >= dedup_ratio，
+    则判定 B 是 A 的内框线，丢弃。完全重合的重复矩形也会被这条规则吃掉。
+    返回结果保持 frames 中的原始出现顺序。
+    """
+    order = {id(r): i for i, r in enumerate(frames)}
+    kept = []
+    for r in sorted(frames, key=lambda x: -_bbox_area(x)):
+        area = _bbox_area(r)
+        if any(_bbox_contains(k, r) and area >= _bbox_area(k) * dedup_ratio
+               for k in kept):
+            continue
+        kept.append(r)
+    kept.sort(key=lambda r: order[id(r)])
+    return kept
+
+
+def detect_frames_hierarchical(doc, min_side=80, min_area=5000,
+                               min_area_share=0.15, dedup_ratio=0.8):
     """检测所有闭合矩形图框，返回 (sheet_bbox_or_None, list_of_target_frame_bboxes)。
 
     规则：
@@ -190,6 +221,13 @@ def detect_frames_hierarchical(doc, min_side=80, min_area=5000):
     - 若存在一个"整图纸框"（bbox 包含其它所有框，且面积明显更大），则它是 sheet（纸边），
       不作为替换目标；其余框为 target（需逐框插入公司图框）。
     - 若无单一整图纸框（如并排多框，互不包含），则所有框均为 target。
+    - 目标框再过两道合理性筛（多框时才启用，单框保持旧行为）：
+      1) 面积占比：面积不足最大目标框 min_area_share 的剔除。电气图里大量端子/符号/
+         表格单元都是闭合矩形，CNG 图曾因此检出 61 个"图框"，其中 53 个占比仅 0.003。
+      2) 双线去重：见 dedup_double_border。
+      注意不能用"长宽比接近 √2"来筛——加长图幅在电气图里很常见（CNG 左侧三个图框
+      长宽比就是 2.00），按标准图幅比例过滤会把真图框误杀。
+    - 过滤后若为空，回退到未过滤结果，保证不会"什么都检测不到"。
     - 若只有 1 个框，它就是 target（退化为单框替换，兼容旧行为）。
     """
     msp = doc.modelspace()
@@ -207,23 +245,28 @@ def detect_frames_hierarchical(doc, min_side=80, min_area=5000):
     if len(rects) == 1:
         return None, rects
 
-    def contains(big, small, tol=2.0):
-        return (big[0] <= small[0] + tol and big[1] <= small[1] + tol and
-                big[2] >= small[2] - tol and big[3] >= small[3] - tol)
-
     sheet = None
     for cand in rects:
         others = [o for o in rects if o != cand]
-        if all(contains(cand, o) for o in others):
+        if all(_bbox_contains(cand, o) for o in others):
             # 面积须明显大于其它框，避免平级并排互相误判为 sheet
-            if all((cand[2] - cand[0]) * (cand[3] - cand[1]) >
-                   (o[2] - o[0]) * (o[3] - o[1]) * 1.05 for o in others):
+            if all(_bbox_area(cand) > _bbox_area(o) * 1.05 for o in others):
                 sheet = cand
                 break
-    if sheet is not None:
-        targets = [r for r in rects if r != sheet]
-        return sheet, targets
-    return None, rects
+
+    targets = [r for r in rects if r is not sheet] if sheet is not None else list(rects)
+    raw = list(targets)
+
+    if len(targets) > 1:
+        max_area = max(_bbox_area(r) for r in targets)
+        if max_area > 0:
+            targets = [r for r in targets
+                       if _bbox_area(r) >= max_area * min_area_share]
+        targets = dedup_double_border(targets, dedup_ratio=dedup_ratio)
+
+    if not targets:
+        targets = raw
+    return sheet, targets
 
 
 def extract_frame_fields(doc, frame_bbox, concepts=("TITLE", "DWG_NO", "SCALE", "STAGE")):

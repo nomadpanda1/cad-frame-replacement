@@ -37,13 +37,18 @@ def _is_closed(e):
             return False
 
 
-def delete_frame_border(doc, frame_bbox, tol=2.5):
+def delete_frame_border(doc, frame_bbox, tol=2.5, inner_ratio=0.8):
     """删除与 frame_bbox 重合的闭合矩形边框（旧图框线），返回删除数。
 
     仅匹配 bbox 与该帧基本重合的 LWPOLYLINE/POLYLINE，不影响图内几何——这是逐框替换的
     关键：只去掉该子图的旧边框，保留其内部的零件几何。
+
+    inner_ratio：工程图框常画成"外框 + 内框"两条矩形（CNG 图外框 84100×59400 里面还套
+    一条 80600×57400），只删外框会留下一圈内框残线压在新图框上。故一并删除被 frame_bbox
+    包含、且面积占比 >= inner_ratio 的闭合矩形。设为 None 可关闭该行为。
     """
     x0, y0, x1, y1 = frame_bbox
+    outer_area = max((x1 - x0) * (y1 - y0), 1e-9)
     msp = doc.modelspace()
     n = 0
     for e in list(msp):
@@ -64,8 +69,14 @@ def delete_frame_border(doc, frame_bbox, tol=2.5):
         xs = [p[0] for p in pts]
         ys = [p[1] for p in pts]
         r = (min(xs), min(ys), max(xs), max(ys))
-        if (abs(r[0] - x0) < tol and abs(r[1] - y0) < tol and
-                abs(r[2] - x1) < tol and abs(r[3] - y1) < tol):
+        hit = (abs(r[0] - x0) < tol and abs(r[1] - y0) < tol and
+               abs(r[2] - x1) < tol and abs(r[3] - y1) < tol)
+        if not hit and inner_ratio is not None:
+            inside = (r[0] >= x0 - tol and r[1] >= y0 - tol and
+                      r[2] <= x1 + tol and r[3] <= y1 + tol)
+            if inside and (r[2] - r[0]) * (r[3] - r[1]) >= outer_area * inner_ratio:
+                hit = True
+        if hit:
             msp.delete_entity(e)
             n += 1
     return n
