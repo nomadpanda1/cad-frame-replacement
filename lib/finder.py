@@ -252,8 +252,10 @@ def extract_frame_fields(doc, frame_bbox, concepts=("TITLE", "DWG_NO", "SCALE", 
             continue
         cx = (b.extmin.x + b.extmax.x) / 2
         cy = (b.extmin.y + b.extmax.y) / 2
-        # 限定标题区：右 45% 且 底 60%
-        if not (cx >= fx0 + 0.45 * W and cy <= fy0 + 0.60 * H):
+        # 限定标题区：右 45% 且 底 60%，且必须落在「当前图框」内。
+        # 注意四向都要约束：否则多图框（尤其 2×2 拼贴）时，相邻框的标题文字
+        # 会落入本框"标题区"（原实现只约束 cx 左界/cy 上界，区域向右下无限延伸）。
+        if not (fx0 + 0.45 * W <= cx <= fx1 and fy0 <= cy <= fy0 + 0.60 * H):
             continue
         items.append((cx, cy, raw.strip()))
     fields = {}

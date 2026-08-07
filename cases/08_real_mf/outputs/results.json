@@ -1,0 +1,101 @@
+{
+  "说明": "4 张真实 ESS 图纸(一次设备表/二次信号表/二次柜体表/主接线图)平移拼成 2×2 多图框，内容 100% 真实，仅排布合成。",
+  "整图纸框(纸边)": null,
+  "检测到需替换的图框数": 4,
+  "before实体数": 786,
+  "after实体数": 749,
+  "逐框结果": [
+    {
+      "frame": [
+        10.0,
+        670.0,
+        831.0,
+        1244.0
+      ],
+      "size": "A1",
+      "fields": {
+        "DWG_NO": "BESS-LST-001",
+        "SCALE": "NTS",
+        "STAGE": "学习/概念设计",
+        "TITLE": "16MW/32MWh 储能电站 一次设备表"
+      },
+      "written": [
+        "TITLE",
+        "DWG_NO",
+        "SCALE",
+        "STAGE"
+      ],
+      "del_border": 1,
+      "del_strip": 7
+    },
+    {
+      "frame": [
+        910.0,
+        670.0,
+        1731.0,
+        1244.0
+      ],
+      "size": "A1",
+      "fields": {
+        "DWG_NO": "BESS-LST-003",
+        "SCALE": "NTS",
+        "STAGE": "学习/概念设计",
+        "TITLE": "16MW/32MWh 储能电站 二次系统信号表"
+      },
+      "written": [
+        "TITLE",
+        "DWG_NO",
+        "SCALE",
+        "STAGE"
+      ],
+      "del_border": 1,
+      "del_strip": 9
+    },
+    {
+      "frame": [
+        10.0,
+        10.0,
+        831.0,
+        584.0
+      ],
+      "size": "A1",
+      "fields": {
+        "DWG_NO": "BESS-LST-002",
+        "SCALE": "NTS",
+        "STAGE": "学习/概念设计",
+        "TITLE": "16MW/32MWh 储能电站 二次系统柜体表"
+      },
+      "written": [
+        "TITLE",
+        "DWG_NO",
+        "SCALE",
+        "STAGE"
+      ],
+      "del_border": 1,
+      "del_strip": 7
+    },
+    {
+      "frame": [
+        910.0,
+        10.0,
+        1731.0,
+        584.0
+      ],
+      "size": "A1",
+      "fields": {
+        "DWG_NO": "BESS-SLD-001",
+        "SCALE": "NTS",
+        "STAGE": "学习/概念设计",
+        "TITLE": "16MW/32MWh 储能电站 简化主接线图"
+      },
+      "written": [
+        "TITLE",
+        "DWG_NO",
+        "SCALE",
+        "STAGE"
+      ],
+      "del_border": 1,
+      "del_strip": 14
+    }
+  ]
+}

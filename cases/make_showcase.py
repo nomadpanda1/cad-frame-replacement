@@ -14,7 +14,7 @@ spec = importlib.util.spec_from_file_location("gen_report", os.path.join(HERE, "
 gr = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(gr)
 
-INTRO = """<p>本页聚合六套案例的 <b>生成前 / 公司模板 / 生成后</b> 对比图。案例一为普通图纸（纯 ezdxf 离线，策略一）；案例二为设计院加密 DWG（AutoCAD COM 直接处理，策略二）；案例三为储能 ESS 成果包（纯 ezdxf，策略一）；案例四为无图框/无标题栏的装配体图纸（COM 转 DXF + 清标题栏占位，策略二）；<b>案例六</b>为程序化生成的<b>异常场景合成样本</b>（多图框混排 / 嵌套块标题栏 / 缺字体 / 会签栏差异）；<b>案例七</b>为<b>多图框逐框替换</b>开发项成果（平铺多框含整图纸框 / 并排多框无整图纸框），验证"检测多图框 → 逐框插公司图框 → 逐框回填"。</p>"""
+INTRO = """<p>本页聚合六套案例的 <b>生成前 / 公司模板 / 生成后</b> 对比图。案例一为普通图纸（纯 ezdxf 离线，策略一）；案例二为设计院加密 DWG（AutoCAD COM 直接处理，策略二）；案例三为储能 ESS 成果包（纯 ezdxf，策略一）；案例四为无图框/无标题栏的装配体图纸（COM 转 DXF + 清标题栏占位，策略二）；<b>案例六</b>为程序化生成的<b>异常场景合成样本</b>（多图框混排 / 嵌套块标题栏 / 缺字体 / 会签栏差异）；<b>案例七</b>为<b>多图框逐框替换</b>开发项成果（平铺多框含整图纸框 / 并排多框无整图纸框），验证"检测多图框 → 逐框插公司图框 → 逐框回填"。；<b>案例八</b>为<b>真实多图框端到端验证</b>：用 4 张真实 ESS 图纸拼成 2×2 多图框（内容 100% 真实，仅排布合成），在真实标题栏结构上跑逐框替换管线，过程中发现并修复了标题区越界泄漏 bug。</p>"""
 
 USAGE = """
 <h2>使用说明</h2>
@@ -56,6 +56,7 @@ python run_skill.py --template templates/公司图框.dxf --dry-run  samples/*.d
     <tr><td>案例四 无图框装配体</td><td><code>python run_asm.py</code></td></tr>
     <tr><td>案例六 合成异常样本</td><td><code>python gen_synth.py</code> 生成 → <code>python run_synth.py</code></td></tr>
     <tr><td>案例七 多图框逐框替换</td><td><code>python gen_mf_samples.py</code> 生成 → <code>python run_multiframe.py</code></td></tr>
+    <tr><td>案例八 真实多图框端到端</td><td><code>python gen_real_mf.py</code> 拼图 → <code>python run_real_mf.py</code></td></tr>
   </table>
 
   <h3>4. 已知约束</h3>
@@ -117,6 +118,10 @@ def assemble(embed):
 <h2>案例七：多图框逐框替换（检测多图框 → 逐框插公司图框）</h2>
 <p><span class="tag">2 个合成 DXF</span><span class="tag">平铺多框</span><span class="tag">并排多框</span><span class="tag">逐框回填</span> 新开发项：在 <code>lib/finder.py</code> 新增 <code>detect_frames_hierarchical</code>（识别整图纸框为纸边、其余为替换目标），在 <code>lib/block_replace.py</code> 新增 <code>delete_frame_border</code>/<code>delete_title_strip</code>（外科手术式删除，保留图内几何）。逐框选模板尺寸 → 抽字段 → 删旧框线+标题栏 → 插公司图框(fit=max) → 回填。</p>
 {gr.multi_section()}
+
+<h2>案例八：真实多图框端到端验证（4 张真实 ESS 图拼 2×2 多图框）</h2>
+<p><span class="tag">4×A1</span><span class="tag">真实标题栏</span><span class="tag">逐框回填</span><span class="tag">发现并修复 bug</span> 用 4 张<b>真实</b> ESS 图纸（一次设备表 / 二次系统信号表 / 二次系统柜体表 / 简化主接线图）平移拼成 2×2 网格多图框，内容 100% 真实、仅排布合成。在真实标题栏结构上跑"检测多图框 → 逐框插公司图框 → 逐框回填"，4 个真实图名/图号均正确归位；过程中暴露并修复了 <code>extract_frame_fields</code> 标题区越界泄漏 bug（已加 pytest 回归测试）。</p>
+{gr.real_mf_section()}
 
 {FOOTER}
 </body>

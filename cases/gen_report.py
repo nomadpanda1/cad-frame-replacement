@@ -68,6 +68,13 @@ MULTI = [
      "结论：并排多框逐框替换 ✅ —— 验证 detect_frames_hierarchical 的'无整图纸框'分支"),
 ]
 
+# 案例八：真实多图框端到端验证（用真实 ESS 图纸拼多图框，内容 100% 真实）
+REAL_MF = [
+    ("08 真实多图框端到端", "4×A1", "HH_FRAME_A1×4",
+     "检测：4 个真实图框（由 4 张真实 ESS 图纸——一次设备表/二次系统信号表/二次系统柜体表/简化主接线图——平移拼成 2×2 网格，内容 100% 真实，仅排布合成）；逐框抽取真实字段 图名/图号/比例/阶段 全部正确 ✅",
+     "结论：真实标题栏结构的多图框逐框替换端到端验证通过；过程中发现并修复 extract_frame_fields 标题区越界泄漏 bug（已加回归测试）"),
+]
+
 CSS = """
 body { font-family: "Microsoft YaHei","SimHei",sans-serif; background:#1e1e1e; color:#ddd; margin:40px; }
 h1 { color:#fff; border-bottom:2px solid #4a9eff; padding-bottom:12px; }
@@ -222,6 +229,29 @@ def multi_section():
   <h3>{name} <span class="tag">{size}</span><span class="tag">{tpl}</span></h3>
   <table><tr>
     <td width="33%"><b>生成前</b><br><img src="{b}"></td>
+    <td width="33%"><b>公司模板（首帧所选）</b><br><img src="{t}"></td>
+    <td width="34%"><b>生成后（逐框插入公司图框）</b><br><img src="{a}"></td>
+  </tr></table>
+  <p class="cap ok">{ext}<br>{fill}</p>
+</div>""")
+    return "\n".join(rows)
+
+
+def real_mf_section():
+    rows = []
+    for name, size, tpl, ext, fill in REAL_MF:
+        b = "08_real_mf/outputs/08_real_multiframe_before.png"
+        t = "08_real_mf/outputs/08_real_multiframe_template.png"
+        a = "08_real_mf/outputs/08_real_multiframe_HH.png"
+        if not (os.path.exists(os.path.join(HERE, b)) and
+                os.path.exists(os.path.join(HERE, t)) and
+                os.path.exists(os.path.join(HERE, a))):
+            return ""
+        rows.append(f"""
+<div class="card">
+  <h3>{name} <span class="tag">{size}</span><span class="tag">{tpl}</span></h3>
+  <table><tr>
+    <td width="33%"><b>生成前（4 张真实 ESS 图拼成多图框）</b><br><img src="{b}"></td>
     <td width="33%"><b>公司模板（首帧所选）</b><br><img src="{t}"></td>
     <td width="34%"><b>生成后（逐框插入公司图框）</b><br><img src="{a}"></td>
   </tr></table>

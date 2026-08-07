@@ -9,7 +9,7 @@
 
 ## 🚀 案例与效果（先看这里）
 
-本仓库自带 **7 套完整案例**，覆盖真实机械图纸、电气系统图、储能图纸、装配体、合成异常样本以及多图框逐框替换：
+本仓库自带 **8 套完整案例**，覆盖真实机械图纸、电气系统图、储能图纸、装配体、合成异常样本、多图框逐框替换，以及**真实图纸拼接的多图框端到端验证**：
 
 - 📊 **[cases/report.html](cases/report.html)** —— 完整效果对比报告（含 54 张前后对比图 + 使用说明）
 - 📦 **[cases/showcase.html](cases/showcase.html)** —— 单文件离线版，图片全部内嵌，可直接下载发微信/邮件
@@ -48,6 +48,11 @@
 <td><img src="cases/07_multiframe/outputs/07b_side_by_side_before.png" width="380" alt="before"></td>
 <td><img src="cases/07_multiframe/outputs/07b_side_by_side_HH.png" width="380" alt="after"></td>
 </tr>
+<tr>
+<td align="center"><b>案例八：真实多图框（4×A1 拼接）</b></td>
+<td><img src="cases/08_real_mf/outputs/08_real_multiframe_before.png" width="380" alt="before"></td>
+<td><img src="cases/08_real_mf/outputs/08_real_multiframe_HH.png" width="380" alt="after"></td>
+</tr>
 </table>
 
 ### 📌 案例修复记录（v0.2）
@@ -61,6 +66,10 @@
 - **案例六 · 合成异常样本（已修复 ✅）**
   - **06a 多图框混排**：旧版按「整图幅」插一张 A1 框，子图框没动，看起来像没处理完。现已复用案例七的逐框替换逻辑，after 图含 3 个 HH_FRAME INSERT，真正逐框替换（「多图框混排」不再是局限）。
   - **06b 嵌套块 / 06d 会签栏**：插入公司框前先清理旧标题栏（删除旧 TITLEBLOCK 块、白名单清旧标题条），消除新旧标题栏重叠。
+
+- **案例八 · 真实多图框字段串框（已修复 ✅）**
+  之前所有多图框案例都是合成图（标题栏文字短、间距大），没暴露问题。本案例用 **4 张真实 ESS A1 图纸拼成 2×2 多图框**（标题栏、图号、比例全是真实内容，只有排布是合成的）跑完整流程，立刻发现：`extract_frame_fields` 的标题区判定只卡了「x 大于左边界、y 小于上边界」两个方向，是一个**无限延伸的象限**，在多图框里会把**邻框的标题文字吸进来** —— 第 1 框读出来的图名是右边第 2 框的「二次系统信号表」。
+  **修复**：标题区改为四边有界（`fx0+0.45W ≤ cx ≤ fx1` 且 `fy0 ≤ cy ≤ fy0+0.60H`），并补 `test_extract_no_leak_from_neighbor_frame` 回归单测（单测数 17 → 18）。修复后 4 个框的图名/图号全部正确回填，几何零丢失（786 → 749 实体 = −41 旧框线旧标题条 +4 个 HH_FRAME_A1）。
 
 ---
 
@@ -83,8 +92,10 @@ cad-frame-replacement/
 ├── run_asm.py              # 案例四：无图框装配体
 ├── run_synth.py            # 案例六：合成异常样本验证
 ├── run_multiframe.py       # 案例七：多图框逐框替换
+├── run_real_mf.py          # 案例八：真实多图框（4 张真实 ESS 图拼接）端到端验证
 ├── gen_synth.py            # 生成合成异常样本图纸
 ├── gen_mf_samples.py       # 生成多图框测试样本
+├── gen_real_mf.py          # 案例八：把 4 张真实 A1 图纸拼成 2×2 多图框 DXF
 ├── make_tpl_dwgs*.py       # 生成 HH 公司图框模板
 ├── lib/                    # 核心库
 │   ├── concepts.py         # 中英文/简写字段名 -> 统一“概念”中间层
@@ -96,7 +107,7 @@ cad-frame-replacement/
 │   ├── acad.py             # DWG <-> DXF 转换器探测（ODA / LibreCAD）
 │   └── logbook.py          # 执行日志 + run_report.json
 ├── templates/              # HH 公司图框模板 A0-A4
-├── cases/                  # 7 套案例（输入/输出/对比图/报告）
+├── cases/                  # 8 套案例（输入/输出/对比图/报告）
 │   ├── report.html         # 完整对比报告
 │   ├── showcase.html       # 单文件内嵌图片版
 │   ├── index.html          # 案例导航页
@@ -105,7 +116,8 @@ cad-frame-replacement/
 │   ├── 03_ESS_cad/         # 储能 ESS 图纸
 │   ├── 04_assembly/        # 无图框装配体
 │   ├── 06_synth/           # 合成异常样本
-│   └── 07_multiframe/      # 多图框逐框替换
+│   ├── 07_multiframe/      # 多图框逐框替换
+│   └── 08_real_mf/         # 真实多图框（4 张真实 ESS A1 拼接）端到端验证
 ├── samples/                # 通用：放“待处理的旧图纸”
 └── output/                 # 通用：生成的成品（原名 + _HH 后缀，不覆盖原图）
 ```
@@ -122,6 +134,7 @@ python run_ess.py       # 案例三：ESS 储能
 python run_asm.py       # 案例四：无图框装配体
 python run_synth.py     # 案例六：合成异常样本
 python run_multiframe.py # 案例七：多图框逐框替换
+python gen_real_mf.py && python run_real_mf.py  # 案例八：真实 4×A1 拼接多图框
 
 # 3) 看报告
 cases/report.html       # 浏览器打开
@@ -179,14 +192,18 @@ python run_skill.py --template templates/公司图框.dxf --dry-run  samples/*.d
   用 `--fit max` 满填（横向可能略溢出进上方电路，约 2% 形变，可接受）。
 - ATTRIB 是 INSERT 的嵌套子实体，不会出现在 modelspace 顶层迭代里；校验请用
   `insert.attribs` 读取，不要用 `msp` 遍历计数。
+- **多图框已用真实内容验证（案例八）**：手上暂无「一个 DXF 里天然有多个图框」的真实图纸，
+  故用 4 张真实 ESS A1 图拼成 2×2 多图框（标题栏/图号/比例均为真实内容，仅排布是合成的）跑通全流程；
+  这次验证同时暴露并修复了「邻框标题文字串框」的真实 bug。若你手上有天然多图框的图纸，
+  建议先 `--detect-only` 看一下识别出的框数是否符合预期。
 
 ---
 
 ## 7. 本分发版包含内容
 - **核心**：`lib/`（图框检测、字段提取映射、替换、模板学习）
 - **模板**：`templates/`（HH 公司图框 A0-A4）
-- **7 套完整案例**：`cases/01_SW_parts`、`cases/02_CNG_electrical`、`cases/03_ESS_cad`、
-  `cases/04_assembly`、`cases/06_synth`、`cases/07_multiframe`，每套含输入图纸、输出成品、前后对比 PNG
+- **8 套完整案例**：`cases/01_SW_parts`、`cases/02_CNG_electrical`、`cases/03_ESS_cad`、
+  `cases/04_assembly`、`cases/06_synth`、`cases/07_multiframe`、`cases/08_real_mf`，每套含输入图纸、输出成品、前后对比 PNG
 - **报告**：`cases/report.html`（链接图）、`cases/showcase.html`（内嵌图单文件）、`cases/index.html`
 - **入口脚本**：全部 `run_*.py` / `gen_*.py` / `make_*.py`
 - **其他**：`requirements.txt`、`.gitignore`

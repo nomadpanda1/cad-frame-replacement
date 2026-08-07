@@ -1,0 +1,26336 @@
+  0
+SECTION
+  2
+HEADER
+  9
+$ACADVER
+  1
+AC1024
+  9
+$ACADMAINTVER
+ 70
+6
+  9
+$DWGCODEPAGE
+  3
+ANSI_1252
+  9
+$LASTSAVEDBY
+  1
+ezdxf
+  9
+$INSBASE
+ 10
+0.0
+ 20
+0.0
+ 30
+0.0
+  9
+$EXTMIN
+ 10
+1e+20
+ 20
+1e+20
+ 30
+1e+20
+  9
+$EXTMAX
+ 10
+-1e+20
+ 20
+-1e+20
+ 30
+-1e+20
+  9
+$LIMMIN
+ 10
+0.0
+ 20
+0.0
+  9
+$LIMMAX
+ 10
+420.0
+ 20
+297.0
+  9
+$ORTHOMODE
+ 70
+0
+  9
+$REGENMODE
+ 70
+1
+  9
+$FILLMODE
+ 70
+1
+  9
+$QTEXTMODE
+ 70
+0
+  9
+$MIRRTEXT
+ 70
+1
+  9
+$LTSCALE
+ 40
+1.0
+  9
+$ATTMODE
+ 70
+1
+  9
+$TEXTSIZE
+ 40
+2.5
+  9
+$TRACEWID
+ 40
+1.0
+  9
+$TEXTSTYLE
+  7
+Standard
+  9
+$CLAYER
+  8
+0
+  9
+$CELTYPE
+  6
+ByLayer
+  9
+$CECOLOR
+ 62
+256
+  9
+$CELTSCALE
+ 40
+1.0
+  9
+$DISPSILH
+ 70
+0
+  9
+$DIMSCALE
+ 40
+1.0
+  9
+$DIMASZ
+ 40
+2.5
+  9
+$DIMEXO
+ 40
+0.625
+  9
+$DIMDLI
+ 40
+3.75
+  9
+$DIMRND
+ 40
+0.0
+  9
+$DIMDLE
+ 40
+0.0
+  9
+$DIMEXE
+ 40
+1.25
+  9
+$DIMTP
+ 40
+0.0
+  9
+$DIMTM
+ 40
+0.0
+  9
+$DIMTXT
+ 40
+2.5
+  9
+$DIMCEN
+ 40
+2.5
+  9
+$DIMTSZ
+ 40
+0.0
+  9
+$DIMTOL
+ 70
+0
+  9
+$DIMLIM
+ 70
+0
+  9
+$DIMTIH
+ 70
+0
+  9
+$DIMTOH
+ 70
+0
+  9
+$DIMSE1
+ 70
+0
+  9
+$DIMSE2
+ 70
+0
+  9
+$DIMTAD
+ 70
+1
+  9
+$DIMZIN
+ 70
+8
+  9
+$DIMBLK
+  1
+
+  9
+$DIMASO
+ 70
+1
+  9
+$DIMSHO
+ 70
+1
+  9
+$DIMPOST
+  1
+
+  9
+$DIMAPOST
+  1
+
+  9
+$DIMALT
+ 70
+0
+  9
+$DIMALTD
+ 70
+3
+  9
+$DIMALTF
+ 40
+0.03937007874
+  9
+$DIMLFAC
+ 40
+1.0
+  9
+$DIMTOFL
+ 70
+1
+  9
+$DIMTVP
+ 40
+0.0
+  9
+$DIMTIX
+ 70
+0
+  9
+$DIMSOXD
+ 70
+0
+  9
+$DIMSAH
+ 70
+0
+  9
+$DIMBLK1
+  1
+
+  9
+$DIMBLK2
+  1
+
+  9
+$DIMSTYLE
+  2
+ISO-25
+  9
+$DIMCLRD
+ 70
+0
+  9
+$DIMCLRE
+ 70
+0
+  9
+$DIMCLRT
+ 70
+0
+  9
+$DIMTFAC
+ 40
+1.0
+  9
+$DIMGAP
+ 40
+0.625
+  9
+$DIMJUST
+ 70
+0
+  9
+$DIMSD1
+ 70
+0
+  9
+$DIMSD2
+ 70
+0
+  9
+$DIMTOLJ
+ 70
+0
+  9
+$DIMTZIN
+ 70
+8
+  9
+$DIMALTZ
+ 70
+0
+  9
+$DIMALTTZ
+ 70
+0
+  9
+$DIMUPT
+ 70
+0
+  9
+$DIMDEC
+ 70
+2
+  9
+$DIMTDEC
+ 70
+2
+  9
+$DIMALTU
+ 70
+2
+  9
+$DIMALTTD
+ 70
+3
+  9
+$DIMTXSTY
+  7
+Standard
+  9
+$DIMAUNIT
+ 70
+0
+  9
+$DIMADEC
+ 70
+0
+  9
+$DIMALTRND
+ 40
+0.0
+  9
+$DIMAZIN
+ 70
+0
+  9
+$DIMDSEP
+ 70
+44
+  9
+$DIMATFIT
+ 70
+3
+  9
+$DIMFRAC
+ 70
+0
+  9
+$DIMLDRBLK
+  1
+
+  9
+$DIMLUNIT
+ 70
+2
+  9
+$DIMLWD
+ 70
+-2
+  9
+$DIMLWE
+ 70
+-2
+  9
+$DIMTMOVE
+ 70
+0
+  9
+$DIMFXL
+ 40
+1.0
+  9
+$DIMFXLON
+ 70
+0
+  9
+$DIMJOGANG
+ 40
+0.785398163397
+  9
+$DIMTFILL
+ 70
+0
+  9
+$DIMTFILLCLR
+ 70
+0
+  9
+$DIMARCSYM
+ 70
+0
+  9
+$DIMLTYPE
+  6
+
+  9
+$DIMLTEX1
+  6
+
+  9
+$DIMLTEX2
+  6
+
+  9
+$DIMTXTDIRECTION
+ 70
+0
+  9
+$LUNITS
+ 70
+2
+  9
+$LUPREC
+ 70
+4
+  9
+$SKETCHINC
+ 40
+1.0
+  9
+$FILLETRAD
+ 40
+10.0
+  9
+$AUNITS
+ 70
+0
+  9
+$AUPREC
+ 70
+2
+  9
+$MENU
+  1
+.
+  9
+$ELEVATION
+ 40
+0.0
+  9
+$PELEVATION
+ 40
+0.0
+  9
+$THICKNESS
+ 40
+0.0
+  9
+$LIMCHECK
+ 70
+0
+  9
+$CHAMFERA
+ 40
+0.0
+  9
+$CHAMFERB
+ 40
+0.0
+  9
+$CHAMFERC
+ 40
+0.0
+  9
+$CHAMFERD
+ 40
+0.0
+  9
+$SKPOLY
+ 70
+0
+  9
+$TDCREATE
+ 40
+2461260.6618055557
+  9
+$TDUCREATE
+ 40
+2458532.153996898
+  9
+$TDUPDATE
+ 40
+2461260.6618055557
+  9
+$TDUUPDATE
+ 40
+2458532.1544311
+  9
+$TDINDWG
+ 40
+0.0
+  9
+$TDUSRTIMER
+ 40
+0.0
+  9
+$USRTIMER
+ 70
+1
+  9
+$ANGBASE
+ 50
+0.0
+  9
+$ANGDIR
+ 70
+0
+  9
+$PDMODE
+ 70
+0
+  9
+$PDSIZE
+ 40
+0.0
+  9
+$PLINEWID
+ 40
+0.0
+  9
+$SPLFRAME
+ 70
+0
+  9
+$SPLINETYPE
+ 70
+6
+  9
+$SPLINESEGS
+ 70
+8
+  9
+$HANDSEED
+  5
+344
+  9
+$SURFTAB1
+ 70
+6
+  9
+$SURFTAB2
+ 70
+6
+  9
+$SURFTYPE
+ 70
+6
+  9
+$SURFU
+ 70
+6
+  9
+$SURFV
+ 70
+6
+  9
+$UCSBASE
+  2
+
+  9
+$UCSNAME
+  2
+
+  9
+$UCSORG
+ 10
+0.0
+ 20
+0.0
+ 30
+0.0
+  9
+$UCSXDIR
+ 10
+1.0
+ 20
+0.0
+ 30
+0.0
+  9
+$UCSYDIR
+ 10
+0.0
+ 20
+1.0
+ 30
+0.0
+  9
+$UCSORTHOREF
+  2
+
+  9
+$UCSORTHOVIEW
+ 70
+0
+  9
+$UCSORGTOP
+ 10
+0.0
+ 20
+0.0
+ 30
+0.0
+  9
+$UCSORGBOTTOM
+ 10
+0.0
+ 20
+0.0
+ 30
+0.0
+  9
+$UCSORGLEFT
+ 10
+0.0
+ 20
+0.0
+ 30
+0.0
+  9
+$UCSORGRIGHT
+ 10
+0.0
+ 20
+0.0
+ 30
+0.0
+  9
+$UCSORGFRONT
+ 10
+0.0
+ 20
+0.0
+ 30
+0.0
+  9
+$UCSORGBACK
+ 10
+0.0
+ 20
+0.0
+ 30
+0.0
+  9
+$PUCSBASE
+  2
+
+  9
+$PUCSNAME
+  2
+
+  9
+$PUCSORG
+ 10
+0.0
+ 20
+0.0
+ 30
+0.0
+  9
+$PUCSXDIR
+ 10
+1.0
+ 20
+0.0
+ 30
+0.0
+  9
+$PUCSYDIR
+ 10
+0.0
+ 20
+1.0
+ 30
+0.0
+  9
+$PUCSORTHOREF
+  2
+
+  9
+$PUCSORTHOVIEW
+ 70
+0
+  9
+$PUCSORGTOP
+ 10
+0.0
+ 20
+0.0
+ 30
+0.0
+  9
+$PUCSORGBOTTOM
+ 10
+0.0
+ 20
+0.0
+ 30
+0.0
+  9
+$PUCSORGLEFT
+ 10
+0.0
+ 20
+0.0
+ 30
+0.0
+  9
+$PUCSORGRIGHT
+ 10
+0.0
+ 20
+0.0
+ 30
+0.0
+  9
+$PUCSORGFRONT
+ 10
+0.0
+ 20
+0.0
+ 30
+0.0
+  9
+$PUCSORGBACK
+ 10
+0.0
+ 20
+0.0
+ 30
+0.0
+  9
+$USERI1
+ 70
+0
+  9
+$USERI2
+ 70
+0
+  9
+$USERI3
+ 70
+0
+  9
+$USERI4
+ 70
+0
+  9
+$USERI5
+ 70
+0
+  9
+$USERR1
+ 40
+0.0
+  9
+$USERR2
+ 40
+0.0
+  9
+$USERR3
+ 40
+0.0
+  9
+$USERR4
+ 40
+0.0
+  9
+$USERR5
+ 40
+0.0
+  9
+$WORLDVIEW
+ 70
+1
+  9
+$SHADEDGE
+ 70
+3
+  9
+$SHADEDIF
+ 70
+70
+  9
+$TILEMODE
+ 70
+1
+  9
+$MAXACTVP
+ 70
+64
+  9
+$PINSBASE
+ 10
+0.0
+ 20
+0.0
+ 30
+0.0
+  9
+$PLIMCHECK
+ 70
+0
+  9
+$PEXTMIN
+ 10
+1e+20
+ 20
+1e+20
+ 30
+1e+20
+  9
+$PEXTMAX
+ 10
+-1e+20
+ 20
+-1e+20
+ 30
+-1e+20
+  9
+$PLIMMIN
+ 10
+0.0
+ 20
+0.0
+  9
+$PLIMMAX
+ 10
+420.0
+ 20
+297.0
+  9
+$UNITMODE
+ 70
+0
+  9
+$VISRETAIN
+ 70
+1
+  9
+$PLINEGEN
+ 70
+0
+  9
+$PSLTSCALE
+ 70
+1
+  9
+$TREEDEPTH
+ 70
+3020
+  9
+$CMLSTYLE
+  2
+Standard
+  9
+$CMLJUST
+ 70
+0
+  9
+$CMLSCALE
+ 40
+20.0
+  9
+$PROXYGRAPHICS
+ 70
+1
+  9
+$MEASUREMENT
+ 70
+1
+  9
+$CELWEIGHT
+370
+-1
+  9
+$ENDCAPS
+280
+0
+  9
+$JOINSTYLE
+280
+0
+  9
+$LWDISPLAY
+290
+0
+  9
+$INSUNITS
+ 70
+6
+  9
+$HYPERLINKBASE
+  1
+
+  9
+$STYLESHEET
+  1
+
+  9
+$XEDIT
+290
+1
+  9
+$CEPSNTYPE
+380
+0
+  9
+$PSTYLEMODE
+290
+1
+  9
+$FINGERPRINTGUID
+  2
+{E9AED70E-9C2D-4803-8B1D-8A24420C5F50}
+  9
+$VERSIONGUID
+  2
+{04BDFAF5-B830-4FC5-BBEE-16F7B7885061}
+  9
+$EXTNAMES
+290
+1
+  9
+$PSVPSCALE
+ 40
+0.0
+  9
+$OLESTARTUP
+290
+0
+  9
+$SORTENTS
+280
+127
+  9
+$INDEXCTL
+280
+0
+  9
+$HIDETEXT
+280
+1
+  9
+$XCLIPFRAME
+280
+1
+  9
+$HALOGAP
+280
+0
+  9
+$OBSCOLOR
+ 70
+257
+  9
+$OBSLTYPE
+280
+0
+  9
+$INTERSECTIONDISPLAY
+280
+0
+  9
+$INTERSECTIONCOLOR
+ 70
+257
+  9
+$DIMASSOC
+280
+2
+  9
+$PROJECTNAME
+  1
+
+  9
+$CAMERADISPLAY
+290
+0
+  9
+$LENSLENGTH
+ 40
+50.0
+  9
+$CAMERAHEIGHT
+ 40
+0.0
+  9
+$STEPSPERSEC
+ 40
+24.0
+  9
+$STEPSIZE
+ 40
+100.0
+  9
+$3DDWFPREC
+ 40
+2.0
+  9
+$PSOLWIDTH
+ 40
+0.005
+  9
+$PSOLHEIGHT
+ 40
+0.08
+  9
+$LOFTANG1
+ 40
+1.570796326795
+  9
+$LOFTANG2
+ 40
+1.570796326795
+  9
+$LOFTMAG1
+ 40
+0.0
+  9
+$LOFTMAG2
+ 40
+0.0
+  9
+$LOFTPARAM
+ 70
+7
+  9
+$LOFTNORMALS
+280
+1
+  9
+$LATITUDE
+ 40
+37.795
+  9
+$LONGITUDE
+ 40
+-122.394
+  9
+$NORTHDIRECTION
+ 40
+0.0
+  9
+$TIMEZONE
+ 70
+-8000
+  9
+$LIGHTGLYPHDISPLAY
+280
+1
+  9
+$TILEMODELIGHTSYNCH
+280
+1
+  9
+$CMATERIAL
+347
+20
+  9
+$SOLIDHIST
+280
+0
+  9
+$SHOWHIST
+280
+1
+  9
+$DWFFRAME
+280
+2
+  9
+$DGNFRAME
+280
+2
+  9
+$REALWORLDSCALE
+290
+1
+  9
+$INTERFERECOLOR
+ 62
+256
+  9
+$CSHADOW
+280
+0
+  9
+$SHADOWPLANELOCATION
+ 40
+0.0
+  0
+ENDSEC
+  0
+SECTION
+  2
+CLASSES
+  0
+CLASS
+  1
+ACDBDICTIONARYWDFLT
+  2
+AcDbDictionaryWithDefault
+  3
+ObjectDBX Classes
+ 90
+0
+ 91
+0
+280
+0
+281
+0
+  0
+CLASS
+  1
+SUN
+  2
+AcDbSun
+  3
+SCENEOE
+ 90
+1153
+ 91
+0
+280
+0
+281
+0
+  0
+CLASS
+  1
+VISUALSTYLE
+  2
+AcDbVisualStyle
+  3
+ObjectDBX Classes
+ 90
+4095
+ 91
+0
+280
+0
+281
+0
+  0
+CLASS
+  1
+MATERIAL
+  2
+AcDbMaterial
+  3
+ObjectDBX Classes
+ 90
+1153
+ 91
+0
+280
+0
+281
+0
+  0
+CLASS
+  1
+SCALE
+  2
+AcDbScale
+  3
+ObjectDBX Classes
+ 90
+1153
+ 91
+0
+280
+0
+281
+0
+  0
+CLASS
+  1
+TABLESTYLE
+  2
+AcDbTableStyle
+  3
+ObjectDBX Classes
+ 90
+4095
+ 91
+0
+280
+0
+281
+0
+  0
+CLASS
+  1
+MLEADERSTYLE
+  2
+AcDbMLeaderStyle
+  3
+ACDB_MLEADERSTYLE_CLASS
+ 90
+4095
+ 91
+0
+280
+0
+281
+0
+  0
+CLASS
+  1
+DICTIONARYVAR
+  2
+AcDbDictionaryVar
+  3
+ObjectDBX Classes
+ 90
+0
+ 91
+0
+280
+0
+281
+0
+  0
+CLASS
+  1
+CELLSTYLEMAP
+  2
+AcDbCellStyleMap
+  3
+ObjectDBX Classes
+ 90
+1152
+ 91
+0
+280
+0
+281
+0
+  0
+CLASS
+  1
+MENTALRAYRENDERSETTINGS
+  2
+AcDbMentalRayRenderSettings
+  3
+SCENEOE
+ 90
+1024
+ 91
+0
+280
+0
+281
+0
+  0
+CLASS
+  1
+ACDBDETAILVIEWSTYLE
+  2
+AcDbDetailViewStyle
+  3
+ObjectDBX Classes
+ 90
+1025
+ 91
+0
+280
+0
+281
+0
+  0
+CLASS
+  1
+ACDBSECTIONVIEWSTYLE
+  2
+AcDbSectionViewStyle
+  3
+ObjectDBX Classes
+ 90
+1025
+ 91
+0
+280
+0
+281
+0
+  0
+CLASS
+  1
+RASTERVARIABLES
+  2
+AcDbRasterVariables
+  3
+ISM
+ 90
+0
+ 91
+0
+280
+0
+281
+0
+  0
+CLASS
+  1
+LAYOUT
+  2
+AcDbLayout
+  3
+ObjectDBX Classes
+ 90
+0
+ 91
+0
+280
+0
+281
+0
+  0
+CLASS
+  1
+ACDBPLACEHOLDER
+  2
+AcDbPlaceHolder
+  3
+ObjectDBX Classes
+ 90
+0
+ 91
+0
+280
+0
+281
+0
+  0
+ENDSEC
+  0
+SECTION
+  2
+TABLES
+  0
+TABLE
+  2
+VPORT
+  5
+8
+330
+0
+100
+AcDbSymbolTable
+ 70
+1
+  0
+VPORT
+  5
+23
+330
+8
+100
+AcDbSymbolTableRecord
+100
+AcDbViewportTableRecord
+  2
+*Active
+ 70
+0
+ 10
+0.0
+ 20
+0.0
+ 11
+1.0
+ 21
+1.0
+ 12
+0.0
+ 22
+0.0
+ 13
+0.0
+ 23
+0.0
+ 14
+0.5
+ 24
+0.5
+ 15
+0.5
+ 25
+0.5
+ 16
+0.0
+ 26
+0.0
+ 36
+1.0
+ 17
+0.0
+ 27
+0.0
+ 37
+0.0
+ 40
+1000.0
+ 41
+1.34
+ 42
+50.0
+ 43
+0.0
+ 44
+0.0
+ 50
+0.0
+ 51
+0.0
+ 71
+0
+ 72
+1000
+ 73
+1
+ 74
+3
+ 75
+0
+ 76
+0
+ 77
+0
+ 78
+0
+281
+0
+ 65
+0
+146
+0.0
+  0
+ENDTAB
+  0
+TABLE
+  2
+LTYPE
+  5
+2
+330
+0
+100
+AcDbSymbolTable
+ 70
+3
+  0
+LTYPE
+  5
+24
+330
+2
+100
+AcDbSymbolTableRecord
+100
+AcDbLinetypeTableRecord
+  2
+ByBlock
+ 70
+0
+  3
+
+ 72
+65
+ 73
+0
+ 40
+0.0
+  0
+LTYPE
+  5
+25
+330
+2
+100
+AcDbSymbolTableRecord
+100
+AcDbLinetypeTableRecord
+  2
+ByLayer
+ 70
+0
+  3
+
+ 72
+65
+ 73
+0
+ 40
+0.0
+  0
+LTYPE
+  5
+26
+330
+2
+100
+AcDbSymbolTableRecord
+100
+AcDbLinetypeTableRecord
+  2
+Continuous
+ 70
+0
+  3
+
+ 72
+65
+ 73
+0
+ 40
+0.0
+  0
+ENDTAB
+  0
+TABLE
+  2
+LAYER
+  5
+1
+330
+0
+100
+AcDbSymbolTable
+ 70
+2
+  0
+LAYER
+  5
+27
+330
+1
+100
+AcDbSymbolTableRecord
+100
+AcDbLayerTableRecord
+  2
+0
+ 70
+0
+ 62
+7
+  6
+Continuous
+370
+-3
+390
+13
+347
+21
+  0
+LAYER
+  5
+28
+330
+1
+100
+AcDbSymbolTableRecord
+100
+AcDbLayerTableRecord
+  2
+Defpoints
+ 70
+0
+ 62
+7
+  6
+Continuous
+290
+0
+370
+-3
+390
+13
+347
+21
+  0
+ENDTAB
+  0
+TABLE
+  2
+STYLE
+  5
+5
+330
+0
+100
+AcDbSymbolTable
+ 70
+1
+  0
+STYLE
+  5
+29
+330
+5
+100
+AcDbSymbolTableRecord
+100
+AcDbTextStyleTableRecord
+  2
+Standard
+ 70
+0
+ 40
+0.0
+ 41
+1.0
+ 50
+0.0
+ 71
+0
+ 42
+2.5
+  3
+txt
+  4
+
+  0
+ENDTAB
+  0
+TABLE
+  2
+VIEW
+  5
+7
+330
+0
+100
+AcDbSymbolTable
+ 70
+0
+  0
+ENDTAB
+  0
+TABLE
+  2
+UCS
+  5
+6
+330
+0
+100
+AcDbSymbolTable
+ 70
+0
+  0
+ENDTAB
+  0
+TABLE
+  2
+APPID
+  5
+3
+330
+0
+100
+AcDbSymbolTable
+ 70
+3
+  0
+APPID
+  5
+2A
+330
+3
+100
+AcDbSymbolTableRecord
+100
+AcDbRegAppTableRecord
+  2
+ACAD
+ 70
+0
+  0
+APPID
+  5
+341
+330
+3
+100
+AcDbSymbolTableRecord
+100
+AcDbRegAppTableRecord
+  2
+HATCHBACKGROUNDCOLOR
+ 70
+0
+  0
+APPID
+  5
+342
+330
+3
+100
+AcDbSymbolTableRecord
+100
+AcDbRegAppTableRecord
+  2
+EZDXF
+ 70
+0
+  0
+ENDTAB
+  0
+TABLE
+  2
+DIMSTYLE
+  5
+4
+330
+0
+100
+AcDbSymbolTable
+ 70
+1
+100
+AcDbDimStyleTable
+  0
+DIMSTYLE
+105
+2B
+330
+4
+100
+AcDbSymbolTableRecord
+100
+AcDbDimStyleTableRecord
+  2
+Standard
+ 70
+0
+ 40
+1.0
+ 41
+2.5
+ 42
+0.625
+ 43
+3.75
+ 44
+1.25
+ 45
+0.0
+ 46
+0.0
+ 47
+0.0
+ 48
+0.0
+ 49
+2.5
+140
+2.5
+141
+2.5
+142
+0.0
+143
+0.03937007874
+144
+1.0
+145
+0.0
+146
+1.0
+147
+0.625
+148
+0.0
+ 69
+0
+ 70
+0
+ 71
+0
+ 72
+0
+ 73
+0
+ 74
+0
+ 75
+0
+ 76
+0
+ 77
+1
+ 78
+8
+ 79
+3
+170
+0
+171
+3
+172
+1
+173
+0
+174
+0
+175
+0
+176
+0
+177
+0
+178
+0
+179
+2
+271
+2
+272
+2
+273
+2
+274
+3
+275
+0
+276
+0
+277
+2
+278
+44
+279
+0
+280
+0
+281
+0
+282
+0
+283
+0
+284
+8
+285
+0
+286
+0
+288
+0
+289
+3
+290
+0
+371
+-2
+372
+-2
+  0
+ENDTAB
+  0
+TABLE
+  2
+BLOCK_RECORD
+  5
+9
+330
+0
+100
+AcDbSymbolTable
+ 70
+2
+  0
+BLOCK_RECORD
+  5
+17
+330
+9
+100
+AcDbSymbolTableRecord
+100
+AcDbBlockTableRecord
+  2
+*Model_Space
+340
+1A
+ 70
+0
+280
+1
+281
+0
+  0
+BLOCK_RECORD
+  5
+1B
+330
+9
+100
+AcDbSymbolTableRecord
+100
+AcDbBlockTableRecord
+  2
+*Paper_Space
+340
+1E
+ 70
+0
+280
+1
+281
+0
+  0
+ENDTAB
+  0
+ENDSEC
+  0
+SECTION
+  2
+BLOCKS
+  0
+BLOCK
+  5
+18
+330
+17
+100
+AcDbEntity
+  8
+0
+100
+AcDbBlockBegin
+  2
+*Model_Space
+ 70
+0
+ 10
+0.0
+ 20
+0.0
+ 30
+0.0
+  3
+*Model_Space
+  1
+
+  0
+ENDBLK
+  5
+19
+330
+17
+100
+AcDbEntity
+  8
+0
+100
+AcDbBlockEnd
+  0
+BLOCK
+  5
+1C
+330
+1B
+100
+AcDbEntity
+  8
+0
+100
+AcDbBlockBegin
+  2
+*Paper_Space
+ 70
+0
+ 10
+0.0
+ 20
+0.0
+ 30
+0.0
+  3
+*Paper_Space
+  1
+
+  0
+ENDBLK
+  5
+1D
+330
+1B
+100
+AcDbEntity
+  8
+0
+100
+AcDbBlockEnd
+  0
+ENDSEC
+  0
+SECTION
+  2
+ENTITIES
+  0
+LWPOLYLINE
+  5
+2F
+330
+17
+100
+AcDbEntity
+  8
+FRAME
+100
+AcDbPolyline
+ 90
+4
+ 70
+1
+ 10
+10.0
+ 20
+670.0
+ 10
+831.0
+ 20
+670.0
+ 10
+831.0
+ 20
+1244.0
+ 10
+10.0
+ 20
+1244.0
+  0
+LWPOLYLINE
+  5
+30
+330
+17
+100
+AcDbEntity
+  8
+FRAME
+100
+AcDbPolyline
+ 90
+4
+ 70
+1
+ 10
+565.0
+ 20
+670.0
+ 10
+831.0
+ 20
+670.0
+ 10
+831.0
+ 20
+715.0
+ 10
+565.0
+ 20
+715.0
+  0
+LINE
+  5
+31
+330
+17
+100
+AcDbEntity
+  8
+FRAME
+100
+AcDbLine
+ 10
+565.0
+ 20
+695.0
+ 30
+0.0
+ 11
+831.0
+ 21
+695.0
+ 31
+0.0
+  0
+LINE
+  5
+32
+330
+17
+100
+AcDbEntity
+  8
+FRAME
+100
+AcDbLine
+ 10
+700.0
+ 20
+670.0
+ 30
+0.0
+ 11
+700.0
+ 21
+715.0
+ 31
+0.0
+  0
+TEXT
+  5
+33
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+575.0
+ 20
+704.0
+ 30
+0.0
+ 40
+4.0
+  1
+16MW/32MWh 储能电站 一次设备表
+  7
+CN_TEXT
+ 11
+575.0
+ 21
+704.0
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+34
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+710.0
+ 20
+704.0
+ 30
+0.0
+ 40
+3.0
+  1
+图号: BESS-LST-001
+  7
+CN_TEXT
+ 11
+710.0
+ 21
+704.0
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+35
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+575.0
+ 20
+683.0
+ 30
+0.0
+ 40
+3.0
+  1
+阶段: 学习/概念设计
+  7
+CN_TEXT
+ 11
+575.0
+ 21
+683.0
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+36
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+710.0
+ 20
+683.0
+ 30
+0.0
+ 40
+3.0
+  1
+比例: NTS
+  7
+CN_TEXT
+ 11
+710.0
+ 21
+683.0
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+37
+330
+17
+100
+AcDbEntity
+  8
+ANNOT
+100
+AcDbText
+ 10
+20.0
+ 20
+680.0
+ 30
+0.0
+ 40
+3.0
+  1
+注意：参数须按公司受控图纸和设备资料复核
+  7
+CN_TEXT
+ 11
+20.0
+ 21
+680.0
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+38
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+420.0
+ 20
+1225.0
+ 30
+0.0
+ 40
+7.0
+  1
+16MW/32MWh 储能电站 一次设备表
+  7
+CN_TEXT
+ 72
+1
+ 11
+420.0
+ 21
+1225.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+LINE
+  5
+39
+330
+17
+100
+AcDbEntity
+  8
+TABLE
+100
+AcDbLine
+ 10
+25.0
+ 20
+1195.0
+ 30
+0.0
+ 11
+804.9999999999999
+ 21
+1195.0
+ 31
+0.0
+  0
+LINE
+  5
+3A
+330
+17
+100
+AcDbEntity
+  8
+TABLE
+100
+AcDbLine
+ 10
+25.0
+ 20
+1177.0
+ 30
+0.0
+ 11
+804.9999999999999
+ 21
+1177.0
+ 31
+0.0
+  0
+LINE
+  5
+3B
+330
+17
+100
+AcDbEntity
+  8
+TABLE
+100
+AcDbLine
+ 10
+25.0
+ 20
+1159.0
+ 30
+0.0
+ 11
+804.9999999999999
+ 21
+1159.0
+ 31
+0.0
+  0
+LINE
+  5
+3C
+330
+17
+100
+AcDbEntity
+  8
+TABLE
+100
+AcDbLine
+ 10
+25.0
+ 20
+1141.0
+ 30
+0.0
+ 11
+804.9999999999999
+ 21
+1141.0
+ 31
+0.0
+  0
+LINE
+  5
+3D
+330
+17
+100
+AcDbEntity
+  8
+TABLE
+100
+AcDbLine
+ 10
+25.0
+ 20
+1123.0
+ 30
+0.0
+ 11
+804.9999999999999
+ 21
+1123.0
+ 31
+0.0
+  0
+LINE
+  5
+3E
+330
+17
+100
+AcDbEntity
+  8
+TABLE
+100
+AcDbLine
+ 10
+25.0
+ 20
+1105.0
+ 30
+0.0
+ 11
+804.9999999999999
+ 21
+1105.0
+ 31
+0.0
+  0
+LINE
+  5
+3F
+330
+17
+100
+AcDbEntity
+  8
+TABLE
+100
+AcDbLine
+ 10
+25.0
+ 20
+1087.0
+ 30
+0.0
+ 11
+804.9999999999999
+ 21
+1087.0
+ 31
+0.0
+  0
+LINE
+  5
+40
+330
+17
+100
+AcDbEntity
+  8
+TABLE
+100
+AcDbLine
+ 10
+25.0
+ 20
+1069.0
+ 30
+0.0
+ 11
+804.9999999999999
+ 21
+1069.0
+ 31
+0.0
+  0
+LINE
+  5
+41
+330
+17
+100
+AcDbEntity
+  8
+TABLE
+100
+AcDbLine
+ 10
+25.0
+ 20
+1051.0
+ 30
+0.0
+ 11
+804.9999999999999
+ 21
+1051.0
+ 31
+0.0
+  0
+LINE
+  5
+42
+330
+17
+100
+AcDbEntity
+  8
+TABLE
+100
+AcDbLine
+ 10
+25.0
+ 20
+1033.0
+ 30
+0.0
+ 11
+804.9999999999999
+ 21
+1033.0
+ 31
+0.0
+  0
+LINE
+  5
+43
+330
+17
+100
+AcDbEntity
+  8
+TABLE
+100
+AcDbLine
+ 10
+25.0
+ 20
+1015.0
+ 30
+0.0
+ 11
+804.9999999999999
+ 21
+1015.0
+ 31
+0.0
+  0
+LINE
+  5
+44
+330
+17
+100
+AcDbEntity
+  8
+TABLE
+100
+AcDbLine
+ 10
+25.0
+ 20
+997.0
+ 30
+0.0
+ 11
+804.9999999999999
+ 21
+997.0
+ 31
+0.0
+  0
+LINE
+  5
+45
+330
+17
+100
+AcDbEntity
+  8
+TABLE
+100
+AcDbLine
+ 10
+25.0
+ 20
+979.0
+ 30
+0.0
+ 11
+804.9999999999999
+ 21
+979.0
+ 31
+0.0
+  0
+LINE
+  5
+46
+330
+17
+100
+AcDbEntity
+  8
+TABLE
+100
+AcDbLine
+ 10
+25.0
+ 20
+1195.0
+ 30
+0.0
+ 11
+25.0
+ 21
+979.0
+ 31
+0.0
+  0
+LINE
+  5
+47
+330
+17
+100
+AcDbEntity
+  8
+TABLE
+100
+AcDbLine
+ 10
+75.73170731707317
+ 20
+1195.0
+ 30
+0.0
+ 11
+75.73170731707317
+ 21
+979.0
+ 31
+0.0
+  0
+LINE
+  5
+48
+330
+17
+100
+AcDbEntity
+  8
+TABLE
+100
+AcDbLine
+ 10
+202.5609756097561
+ 20
+1195.0
+ 30
+0.0
+ 11
+202.5609756097561
+ 21
+979.0
+ 31
+0.0
+  0
+LINE
+  5
+49
+330
+17
+100
+AcDbEntity
+  8
+TABLE
+100
+AcDbLine
+ 10
+278.6585365853658
+ 20
+1195.0
+ 30
+0.0
+ 11
+278.6585365853658
+ 21
+979.0
+ 31
+0.0
+  0
+LINE
+  5
+4A
+330
+17
+100
+AcDbEntity
+  8
+TABLE
+100
+AcDbLine
+ 10
+456.2195121951219
+ 20
+1195.0
+ 30
+0.0
+ 11
+456.2195121951219
+ 21
+979.0
+ 31
+0.0
+  0
+LINE
+  5
+4B
+330
+17
+100
+AcDbEntity
+  8
+TABLE
+100
+AcDbLine
+ 10
+513.2926829268292
+ 20
+1195.0
+ 30
+0.0
+ 11
+513.2926829268292
+ 21
+979.0
+ 31
+0.0
+  0
+LINE
+  5
+4C
+330
+17
+100
+AcDbEntity
+  8
+TABLE
+100
+AcDbLine
+ 10
+690.8536585365853
+ 20
+1195.0
+ 30
+0.0
+ 11
+690.8536585365853
+ 21
+979.0
+ 31
+0.0
+  0
+LINE
+  5
+4D
+330
+17
+100
+AcDbEntity
+  8
+TABLE
+100
+AcDbLine
+ 10
+804.9999999999999
+ 20
+1195.0
+ 30
+0.0
+ 11
+804.9999999999999
+ 21
+979.0
+ 31
+0.0
+  0
+TEXT
+  5
+4E
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+50.36585365853659
+ 20
+1186.0
+ 30
+0.0
+ 40
+3.0
+  1
+序号
+  7
+CN_TEXT
+ 72
+1
+ 11
+50.36585365853659
+ 21
+1186.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+TEXT
+  5
+4F
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+139.14634146341464
+ 20
+1186.0
+ 30
+0.0
+ 40
+3.0
+  1
+设备名称
+  7
+CN_TEXT
+ 72
+1
+ 11
+139.14634146341464
+ 21
+1186.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+TEXT
+  5
+50
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+240.60975609756096
+ 20
+1186.0
+ 30
+0.0
+ 40
+3.0
+  1
+代号
+  7
+CN_TEXT
+ 72
+1
+ 11
+240.60975609756096
+ 21
+1186.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+TEXT
+  5
+51
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+367.43902439024384
+ 20
+1186.0
+ 30
+0.0
+ 40
+3.0
+  1
+主要参数
+  7
+CN_TEXT
+ 72
+1
+ 11
+367.43902439024384
+ 21
+1186.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+TEXT
+  5
+52
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+484.7560975609756
+ 20
+1186.0
+ 30
+0.0
+ 40
+3.0
+  1
+数量
+  7
+CN_TEXT
+ 72
+1
+ 11
+484.7560975609756
+ 21
+1186.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+TEXT
+  5
+53
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+602.0731707317073
+ 20
+1186.0
+ 30
+0.0
+ 40
+3.0
+  1
+说明
+  7
+CN_TEXT
+ 72
+1
+ 11
+602.0731707317073
+ 21
+1186.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+TEXT
+  5
+54
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+747.9268292682925
+ 20
+1186.0
+ 30
+0.0
+ 40
+3.0
+  1
+数据状态
+  7
+CN_TEXT
+ 72
+1
+ 11
+747.9268292682925
+ 21
+1186.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+TEXT
+  5
+55
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+27.0
+ 20
+1165.84
+ 30
+0.0
+ 40
+2.6
+  1
+1
+  7
+CN_TEXT
+ 11
+27.0
+ 21
+1165.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+56
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+77.73170731707317
+ 20
+1165.84
+ 30
+0.0
+ 40
+2.6
+  1
+电池预制舱
+  7
+CN_TEXT
+ 11
+77.73170731707317
+ 21
+1165.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+57
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+204.5609756097561
+ 20
+1165.84
+ 30
+0.0
+ 40
+2.6
+  1
+BESS
+  7
+CN_TEXT
+ 11
+204.5609756097561
+ 21
+1165.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+58
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+280.6585365853658
+ 20
+1165.84
+ 30
+0.0
+ 40
+2.6
+  1
+2MWh/单元
+  7
+CN_TEXT
+ 11
+280.6585365853658
+ 21
+1165.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+59
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+458.2195121951219
+ 20
+1165.84
+ 30
+0.0
+ 40
+2.6
+  1
+16
+  7
+CN_TEXT
+ 11
+458.2195121951219
+ 21
+1165.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+5A
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+515.2926829268292
+ 20
+1165.84
+ 30
+0.0
+ 40
+2.6
+  1
+32MWh
+  7
+CN_TEXT
+ 11
+515.2926829268292
+ 21
+1165.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+5B
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+692.8536585365853
+ 20
+1165.84
+ 30
+0.0
+ 40
+2.6
+  1
+源资料可确认
+  7
+CN_TEXT
+ 11
+692.8536585365853
+ 21
+1165.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+5C
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+27.0
+ 20
+1147.84
+ 30
+0.0
+ 40
+2.6
+  1
+2
+  7
+CN_TEXT
+ 11
+27.0
+ 21
+1147.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+5D
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+77.73170731707317
+ 20
+1147.84
+ 30
+0.0
+ 40
+2.6
+  1
+储能变流器
+  7
+CN_TEXT
+ 11
+77.73170731707317
+ 21
+1147.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+5E
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+204.5609756097561
+ 20
+1147.84
+ 30
+0.0
+ 40
+2.6
+  1
+PCS
+  7
+CN_TEXT
+ 11
+204.5609756097561
+ 21
+1147.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+5F
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+280.6585365853658
+ 20
+1147.84
+ 30
+0.0
+ 40
+2.6
+  1
+500kW/台
+  7
+CN_TEXT
+ 11
+280.6585365853658
+ 21
+1147.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+60
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+458.2195121951219
+ 20
+1147.84
+ 30
+0.0
+ 40
+2.6
+  1
+32
+  7
+CN_TEXT
+ 11
+458.2195121951219
+ 21
+1147.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+61
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+515.2926829268292
+ 20
+1147.84
+ 30
+0.0
+ 40
+2.6
+  1
+16MW
+  7
+CN_TEXT
+ 11
+515.2926829268292
+ 21
+1147.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+62
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+692.8536585365853
+ 20
+1147.84
+ 30
+0.0
+ 40
+2.6
+  1
+由2台/单元推导
+  7
+CN_TEXT
+ 11
+692.8536585365853
+ 21
+1147.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+63
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+27.0
+ 20
+1129.8400000000001
+ 30
+0.0
+ 40
+2.6
+  1
+3
+  7
+CN_TEXT
+ 11
+27.0
+ 21
+1129.8400000000001
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+64
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+77.73170731707317
+ 20
+1129.8400000000001
+ 30
+0.0
+ 40
+2.6
+  1
+升压分裂变压器
+  7
+CN_TEXT
+ 11
+77.73170731707317
+ 21
+1129.8400000000001
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+65
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+204.5609756097561
+ 20
+1129.8400000000001
+ 30
+0.0
+ 40
+2.6
+  1
+T
+  7
+CN_TEXT
+ 11
+204.5609756097561
+ 21
+1129.8400000000001
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+66
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+280.6585365853658
+ 20
+1129.8400000000001
+ 30
+0.0
+ 40
+2.6
+  1
+10kV/低压侧，约1MW/单元
+  7
+CN_TEXT
+ 11
+280.6585365853658
+ 21
+1129.8400000000001
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+67
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+458.2195121951219
+ 20
+1129.8400000000001
+ 30
+0.0
+ 40
+2.6
+  1
+16
+  7
+CN_TEXT
+ 11
+458.2195121951219
+ 21
+1129.8400000000001
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+68
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+515.2926829268292
+ 20
+1129.8400000000001
+ 30
+0.0
+ 40
+2.6
+  1
+待确认阻抗和组别
+  7
+CN_TEXT
+ 11
+515.2926829268292
+ 21
+1129.8400000000001
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+69
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+692.8536585365853
+ 20
+1129.8400000000001
+ 30
+0.0
+ 40
+2.6
+  1
+概念假设
+  7
+CN_TEXT
+ 11
+692.8536585365853
+ 21
+1129.8400000000001
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+6A
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+27.0
+ 20
+1111.8400000000001
+ 30
+0.0
+ 40
+2.6
+  1
+4
+  7
+CN_TEXT
+ 11
+27.0
+ 21
+1111.8400000000001
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+6B
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+77.73170731707317
+ 20
+1111.8400000000001
+ 30
+0.0
+ 40
+2.6
+  1
+10kV预制舱
+  7
+CN_TEXT
+ 11
+77.73170731707317
+ 21
+1111.8400000000001
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+6C
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+204.5609756097561
+ 20
+1111.8400000000001
+ 30
+0.0
+ 40
+2.6
+  1
+10kV-SWGR
+  7
+CN_TEXT
+ 11
+204.5609756097561
+ 21
+1111.8400000000001
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+6D
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+280.6585365853658
+ 20
+1111.8400000000001
+ 30
+0.0
+ 40
+2.6
+  1
+I、II段
+  7
+CN_TEXT
+ 11
+280.6585365853658
+ 21
+1111.8400000000001
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+6E
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+458.2195121951219
+ 20
+1111.8400000000001
+ 30
+0.0
+ 40
+2.6
+  1
+2
+  7
+CN_TEXT
+ 11
+458.2195121951219
+ 21
+1111.8400000000001
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+6F
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+515.2926829268292
+ 20
+1111.8400000000001
+ 30
+0.0
+ 40
+2.6
+  1
+含进线/馈线/PT等
+  7
+CN_TEXT
+ 11
+515.2926829268292
+ 21
+1111.8400000000001
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+70
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+692.8536585365853
+ 20
+1111.8400000000001
+ 30
+0.0
+ 40
+2.6
+  1
+源资料可确认
+  7
+CN_TEXT
+ 11
+692.8536585365853
+ 21
+1111.8400000000001
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+71
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+27.0
+ 20
+1093.8400000000001
+ 30
+0.0
+ 40
+2.6
+  1
+5
+  7
+CN_TEXT
+ 11
+27.0
+ 21
+1093.8400000000001
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+72
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+77.73170731707317
+ 20
+1093.8400000000001
+ 30
+0.0
+ 40
+2.6
+  1
+10kV储能馈线柜
+  7
+CN_TEXT
+ 11
+77.73170731707317
+ 21
+1093.8400000000001
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+73
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+204.5609756097561
+ 20
+1093.8400000000001
+ 30
+0.0
+ 40
+2.6
+  1
+QF
+  7
+CN_TEXT
+ 11
+204.5609756097561
+ 21
+1093.8400000000001
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+74
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+280.6585365853658
+ 20
+1093.8400000000001
+ 30
+0.0
+ 40
+2.6
+  1
+约4MW/8MWh馈线组
+  7
+CN_TEXT
+ 11
+280.6585365853658
+ 21
+1093.8400000000001
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+75
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+458.2195121951219
+ 20
+1093.8400000000001
+ 30
+0.0
+ 40
+2.6
+  1
+4
+  7
+CN_TEXT
+ 11
+458.2195121951219
+ 21
+1093.8400000000001
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+76
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+515.2926829268292
+ 20
+1093.8400000000001
+ 30
+0.0
+ 40
+2.6
+  1
+每段母线2回
+  7
+CN_TEXT
+ 11
+515.2926829268292
+ 21
+1093.8400000000001
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+77
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+692.8536585365853
+ 20
+1093.8400000000001
+ 30
+0.0
+ 40
+2.6
+  1
+由主接线图确认
+  7
+CN_TEXT
+ 11
+692.8536585365853
+ 21
+1093.8400000000001
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+78
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+27.0
+ 20
+1075.8400000000001
+ 30
+0.0
+ 40
+2.6
+  1
+6
+  7
+CN_TEXT
+ 11
+27.0
+ 21
+1075.8400000000001
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+79
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+77.73170731707317
+ 20
+1075.8400000000001
+ 30
+0.0
+ 40
+2.6
+  1
+储能单元环网/负荷开关
+  7
+CN_TEXT
+ 11
+77.73170731707317
+ 21
+1075.8400000000001
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+7A
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+204.5609756097561
+ 20
+1075.8400000000001
+ 30
+0.0
+ 40
+2.6
+  1
+QS
+  7
+CN_TEXT
+ 11
+204.5609756097561
+ 21
+1075.8400000000001
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+7B
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+280.6585365853658
+ 20
+1075.8400000000001
+ 30
+0.0
+ 40
+2.6
+  1
+10kV，参数待确认
+  7
+CN_TEXT
+ 11
+280.6585365853658
+ 21
+1075.8400000000001
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+7C
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+458.2195121951219
+ 20
+1075.8400000000001
+ 30
+0.0
+ 40
+2.6
+  1
+16
+  7
+CN_TEXT
+ 11
+458.2195121951219
+ 21
+1075.8400000000001
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+7D
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+515.2926829268292
+ 20
+1075.8400000000001
+ 30
+0.0
+ 40
+2.6
+  1
+每1MW/2MWh单元1套
+  7
+CN_TEXT
+ 11
+515.2926829268292
+ 21
+1075.8400000000001
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+7E
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+692.8536585365853
+ 20
+1075.8400000000001
+ 30
+0.0
+ 40
+2.6
+  1
+拓扑确认，参数待定
+  7
+CN_TEXT
+ 11
+692.8536585365853
+ 21
+1075.8400000000001
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+7F
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+27.0
+ 20
+1057.8400000000001
+ 30
+0.0
+ 40
+2.6
+  1
+7
+  7
+CN_TEXT
+ 11
+27.0
+ 21
+1057.8400000000001
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+80
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+77.73170731707317
+ 20
+1057.8400000000001
+ 30
+0.0
+ 40
+2.6
+  1
+母联柜
+  7
+CN_TEXT
+ 11
+77.73170731707317
+ 21
+1057.8400000000001
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+81
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+204.5609756097561
+ 20
+1057.8400000000001
+ 30
+0.0
+ 40
+2.6
+  1
+QF-BC
+  7
+CN_TEXT
+ 11
+204.5609756097561
+ 21
+1057.8400000000001
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+82
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+280.6585365853658
+ 20
+1057.8400000000001
+ 30
+0.0
+ 40
+2.6
+  1
+10kV
+  7
+CN_TEXT
+ 11
+280.6585365853658
+ 21
+1057.8400000000001
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+83
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+458.2195121951219
+ 20
+1057.8400000000001
+ 30
+0.0
+ 40
+2.6
+  1
+1
+  7
+CN_TEXT
+ 11
+458.2195121951219
+ 21
+1057.8400000000001
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+84
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+515.2926829268292
+ 20
+1057.8400000000001
+ 30
+0.0
+ 40
+2.6
+  1
+分段母线联络
+  7
+CN_TEXT
+ 11
+515.2926829268292
+ 21
+1057.8400000000001
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+85
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+692.8536585365853
+ 20
+1057.8400000000001
+ 30
+0.0
+ 40
+2.6
+  1
+源图可辨认
+  7
+CN_TEXT
+ 11
+692.8536585365853
+ 21
+1057.8400000000001
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+86
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+27.0
+ 20
+1039.8400000000001
+ 30
+0.0
+ 40
+2.6
+  1
+8
+  7
+CN_TEXT
+ 11
+27.0
+ 21
+1039.8400000000001
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+87
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+77.73170731707317
+ 20
+1039.8400000000001
+ 30
+0.0
+ 40
+2.6
+  1
+站用变压器
+  7
+CN_TEXT
+ 11
+77.73170731707317
+ 21
+1039.8400000000001
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+88
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+204.5609756097561
+ 20
+1039.8400000000001
+ 30
+0.0
+ 40
+2.6
+  1
+T-STA
+  7
+CN_TEXT
+ 11
+204.5609756097561
+ 21
+1039.8400000000001
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+89
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+280.6585365853658
+ 20
+1039.8400000000001
+ 30
+0.0
+ 40
+2.6
+  1
+10/0.4kV，630kVA
+  7
+CN_TEXT
+ 11
+280.6585365853658
+ 21
+1039.8400000000001
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+8A
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+458.2195121951219
+ 20
+1039.8400000000001
+ 30
+0.0
+ 40
+2.6
+  1
+2
+  7
+CN_TEXT
+ 11
+458.2195121951219
+ 21
+1039.8400000000001
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+8B
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+515.2926829268292
+ 20
+1039.8400000000001
+ 30
+0.0
+ 40
+2.6
+  1
+每8MW单元1台
+  7
+CN_TEXT
+ 11
+515.2926829268292
+ 21
+1039.8400000000001
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+8C
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+692.8536585365853
+ 20
+1039.8400000000001
+ 30
+0.0
+ 40
+2.6
+  1
+源资料可确认
+  7
+CN_TEXT
+ 11
+692.8536585365853
+ 21
+1039.8400000000001
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+8D
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+27.0
+ 20
+1021.84
+ 30
+0.0
+ 40
+2.6
+  1
+9
+  7
+CN_TEXT
+ 11
+27.0
+ 21
+1021.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+8E
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+77.73170731707317
+ 20
+1021.84
+ 30
+0.0
+ 40
+2.6
+  1
+总控预制舱
+  7
+CN_TEXT
+ 11
+77.73170731707317
+ 21
+1021.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+8F
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+204.5609756097561
+ 20
+1021.84
+ 30
+0.0
+ 40
+2.6
+  1
+CTRL
+  7
+CN_TEXT
+ 11
+204.5609756097561
+ 21
+1021.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+90
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+280.6585365853658
+ 20
+1021.84
+ 30
+0.0
+ 40
+2.6
+  1
+监控和二次系统
+  7
+CN_TEXT
+ 11
+280.6585365853658
+ 21
+1021.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+91
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+458.2195121951219
+ 20
+1021.84
+ 30
+0.0
+ 40
+2.6
+  1
+1
+  7
+CN_TEXT
+ 11
+458.2195121951219
+ 21
+1021.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+92
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+515.2926829268292
+ 20
+1021.84
+ 30
+0.0
+ 40
+2.6
+  1
+集中控制
+  7
+CN_TEXT
+ 11
+515.2926829268292
+ 21
+1021.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+93
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+692.8536585365853
+ 20
+1021.84
+ 30
+0.0
+ 40
+2.6
+  1
+源资料可确认
+  7
+CN_TEXT
+ 11
+692.8536585365853
+ 21
+1021.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+94
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+27.0
+ 20
+1003.84
+ 30
+0.0
+ 40
+2.6
+  1
+10
+  7
+CN_TEXT
+ 11
+27.0
+ 21
+1003.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+95
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+77.73170731707317
+ 20
+1003.84
+ 30
+0.0
+ 40
+2.6
+  1
+交直流一体化电源
+  7
+CN_TEXT
+ 11
+77.73170731707317
+ 21
+1003.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+96
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+204.5609756097561
+ 20
+1003.84
+ 30
+0.0
+ 40
+2.6
+  1
+ACDC
+  7
+CN_TEXT
+ 11
+204.5609756097561
+ 21
+1003.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+97
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+280.6585365853658
+ 20
+1003.84
+ 30
+0.0
+ 40
+2.6
+  1
+容量待负荷统计
+  7
+CN_TEXT
+ 11
+280.6585365853658
+ 21
+1003.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+98
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+458.2195121951219
+ 20
+1003.84
+ 30
+0.0
+ 40
+2.6
+  1
+1
+  7
+CN_TEXT
+ 11
+458.2195121951219
+ 21
+1003.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+99
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+515.2926829268292
+ 20
+1003.84
+ 30
+0.0
+ 40
+2.6
+  1
+DC/UPS/通信电源
+  7
+CN_TEXT
+ 11
+515.2926829268292
+ 21
+1003.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+9A
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+692.8536585365853
+ 20
+1003.84
+ 30
+0.0
+ 40
+2.6
+  1
+功能确认，参数待定
+  7
+CN_TEXT
+ 11
+692.8536585365853
+ 21
+1003.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+9B
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+27.0
+ 20
+985.84
+ 30
+0.0
+ 40
+2.6
+  1
+11
+  7
+CN_TEXT
+ 11
+27.0
+ 21
+985.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+9C
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+77.73170731707317
+ 20
+985.84
+ 30
+0.0
+ 40
+2.6
+  1
+电能质量监测
+  7
+CN_TEXT
+ 11
+77.73170731707317
+ 21
+985.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+9D
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+204.5609756097561
+ 20
+985.84
+ 30
+0.0
+ 40
+2.6
+  1
+PQ
+  7
+CN_TEXT
+ 11
+204.5609756097561
+ 21
+985.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+9E
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+280.6585365853658
+ 20
+985.84
+ 30
+0.0
+ 40
+2.6
+  1
+并网点监测
+  7
+CN_TEXT
+ 11
+280.6585365853658
+ 21
+985.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+9F
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+458.2195121951219
+ 20
+985.84
+ 30
+0.0
+ 40
+2.6
+  1
+1
+  7
+CN_TEXT
+ 11
+458.2195121951219
+ 21
+985.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+A0
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+515.2926829268292
+ 20
+985.84
+ 30
+0.0
+ 40
+2.6
+  1
+谐波/电压/频率
+  7
+CN_TEXT
+ 11
+515.2926829268292
+ 21
+985.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+A1
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+692.8536585365853
+ 20
+985.84
+ 30
+0.0
+ 40
+2.6
+  1
+功能确认，数量待定
+  7
+CN_TEXT
+ 11
+692.8536585365853
+ 21
+985.84
+ 31
+0.0
+100
+AcDbText
+  0
+LWPOLYLINE
+  5
+A2
+330
+17
+100
+AcDbEntity
+  8
+FRAME
+100
+AcDbPolyline
+ 90
+4
+ 70
+1
+ 10
+910.0
+ 20
+670.0
+ 10
+1731.0
+ 20
+670.0
+ 10
+1731.0
+ 20
+1244.0
+ 10
+910.0
+ 20
+1244.0
+  0
+LWPOLYLINE
+  5
+A3
+330
+17
+100
+AcDbEntity
+  8
+FRAME
+100
+AcDbPolyline
+ 90
+4
+ 70
+1
+ 10
+1465.0
+ 20
+670.0
+ 10
+1731.0
+ 20
+670.0
+ 10
+1731.0
+ 20
+715.0
+ 10
+1465.0
+ 20
+715.0
+  0
+LINE
+  5
+A4
+330
+17
+100
+AcDbEntity
+  8
+FRAME
+100
+AcDbLine
+ 10
+1465.0
+ 20
+695.0
+ 30
+0.0
+ 11
+1731.0
+ 21
+695.0
+ 31
+0.0
+  0
+LINE
+  5
+A5
+330
+17
+100
+AcDbEntity
+  8
+FRAME
+100
+AcDbLine
+ 10
+1600.0
+ 20
+670.0
+ 30
+0.0
+ 11
+1600.0
+ 21
+715.0
+ 31
+0.0
+  0
+TEXT
+  5
+A6
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1475.0
+ 20
+704.0
+ 30
+0.0
+ 40
+4.0
+  1
+16MW/32MWh 储能电站 二次系统信号表
+  7
+CN_TEXT
+ 11
+1475.0
+ 21
+704.0
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+A7
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1610.0
+ 20
+704.0
+ 30
+0.0
+ 40
+3.0
+  1
+图号: BESS-LST-003
+  7
+CN_TEXT
+ 11
+1610.0
+ 21
+704.0
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+A8
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1475.0
+ 20
+683.0
+ 30
+0.0
+ 40
+3.0
+  1
+阶段: 学习/概念设计
+  7
+CN_TEXT
+ 11
+1475.0
+ 21
+683.0
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+A9
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1610.0
+ 20
+683.0
+ 30
+0.0
+ 40
+3.0
+  1
+比例: NTS
+  7
+CN_TEXT
+ 11
+1610.0
+ 21
+683.0
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+AA
+330
+17
+100
+AcDbEntity
+  8
+ANNOT
+100
+AcDbText
+ 10
+920.0
+ 20
+680.0
+ 30
+0.0
+ 40
+3.0
+  1
+注意：参数须按公司受控图纸和设备资料复核
+  7
+CN_TEXT
+ 11
+920.0
+ 21
+680.0
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+AB
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1320.0
+ 20
+1225.0
+ 30
+0.0
+ 40
+7.0
+  1
+16MW/32MWh 储能电站 二次系统信号表
+  7
+CN_TEXT
+ 72
+1
+ 11
+1320.0
+ 21
+1225.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+LINE
+  5
+AC
+330
+17
+100
+AcDbEntity
+  8
+TABLE
+100
+AcDbLine
+ 10
+925.0
+ 20
+1195.0
+ 30
+0.0
+ 11
+1705.0
+ 21
+1195.0
+ 31
+0.0
+  0
+LINE
+  5
+AD
+330
+17
+100
+AcDbEntity
+  8
+TABLE
+100
+AcDbLine
+ 10
+925.0
+ 20
+1177.0
+ 30
+0.0
+ 11
+1705.0
+ 21
+1177.0
+ 31
+0.0
+  0
+LINE
+  5
+AE
+330
+17
+100
+AcDbEntity
+  8
+TABLE
+100
+AcDbLine
+ 10
+925.0
+ 20
+1159.0
+ 30
+0.0
+ 11
+1705.0
+ 21
+1159.0
+ 31
+0.0
+  0
+LINE
+  5
+AF
+330
+17
+100
+AcDbEntity
+  8
+TABLE
+100
+AcDbLine
+ 10
+925.0
+ 20
+1141.0
+ 30
+0.0
+ 11
+1705.0
+ 21
+1141.0
+ 31
+0.0
+  0
+LINE
+  5
+B0
+330
+17
+100
+AcDbEntity
+  8
+TABLE
+100
+AcDbLine
+ 10
+925.0
+ 20
+1123.0
+ 30
+0.0
+ 11
+1705.0
+ 21
+1123.0
+ 31
+0.0
+  0
+LINE
+  5
+B1
+330
+17
+100
+AcDbEntity
+  8
+TABLE
+100
+AcDbLine
+ 10
+925.0
+ 20
+1105.0
+ 30
+0.0
+ 11
+1705.0
+ 21
+1105.0
+ 31
+0.0
+  0
+LINE
+  5
+B2
+330
+17
+100
+AcDbEntity
+  8
+TABLE
+100
+AcDbLine
+ 10
+925.0
+ 20
+1087.0
+ 30
+0.0
+ 11
+1705.0
+ 21
+1087.0
+ 31
+0.0
+  0
+LINE
+  5
+B3
+330
+17
+100
+AcDbEntity
+  8
+TABLE
+100
+AcDbLine
+ 10
+925.0
+ 20
+1069.0
+ 30
+0.0
+ 11
+1705.0
+ 21
+1069.0
+ 31
+0.0
+  0
+LINE
+  5
+B4
+330
+17
+100
+AcDbEntity
+  8
+TABLE
+100
+AcDbLine
+ 10
+925.0
+ 20
+1051.0
+ 30
+0.0
+ 11
+1705.0
+ 21
+1051.0
+ 31
+0.0
+  0
+LINE
+  5
+B5
+330
+17
+100
+AcDbEntity
+  8
+TABLE
+100
+AcDbLine
+ 10
+925.0
+ 20
+1033.0
+ 30
+0.0
+ 11
+1705.0
+ 21
+1033.0
+ 31
+0.0
+  0
+LINE
+  5
+B6
+330
+17
+100
+AcDbEntity
+  8
+TABLE
+100
+AcDbLine
+ 10
+925.0
+ 20
+1015.0
+ 30
+0.0
+ 11
+1705.0
+ 21
+1015.0
+ 31
+0.0
+  0
+LINE
+  5
+B7
+330
+17
+100
+AcDbEntity
+  8
+TABLE
+100
+AcDbLine
+ 10
+925.0
+ 20
+997.0
+ 30
+0.0
+ 11
+1705.0
+ 21
+997.0
+ 31
+0.0
+  0
+LINE
+  5
+B8
+330
+17
+100
+AcDbEntity
+  8
+TABLE
+100
+AcDbLine
+ 10
+925.0
+ 20
+979.0
+ 30
+0.0
+ 11
+1705.0
+ 21
+979.0
+ 31
+0.0
+  0
+LINE
+  5
+B9
+330
+17
+100
+AcDbEntity
+  8
+TABLE
+100
+AcDbLine
+ 10
+925.0
+ 20
+961.0
+ 30
+0.0
+ 11
+1705.0
+ 21
+961.0
+ 31
+0.0
+  0
+LINE
+  5
+BA
+330
+17
+100
+AcDbEntity
+  8
+TABLE
+100
+AcDbLine
+ 10
+925.0
+ 20
+943.0
+ 30
+0.0
+ 11
+1705.0
+ 21
+943.0
+ 31
+0.0
+  0
+LINE
+  5
+BB
+330
+17
+100
+AcDbEntity
+  8
+TABLE
+100
+AcDbLine
+ 10
+925.0
+ 20
+925.0
+ 30
+0.0
+ 11
+1705.0
+ 21
+925.0
+ 31
+0.0
+  0
+LINE
+  5
+BC
+330
+17
+100
+AcDbEntity
+  8
+TABLE
+100
+AcDbLine
+ 10
+925.0
+ 20
+907.0
+ 30
+0.0
+ 11
+1705.0
+ 21
+907.0
+ 31
+0.0
+  0
+LINE
+  5
+BD
+330
+17
+100
+AcDbEntity
+  8
+TABLE
+100
+AcDbLine
+ 10
+925.0
+ 20
+889.0
+ 30
+0.0
+ 11
+1705.0
+ 21
+889.0
+ 31
+0.0
+  0
+LINE
+  5
+BE
+330
+17
+100
+AcDbEntity
+  8
+TABLE
+100
+AcDbLine
+ 10
+925.0
+ 20
+871.0
+ 30
+0.0
+ 11
+1705.0
+ 21
+871.0
+ 31
+0.0
+  0
+LINE
+  5
+BF
+330
+17
+100
+AcDbEntity
+  8
+TABLE
+100
+AcDbLine
+ 10
+925.0
+ 20
+853.0
+ 30
+0.0
+ 11
+1705.0
+ 21
+853.0
+ 31
+0.0
+  0
+LINE
+  5
+C0
+330
+17
+100
+AcDbEntity
+  8
+TABLE
+100
+AcDbLine
+ 10
+925.0
+ 20
+835.0
+ 30
+0.0
+ 11
+1705.0
+ 21
+835.0
+ 31
+0.0
+  0
+LINE
+  5
+C1
+330
+17
+100
+AcDbEntity
+  8
+TABLE
+100
+AcDbLine
+ 10
+925.0
+ 20
+817.0
+ 30
+0.0
+ 11
+1705.0
+ 21
+817.0
+ 31
+0.0
+  0
+LINE
+  5
+C2
+330
+17
+100
+AcDbEntity
+  8
+TABLE
+100
+AcDbLine
+ 10
+925.0
+ 20
+1195.0
+ 30
+0.0
+ 11
+925.0
+ 21
+817.0
+ 31
+0.0
+  0
+LINE
+  5
+C3
+330
+17
+100
+AcDbEntity
+  8
+TABLE
+100
+AcDbLine
+ 10
+1009.5
+ 20
+1195.0
+ 30
+0.0
+ 11
+1009.5
+ 21
+817.0
+ 31
+0.0
+  0
+LINE
+  5
+C4
+330
+17
+100
+AcDbEntity
+  8
+TABLE
+100
+AcDbLine
+ 10
+1185.0
+ 20
+1195.0
+ 30
+0.0
+ 11
+1185.0
+ 21
+817.0
+ 31
+0.0
+  0
+LINE
+  5
+C5
+330
+17
+100
+AcDbEntity
+  8
+TABLE
+100
+AcDbLine
+ 10
+1276.0
+ 20
+1195.0
+ 30
+0.0
+ 11
+1276.0
+ 21
+817.0
+ 31
+0.0
+  0
+LINE
+  5
+C6
+330
+17
+100
+AcDbEntity
+  8
+TABLE
+100
+AcDbLine
+ 10
+1354.0
+ 20
+1195.0
+ 30
+0.0
+ 11
+1354.0
+ 21
+817.0
+ 31
+0.0
+  0
+LINE
+  5
+C7
+330
+17
+100
+AcDbEntity
+  8
+TABLE
+100
+AcDbLine
+ 10
+1510.0
+ 20
+1195.0
+ 30
+0.0
+ 11
+1510.0
+ 21
+817.0
+ 31
+0.0
+  0
+LINE
+  5
+C8
+330
+17
+100
+AcDbEntity
+  8
+TABLE
+100
+AcDbLine
+ 10
+1705.0
+ 20
+1195.0
+ 30
+0.0
+ 11
+1705.0
+ 21
+817.0
+ 31
+0.0
+  0
+TEXT
+  5
+C9
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+967.25
+ 20
+1186.0
+ 30
+0.0
+ 40
+3.0
+  1
+来源
+  7
+CN_TEXT
+ 72
+1
+ 11
+967.25
+ 21
+1186.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+TEXT
+  5
+CA
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1097.25
+ 20
+1186.0
+ 30
+0.0
+ 40
+3.0
+  1
+信号名称
+  7
+CN_TEXT
+ 72
+1
+ 11
+1097.25
+ 21
+1186.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+TEXT
+  5
+CB
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1230.5
+ 20
+1186.0
+ 30
+0.0
+ 40
+3.0
+  1
+类型
+  7
+CN_TEXT
+ 72
+1
+ 11
+1230.5
+ 21
+1186.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+TEXT
+  5
+CC
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1315.0
+ 20
+1186.0
+ 30
+0.0
+ 40
+3.0
+  1
+单位
+  7
+CN_TEXT
+ 72
+1
+ 11
+1315.0
+ 21
+1186.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+TEXT
+  5
+CD
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1432.0
+ 20
+1186.0
+ 30
+0.0
+ 40
+3.0
+  1
+接收系统
+  7
+CN_TEXT
+ 72
+1
+ 11
+1432.0
+ 21
+1186.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+TEXT
+  5
+CE
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1607.5
+ 20
+1186.0
+ 30
+0.0
+ 40
+3.0
+  1
+用途
+  7
+CN_TEXT
+ 72
+1
+ 11
+1607.5
+ 21
+1186.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+TEXT
+  5
+CF
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+927.0
+ 20
+1165.84
+ 30
+0.0
+ 40
+2.6
+  1
+BMS
+  7
+CN_TEXT
+ 11
+927.0
+ 21
+1165.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+D0
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1011.5
+ 20
+1165.84
+ 30
+0.0
+ 40
+2.6
+  1
+电池簇SOC
+  7
+CN_TEXT
+ 11
+1011.5
+ 21
+1165.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+D1
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1187.0
+ 20
+1165.84
+ 30
+0.0
+ 40
+2.6
+  1
+AI/通信
+  7
+CN_TEXT
+ 11
+1187.0
+ 21
+1165.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+D2
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1278.0
+ 20
+1165.84
+ 30
+0.0
+ 40
+2.6
+  1
+%
+  7
+CN_TEXT
+ 11
+1278.0
+ 21
+1165.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+D3
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1356.0
+ 20
+1165.84
+ 30
+0.0
+ 40
+2.6
+  1
+PMS/EMS
+  7
+CN_TEXT
+ 11
+1356.0
+ 21
+1165.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+D4
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1512.0
+ 20
+1165.84
+ 30
+0.0
+ 40
+2.6
+  1
+监视与功率限制
+  7
+CN_TEXT
+ 11
+1512.0
+ 21
+1165.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+D5
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+927.0
+ 20
+1147.84
+ 30
+0.0
+ 40
+2.6
+  1
+BMS
+  7
+CN_TEXT
+ 11
+927.0
+ 21
+1147.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+D6
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1011.5
+ 20
+1147.84
+ 30
+0.0
+ 40
+2.6
+  1
+电池簇SOH
+  7
+CN_TEXT
+ 11
+1011.5
+ 21
+1147.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+D7
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1187.0
+ 20
+1147.84
+ 30
+0.0
+ 40
+2.6
+  1
+AI/通信
+  7
+CN_TEXT
+ 11
+1187.0
+ 21
+1147.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+D8
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1278.0
+ 20
+1147.84
+ 30
+0.0
+ 40
+2.6
+  1
+%
+  7
+CN_TEXT
+ 11
+1278.0
+ 21
+1147.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+D9
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1356.0
+ 20
+1147.84
+ 30
+0.0
+ 40
+2.6
+  1
+PMS/EMS
+  7
+CN_TEXT
+ 11
+1356.0
+ 21
+1147.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+DA
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1512.0
+ 20
+1147.84
+ 30
+0.0
+ 40
+2.6
+  1
+健康评估
+  7
+CN_TEXT
+ 11
+1512.0
+ 21
+1147.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+DB
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+927.0
+ 20
+1129.8400000000001
+ 30
+0.0
+ 40
+2.6
+  1
+BMS
+  7
+CN_TEXT
+ 11
+927.0
+ 21
+1129.8400000000001
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+DC
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1011.5
+ 20
+1129.8400000000001
+ 30
+0.0
+ 40
+2.6
+  1
+单体最高/最低电压
+  7
+CN_TEXT
+ 11
+1011.5
+ 21
+1129.8400000000001
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+DD
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1187.0
+ 20
+1129.8400000000001
+ 30
+0.0
+ 40
+2.6
+  1
+AI/通信
+  7
+CN_TEXT
+ 11
+1187.0
+ 21
+1129.8400000000001
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+DE
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1278.0
+ 20
+1129.8400000000001
+ 30
+0.0
+ 40
+2.6
+  1
+V
+  7
+CN_TEXT
+ 11
+1278.0
+ 21
+1129.8400000000001
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+DF
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1356.0
+ 20
+1129.8400000000001
+ 30
+0.0
+ 40
+2.6
+  1
+SCADA
+  7
+CN_TEXT
+ 11
+1356.0
+ 21
+1129.8400000000001
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+E0
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1512.0
+ 20
+1129.8400000000001
+ 30
+0.0
+ 40
+2.6
+  1
+越限报警
+  7
+CN_TEXT
+ 11
+1512.0
+ 21
+1129.8400000000001
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+E1
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+927.0
+ 20
+1111.8400000000001
+ 30
+0.0
+ 40
+2.6
+  1
+BMS
+  7
+CN_TEXT
+ 11
+927.0
+ 21
+1111.8400000000001
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+E2
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1011.5
+ 20
+1111.8400000000001
+ 30
+0.0
+ 40
+2.6
+  1
+最高/最低温度
+  7
+CN_TEXT
+ 11
+1011.5
+ 21
+1111.8400000000001
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+E3
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1187.0
+ 20
+1111.8400000000001
+ 30
+0.0
+ 40
+2.6
+  1
+AI/通信
+  7
+CN_TEXT
+ 11
+1187.0
+ 21
+1111.8400000000001
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+E4
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1278.0
+ 20
+1111.8400000000001
+ 30
+0.0
+ 40
+2.6
+  1
+degC
+  7
+CN_TEXT
+ 11
+1278.0
+ 21
+1111.8400000000001
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+E5
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1356.0
+ 20
+1111.8400000000001
+ 30
+0.0
+ 40
+2.6
+  1
+SCADA
+  7
+CN_TEXT
+ 11
+1356.0
+ 21
+1111.8400000000001
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+E6
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1512.0
+ 20
+1111.8400000000001
+ 30
+0.0
+ 40
+2.6
+  1
+越限报警/联锁
+  7
+CN_TEXT
+ 11
+1512.0
+ 21
+1111.8400000000001
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+E7
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+927.0
+ 20
+1093.8400000000001
+ 30
+0.0
+ 40
+2.6
+  1
+BMS
+  7
+CN_TEXT
+ 11
+927.0
+ 21
+1093.8400000000001
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+E8
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1011.5
+ 20
+1093.8400000000001
+ 30
+0.0
+ 40
+2.6
+  1
+绝缘故障
+  7
+CN_TEXT
+ 11
+1011.5
+ 21
+1093.8400000000001
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+E9
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1187.0
+ 20
+1093.8400000000001
+ 30
+0.0
+ 40
+2.6
+  1
+DI/通信
+  7
+CN_TEXT
+ 11
+1187.0
+ 21
+1093.8400000000001
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+EA
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1278.0
+ 20
+1093.8400000000001
+ 30
+0.0
+ 40
+2.6
+  1
+状态
+  7
+CN_TEXT
+ 11
+1278.0
+ 21
+1093.8400000000001
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+EB
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1356.0
+ 20
+1093.8400000000001
+ 30
+0.0
+ 40
+2.6
+  1
+PCS/PMS
+  7
+CN_TEXT
+ 11
+1356.0
+ 21
+1093.8400000000001
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+EC
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1512.0
+ 20
+1093.8400000000001
+ 30
+0.0
+ 40
+2.6
+  1
+停机联锁
+  7
+CN_TEXT
+ 11
+1512.0
+ 21
+1093.8400000000001
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+ED
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+927.0
+ 20
+1075.8400000000001
+ 30
+0.0
+ 40
+2.6
+  1
+PCS
+  7
+CN_TEXT
+ 11
+927.0
+ 21
+1075.8400000000001
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+EE
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1011.5
+ 20
+1075.8400000000001
+ 30
+0.0
+ 40
+2.6
+  1
+有功功率
+  7
+CN_TEXT
+ 11
+1011.5
+ 21
+1075.8400000000001
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+EF
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1187.0
+ 20
+1075.8400000000001
+ 30
+0.0
+ 40
+2.6
+  1
+AI/通信
+  7
+CN_TEXT
+ 11
+1187.0
+ 21
+1075.8400000000001
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+F0
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1278.0
+ 20
+1075.8400000000001
+ 30
+0.0
+ 40
+2.6
+  1
+kW
+  7
+CN_TEXT
+ 11
+1278.0
+ 21
+1075.8400000000001
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+F1
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1356.0
+ 20
+1075.8400000000001
+ 30
+0.0
+ 40
+2.6
+  1
+PMS/SCADA
+  7
+CN_TEXT
+ 11
+1356.0
+ 21
+1075.8400000000001
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+F2
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1512.0
+ 20
+1075.8400000000001
+ 30
+0.0
+ 40
+2.6
+  1
+控制与监视
+  7
+CN_TEXT
+ 11
+1512.0
+ 21
+1075.8400000000001
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+F3
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+927.0
+ 20
+1057.8400000000001
+ 30
+0.0
+ 40
+2.6
+  1
+PCS
+  7
+CN_TEXT
+ 11
+927.0
+ 21
+1057.8400000000001
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+F4
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1011.5
+ 20
+1057.8400000000001
+ 30
+0.0
+ 40
+2.6
+  1
+无功功率
+  7
+CN_TEXT
+ 11
+1011.5
+ 21
+1057.8400000000001
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+F5
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1187.0
+ 20
+1057.8400000000001
+ 30
+0.0
+ 40
+2.6
+  1
+AI/通信
+  7
+CN_TEXT
+ 11
+1187.0
+ 21
+1057.8400000000001
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+F6
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1278.0
+ 20
+1057.8400000000001
+ 30
+0.0
+ 40
+2.6
+  1
+kvar
+  7
+CN_TEXT
+ 11
+1278.0
+ 21
+1057.8400000000001
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+F7
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1356.0
+ 20
+1057.8400000000001
+ 30
+0.0
+ 40
+2.6
+  1
+PMS/AVC
+  7
+CN_TEXT
+ 11
+1356.0
+ 21
+1057.8400000000001
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+F8
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1512.0
+ 20
+1057.8400000000001
+ 30
+0.0
+ 40
+2.6
+  1
+无功调节
+  7
+CN_TEXT
+ 11
+1512.0
+ 21
+1057.8400000000001
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+F9
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+927.0
+ 20
+1039.8400000000001
+ 30
+0.0
+ 40
+2.6
+  1
+PCS
+  7
+CN_TEXT
+ 11
+927.0
+ 21
+1039.8400000000001
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+FA
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1011.5
+ 20
+1039.8400000000001
+ 30
+0.0
+ 40
+2.6
+  1
+运行/待机/故障
+  7
+CN_TEXT
+ 11
+1011.5
+ 21
+1039.8400000000001
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+FB
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1187.0
+ 20
+1039.8400000000001
+ 30
+0.0
+ 40
+2.6
+  1
+DI/通信
+  7
+CN_TEXT
+ 11
+1187.0
+ 21
+1039.8400000000001
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+FC
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1278.0
+ 20
+1039.8400000000001
+ 30
+0.0
+ 40
+2.6
+  1
+状态
+  7
+CN_TEXT
+ 11
+1278.0
+ 21
+1039.8400000000001
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+FD
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1356.0
+ 20
+1039.8400000000001
+ 30
+0.0
+ 40
+2.6
+  1
+SCADA
+  7
+CN_TEXT
+ 11
+1356.0
+ 21
+1039.8400000000001
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+FE
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1512.0
+ 20
+1039.8400000000001
+ 30
+0.0
+ 40
+2.6
+  1
+状态显示
+  7
+CN_TEXT
+ 11
+1512.0
+ 21
+1039.8400000000001
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+FF
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+927.0
+ 20
+1021.84
+ 30
+0.0
+ 40
+2.6
+  1
+PCS
+  7
+CN_TEXT
+ 11
+927.0
+ 21
+1021.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+100
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1011.5
+ 20
+1021.84
+ 30
+0.0
+ 40
+2.6
+  1
+启停命令
+  7
+CN_TEXT
+ 11
+1011.5
+ 21
+1021.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+101
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1187.0
+ 20
+1021.84
+ 30
+0.0
+ 40
+2.6
+  1
+DO/通信
+  7
+CN_TEXT
+ 11
+1187.0
+ 21
+1021.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+102
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1278.0
+ 20
+1021.84
+ 30
+0.0
+ 40
+2.6
+  1
+命令
+  7
+CN_TEXT
+ 11
+1278.0
+ 21
+1021.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+103
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1356.0
+ 20
+1021.84
+ 30
+0.0
+ 40
+2.6
+  1
+PCS
+  7
+CN_TEXT
+ 11
+1356.0
+ 21
+1021.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+104
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1512.0
+ 20
+1021.84
+ 30
+0.0
+ 40
+2.6
+  1
+运行控制
+  7
+CN_TEXT
+ 11
+1512.0
+ 21
+1021.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+105
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+927.0
+ 20
+1003.84
+ 30
+0.0
+ 40
+2.6
+  1
+PCS
+  7
+CN_TEXT
+ 11
+927.0
+ 21
+1003.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+106
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1011.5
+ 20
+1003.84
+ 30
+0.0
+ 40
+2.6
+  1
+有功/无功给定
+  7
+CN_TEXT
+ 11
+1011.5
+ 21
+1003.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+107
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1187.0
+ 20
+1003.84
+ 30
+0.0
+ 40
+2.6
+  1
+AO/通信
+  7
+CN_TEXT
+ 11
+1187.0
+ 21
+1003.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+108
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1278.0
+ 20
+1003.84
+ 30
+0.0
+ 40
+2.6
+  1
+kW/kvar
+  7
+CN_TEXT
+ 11
+1278.0
+ 21
+1003.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+109
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1356.0
+ 20
+1003.84
+ 30
+0.0
+ 40
+2.6
+  1
+PCS
+  7
+CN_TEXT
+ 11
+1356.0
+ 21
+1003.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+10A
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1512.0
+ 20
+1003.84
+ 30
+0.0
+ 40
+2.6
+  1
+功率控制
+  7
+CN_TEXT
+ 11
+1512.0
+ 21
+1003.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+10B
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+927.0
+ 20
+985.84
+ 30
+0.0
+ 40
+2.6
+  1
+10kV开关柜
+  7
+CN_TEXT
+ 11
+927.0
+ 21
+985.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+10C
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1011.5
+ 20
+985.84
+ 30
+0.0
+ 40
+2.6
+  1
+断路器分合位
+  7
+CN_TEXT
+ 11
+1011.5
+ 21
+985.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+10D
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1187.0
+ 20
+985.84
+ 30
+0.0
+ 40
+2.6
+  1
+DI
+  7
+CN_TEXT
+ 11
+1187.0
+ 21
+985.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+10E
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1278.0
+ 20
+985.84
+ 30
+0.0
+ 40
+2.6
+  1
+状态
+  7
+CN_TEXT
+ 11
+1278.0
+ 21
+985.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+10F
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1356.0
+ 20
+985.84
+ 30
+0.0
+ 40
+2.6
+  1
+保护/SCADA
+  7
+CN_TEXT
+ 11
+1356.0
+ 21
+985.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+110
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1512.0
+ 20
+985.84
+ 30
+0.0
+ 40
+2.6
+  1
+状态与联锁
+  7
+CN_TEXT
+ 11
+1512.0
+ 21
+985.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+111
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+927.0
+ 20
+967.84
+ 30
+0.0
+ 40
+2.6
+  1
+10kV开关柜
+  7
+CN_TEXT
+ 11
+927.0
+ 21
+967.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+112
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1011.5
+ 20
+967.84
+ 30
+0.0
+ 40
+2.6
+  1
+保护动作/告警
+  7
+CN_TEXT
+ 11
+1011.5
+ 21
+967.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+113
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1187.0
+ 20
+967.84
+ 30
+0.0
+ 40
+2.6
+  1
+DI/通信
+  7
+CN_TEXT
+ 11
+1187.0
+ 21
+967.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+114
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1278.0
+ 20
+967.84
+ 30
+0.0
+ 40
+2.6
+  1
+状态
+  7
+CN_TEXT
+ 11
+1278.0
+ 21
+967.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+115
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1356.0
+ 20
+967.84
+ 30
+0.0
+ 40
+2.6
+  1
+SCADA
+  7
+CN_TEXT
+ 11
+1356.0
+ 21
+967.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+116
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1512.0
+ 20
+967.84
+ 30
+0.0
+ 40
+2.6
+  1
+故障处理
+  7
+CN_TEXT
+ 11
+1512.0
+ 21
+967.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+117
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+927.0
+ 20
+949.84
+ 30
+0.0
+ 40
+2.6
+  1
+计量
+  7
+CN_TEXT
+ 11
+927.0
+ 21
+949.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+118
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1011.5
+ 20
+949.84
+ 30
+0.0
+ 40
+2.6
+  1
+母线电压/电流/频率
+  7
+CN_TEXT
+ 11
+1011.5
+ 21
+949.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+119
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1187.0
+ 20
+949.84
+ 30
+0.0
+ 40
+2.6
+  1
+AI/通信
+  7
+CN_TEXT
+ 11
+1187.0
+ 21
+949.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+11A
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1278.0
+ 20
+949.84
+ 30
+0.0
+ 40
+2.6
+  1
+V/A/Hz
+  7
+CN_TEXT
+ 11
+1278.0
+ 21
+949.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+11B
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1356.0
+ 20
+949.84
+ 30
+0.0
+ 40
+2.6
+  1
+SCADA/PQ
+  7
+CN_TEXT
+ 11
+1356.0
+ 21
+949.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+11C
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1512.0
+ 20
+949.84
+ 30
+0.0
+ 40
+2.6
+  1
+监测
+  7
+CN_TEXT
+ 11
+1512.0
+ 21
+949.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+11D
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+927.0
+ 20
+931.84
+ 30
+0.0
+ 40
+2.6
+  1
+站用电
+  7
+CN_TEXT
+ 11
+927.0
+ 21
+931.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+11E
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1011.5
+ 20
+931.84
+ 30
+0.0
+ 40
+2.6
+  1
+AC/DC母线电压
+  7
+CN_TEXT
+ 11
+1011.5
+ 21
+931.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+11F
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1187.0
+ 20
+931.84
+ 30
+0.0
+ 40
+2.6
+  1
+AI
+  7
+CN_TEXT
+ 11
+1187.0
+ 21
+931.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+120
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1278.0
+ 20
+931.84
+ 30
+0.0
+ 40
+2.6
+  1
+V
+  7
+CN_TEXT
+ 11
+1278.0
+ 21
+931.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+121
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1356.0
+ 20
+931.84
+ 30
+0.0
+ 40
+2.6
+  1
+SCADA
+  7
+CN_TEXT
+ 11
+1356.0
+ 21
+931.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+122
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1512.0
+ 20
+931.84
+ 30
+0.0
+ 40
+2.6
+  1
+电源监视
+  7
+CN_TEXT
+ 11
+1512.0
+ 21
+931.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+123
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+927.0
+ 20
+913.84
+ 30
+0.0
+ 40
+2.6
+  1
+消防
+  7
+CN_TEXT
+ 11
+927.0
+ 21
+913.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+124
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1011.5
+ 20
+913.84
+ 30
+0.0
+ 40
+2.6
+  1
+火灾报警
+  7
+CN_TEXT
+ 11
+1011.5
+ 21
+913.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+125
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1187.0
+ 20
+913.84
+ 30
+0.0
+ 40
+2.6
+  1
+DI/通信
+  7
+CN_TEXT
+ 11
+1187.0
+ 21
+913.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+126
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1278.0
+ 20
+913.84
+ 30
+0.0
+ 40
+2.6
+  1
+状态
+  7
+CN_TEXT
+ 11
+1278.0
+ 21
+913.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+127
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1356.0
+ 20
+913.84
+ 30
+0.0
+ 40
+2.6
+  1
+辅助控制/SCADA
+  7
+CN_TEXT
+ 11
+1356.0
+ 21
+913.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+128
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1512.0
+ 20
+913.84
+ 30
+0.0
+ 40
+2.6
+  1
+停机和消防联动
+  7
+CN_TEXT
+ 11
+1512.0
+ 21
+913.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+129
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+927.0
+ 20
+895.8399999999999
+ 30
+0.0
+ 40
+2.6
+  1
+消防
+  7
+CN_TEXT
+ 11
+927.0
+ 21
+895.8399999999999
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+12A
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1011.5
+ 20
+895.8399999999999
+ 30
+0.0
+ 40
+2.6
+  1
+灭火系统动作
+  7
+CN_TEXT
+ 11
+1011.5
+ 21
+895.8399999999999
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+12B
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1187.0
+ 20
+895.8399999999999
+ 30
+0.0
+ 40
+2.6
+  1
+DI
+  7
+CN_TEXT
+ 11
+1187.0
+ 21
+895.8399999999999
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+12C
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1278.0
+ 20
+895.8399999999999
+ 30
+0.0
+ 40
+2.6
+  1
+状态
+  7
+CN_TEXT
+ 11
+1278.0
+ 21
+895.8399999999999
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+12D
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1356.0
+ 20
+895.8399999999999
+ 30
+0.0
+ 40
+2.6
+  1
+SCADA
+  7
+CN_TEXT
+ 11
+1356.0
+ 21
+895.8399999999999
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+12E
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1512.0
+ 20
+895.8399999999999
+ 30
+0.0
+ 40
+2.6
+  1
+事件记录
+  7
+CN_TEXT
+ 11
+1512.0
+ 21
+895.8399999999999
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+12F
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+927.0
+ 20
+877.8399999999999
+ 30
+0.0
+ 40
+2.6
+  1
+环境
+  7
+CN_TEXT
+ 11
+927.0
+ 21
+877.8399999999999
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+130
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1011.5
+ 20
+877.8399999999999
+ 30
+0.0
+ 40
+2.6
+  1
+舱内温湿度
+  7
+CN_TEXT
+ 11
+1011.5
+ 21
+877.8399999999999
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+131
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1187.0
+ 20
+877.8399999999999
+ 30
+0.0
+ 40
+2.6
+  1
+AI/通信
+  7
+CN_TEXT
+ 11
+1187.0
+ 21
+877.8399999999999
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+132
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1278.0
+ 20
+877.8399999999999
+ 30
+0.0
+ 40
+2.6
+  1
+degC/%RH
+  7
+CN_TEXT
+ 11
+1278.0
+ 21
+877.8399999999999
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+133
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1356.0
+ 20
+877.8399999999999
+ 30
+0.0
+ 40
+2.6
+  1
+HVAC/SCADA
+  7
+CN_TEXT
+ 11
+1356.0
+ 21
+877.8399999999999
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+134
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1512.0
+ 20
+877.8399999999999
+ 30
+0.0
+ 40
+2.6
+  1
+环境控制
+  7
+CN_TEXT
+ 11
+1512.0
+ 21
+877.8399999999999
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+135
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+927.0
+ 20
+859.8399999999999
+ 30
+0.0
+ 40
+2.6
+  1
+门禁
+  7
+CN_TEXT
+ 11
+927.0
+ 21
+859.8399999999999
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+136
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1011.5
+ 20
+859.8399999999999
+ 30
+0.0
+ 40
+2.6
+  1
+舱门状态
+  7
+CN_TEXT
+ 11
+1011.5
+ 21
+859.8399999999999
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+137
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1187.0
+ 20
+859.8399999999999
+ 30
+0.0
+ 40
+2.6
+  1
+DI
+  7
+CN_TEXT
+ 11
+1187.0
+ 21
+859.8399999999999
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+138
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1278.0
+ 20
+859.8399999999999
+ 30
+0.0
+ 40
+2.6
+  1
+状态
+  7
+CN_TEXT
+ 11
+1278.0
+ 21
+859.8399999999999
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+139
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1356.0
+ 20
+859.8399999999999
+ 30
+0.0
+ 40
+2.6
+  1
+安防/SCADA
+  7
+CN_TEXT
+ 11
+1356.0
+ 21
+859.8399999999999
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+13A
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1512.0
+ 20
+859.8399999999999
+ 30
+0.0
+ 40
+2.6
+  1
+非法进入报警
+  7
+CN_TEXT
+ 11
+1512.0
+ 21
+859.8399999999999
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+13B
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+927.0
+ 20
+841.8399999999999
+ 30
+0.0
+ 40
+2.6
+  1
+通信
+  7
+CN_TEXT
+ 11
+927.0
+ 21
+841.8399999999999
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+13C
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1011.5
+ 20
+841.8399999999999
+ 30
+0.0
+ 40
+2.6
+  1
+网络设备故障
+  7
+CN_TEXT
+ 11
+1011.5
+ 21
+841.8399999999999
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+13D
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1187.0
+ 20
+841.8399999999999
+ 30
+0.0
+ 40
+2.6
+  1
+DI/SNMP
+  7
+CN_TEXT
+ 11
+1187.0
+ 21
+841.8399999999999
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+13E
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1278.0
+ 20
+841.8399999999999
+ 30
+0.0
+ 40
+2.6
+  1
+状态
+  7
+CN_TEXT
+ 11
+1278.0
+ 21
+841.8399999999999
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+13F
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1356.0
+ 20
+841.8399999999999
+ 30
+0.0
+ 40
+2.6
+  1
+SCADA
+  7
+CN_TEXT
+ 11
+1356.0
+ 21
+841.8399999999999
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+140
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1512.0
+ 20
+841.8399999999999
+ 30
+0.0
+ 40
+2.6
+  1
+通信告警
+  7
+CN_TEXT
+ 11
+1512.0
+ 21
+841.8399999999999
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+141
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+927.0
+ 20
+823.8399999999999
+ 30
+0.0
+ 40
+2.6
+  1
+时间同步
+  7
+CN_TEXT
+ 11
+927.0
+ 21
+823.8399999999999
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+142
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1011.5
+ 20
+823.8399999999999
+ 30
+0.0
+ 40
+2.6
+  1
+时钟失步
+  7
+CN_TEXT
+ 11
+1011.5
+ 21
+823.8399999999999
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+143
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1187.0
+ 20
+823.8399999999999
+ 30
+0.0
+ 40
+2.6
+  1
+DI/通信
+  7
+CN_TEXT
+ 11
+1187.0
+ 21
+823.8399999999999
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+144
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1278.0
+ 20
+823.8399999999999
+ 30
+0.0
+ 40
+2.6
+  1
+状态
+  7
+CN_TEXT
+ 11
+1278.0
+ 21
+823.8399999999999
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+145
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1356.0
+ 20
+823.8399999999999
+ 30
+0.0
+ 40
+2.6
+  1
+SCADA
+  7
+CN_TEXT
+ 11
+1356.0
+ 21
+823.8399999999999
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+146
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1512.0
+ 20
+823.8399999999999
+ 30
+0.0
+ 40
+2.6
+  1
+时间系统告警
+  7
+CN_TEXT
+ 11
+1512.0
+ 21
+823.8399999999999
+ 31
+0.0
+100
+AcDbText
+  0
+LWPOLYLINE
+  5
+147
+330
+17
+100
+AcDbEntity
+  8
+FRAME
+100
+AcDbPolyline
+ 90
+4
+ 70
+1
+ 10
+10.0
+ 20
+10.0
+ 10
+831.0
+ 20
+10.0
+ 10
+831.0
+ 20
+584.0
+ 10
+10.0
+ 20
+584.0
+  0
+LWPOLYLINE
+  5
+148
+330
+17
+100
+AcDbEntity
+  8
+FRAME
+100
+AcDbPolyline
+ 90
+4
+ 70
+1
+ 10
+565.0
+ 20
+10.0
+ 10
+831.0
+ 20
+10.0
+ 10
+831.0
+ 20
+55.0
+ 10
+565.0
+ 20
+55.0
+  0
+LINE
+  5
+149
+330
+17
+100
+AcDbEntity
+  8
+FRAME
+100
+AcDbLine
+ 10
+565.0
+ 20
+35.0
+ 30
+0.0
+ 11
+831.0
+ 21
+35.0
+ 31
+0.0
+  0
+LINE
+  5
+14A
+330
+17
+100
+AcDbEntity
+  8
+FRAME
+100
+AcDbLine
+ 10
+700.0
+ 20
+10.0
+ 30
+0.0
+ 11
+700.0
+ 21
+55.0
+ 31
+0.0
+  0
+TEXT
+  5
+14B
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+575.0
+ 20
+44.0
+ 30
+0.0
+ 40
+4.0
+  1
+16MW/32MWh 储能电站 二次系统柜体表
+  7
+CN_TEXT
+ 11
+575.0
+ 21
+44.0
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+14C
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+710.0
+ 20
+44.0
+ 30
+0.0
+ 40
+3.0
+  1
+图号: BESS-LST-002
+  7
+CN_TEXT
+ 11
+710.0
+ 21
+44.0
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+14D
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+575.0
+ 20
+23.0
+ 30
+0.0
+ 40
+3.0
+  1
+阶段: 学习/概念设计
+  7
+CN_TEXT
+ 11
+575.0
+ 21
+23.0
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+14E
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+710.0
+ 20
+23.0
+ 30
+0.0
+ 40
+3.0
+  1
+比例: NTS
+  7
+CN_TEXT
+ 11
+710.0
+ 21
+23.0
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+14F
+330
+17
+100
+AcDbEntity
+  8
+ANNOT
+100
+AcDbText
+ 10
+20.0
+ 20
+20.0
+ 30
+0.0
+ 40
+3.0
+  1
+注意：参数须按公司受控图纸和设备资料复核
+  7
+CN_TEXT
+ 11
+20.0
+ 21
+20.0
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+150
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+420.0
+ 20
+565.0
+ 30
+0.0
+ 40
+7.0
+  1
+16MW/32MWh 储能电站 二次系统柜体表
+  7
+CN_TEXT
+ 72
+1
+ 11
+420.0
+ 21
+565.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+LINE
+  5
+151
+330
+17
+100
+AcDbEntity
+  8
+TABLE
+100
+AcDbLine
+ 10
+25.0
+ 20
+535.0
+ 30
+0.0
+ 11
+805.0
+ 21
+535.0
+ 31
+0.0
+  0
+LINE
+  5
+152
+330
+17
+100
+AcDbEntity
+  8
+TABLE
+100
+AcDbLine
+ 10
+25.0
+ 20
+517.0
+ 30
+0.0
+ 11
+805.0
+ 21
+517.0
+ 31
+0.0
+  0
+LINE
+  5
+153
+330
+17
+100
+AcDbEntity
+  8
+TABLE
+100
+AcDbLine
+ 10
+25.0
+ 20
+499.0
+ 30
+0.0
+ 11
+805.0
+ 21
+499.0
+ 31
+0.0
+  0
+LINE
+  5
+154
+330
+17
+100
+AcDbEntity
+  8
+TABLE
+100
+AcDbLine
+ 10
+25.0
+ 20
+481.0
+ 30
+0.0
+ 11
+805.0
+ 21
+481.0
+ 31
+0.0
+  0
+LINE
+  5
+155
+330
+17
+100
+AcDbEntity
+  8
+TABLE
+100
+AcDbLine
+ 10
+25.0
+ 20
+463.0
+ 30
+0.0
+ 11
+805.0
+ 21
+463.0
+ 31
+0.0
+  0
+LINE
+  5
+156
+330
+17
+100
+AcDbEntity
+  8
+TABLE
+100
+AcDbLine
+ 10
+25.0
+ 20
+445.0
+ 30
+0.0
+ 11
+805.0
+ 21
+445.0
+ 31
+0.0
+  0
+LINE
+  5
+157
+330
+17
+100
+AcDbEntity
+  8
+TABLE
+100
+AcDbLine
+ 10
+25.0
+ 20
+427.0
+ 30
+0.0
+ 11
+805.0
+ 21
+427.0
+ 31
+0.0
+  0
+LINE
+  5
+158
+330
+17
+100
+AcDbEntity
+  8
+TABLE
+100
+AcDbLine
+ 10
+25.0
+ 20
+409.0
+ 30
+0.0
+ 11
+805.0
+ 21
+409.0
+ 31
+0.0
+  0
+LINE
+  5
+159
+330
+17
+100
+AcDbEntity
+  8
+TABLE
+100
+AcDbLine
+ 10
+25.0
+ 20
+391.0
+ 30
+0.0
+ 11
+805.0
+ 21
+391.0
+ 31
+0.0
+  0
+LINE
+  5
+15A
+330
+17
+100
+AcDbEntity
+  8
+TABLE
+100
+AcDbLine
+ 10
+25.0
+ 20
+373.0
+ 30
+0.0
+ 11
+805.0
+ 21
+373.0
+ 31
+0.0
+  0
+LINE
+  5
+15B
+330
+17
+100
+AcDbEntity
+  8
+TABLE
+100
+AcDbLine
+ 10
+25.0
+ 20
+355.0
+ 30
+0.0
+ 11
+805.0
+ 21
+355.0
+ 31
+0.0
+  0
+LINE
+  5
+15C
+330
+17
+100
+AcDbEntity
+  8
+TABLE
+100
+AcDbLine
+ 10
+25.0
+ 20
+337.0
+ 30
+0.0
+ 11
+805.0
+ 21
+337.0
+ 31
+0.0
+  0
+LINE
+  5
+15D
+330
+17
+100
+AcDbEntity
+  8
+TABLE
+100
+AcDbLine
+ 10
+25.0
+ 20
+319.0
+ 30
+0.0
+ 11
+805.0
+ 21
+319.0
+ 31
+0.0
+  0
+LINE
+  5
+15E
+330
+17
+100
+AcDbEntity
+  8
+TABLE
+100
+AcDbLine
+ 10
+25.0
+ 20
+301.0
+ 30
+0.0
+ 11
+805.0
+ 21
+301.0
+ 31
+0.0
+  0
+LINE
+  5
+15F
+330
+17
+100
+AcDbEntity
+  8
+TABLE
+100
+AcDbLine
+ 10
+25.0
+ 20
+283.0
+ 30
+0.0
+ 11
+805.0
+ 21
+283.0
+ 31
+0.0
+  0
+LINE
+  5
+160
+330
+17
+100
+AcDbEntity
+  8
+TABLE
+100
+AcDbLine
+ 10
+25.0
+ 20
+265.0
+ 30
+0.0
+ 11
+805.0
+ 21
+265.0
+ 31
+0.0
+  0
+LINE
+  5
+161
+330
+17
+100
+AcDbEntity
+  8
+TABLE
+100
+AcDbLine
+ 10
+25.0
+ 20
+247.0
+ 30
+0.0
+ 11
+805.0
+ 21
+247.0
+ 31
+0.0
+  0
+LINE
+  5
+162
+330
+17
+100
+AcDbEntity
+  8
+TABLE
+100
+AcDbLine
+ 10
+25.0
+ 20
+535.0
+ 30
+0.0
+ 11
+25.0
+ 21
+247.0
+ 31
+0.0
+  0
+LINE
+  5
+163
+330
+17
+100
+AcDbEntity
+  8
+TABLE
+100
+AcDbLine
+ 10
+63.18181818181818
+ 20
+535.0
+ 30
+0.0
+ 11
+63.18181818181818
+ 21
+247.0
+ 31
+0.0
+  0
+LINE
+  5
+164
+330
+17
+100
+AcDbEntity
+  8
+TABLE
+100
+AcDbLine
+ 10
+194.0909090909091
+ 20
+535.0
+ 30
+0.0
+ 11
+194.0909090909091
+ 21
+247.0
+ 31
+0.0
+  0
+LINE
+  5
+165
+330
+17
+100
+AcDbEntity
+  8
+TABLE
+100
+AcDbLine
+ 10
+363.18181818181813
+ 20
+535.0
+ 30
+0.0
+ 11
+363.18181818181813
+ 21
+247.0
+ 31
+0.0
+  0
+LINE
+  5
+166
+330
+17
+100
+AcDbEntity
+  8
+TABLE
+100
+AcDbLine
+ 10
+515.9090909090909
+ 20
+535.0
+ 30
+0.0
+ 11
+515.9090909090909
+ 21
+247.0
+ 31
+0.0
+  0
+LINE
+  5
+167
+330
+17
+100
+AcDbEntity
+  8
+TABLE
+100
+AcDbLine
+ 10
+668.6363636363636
+ 20
+535.0
+ 30
+0.0
+ 11
+668.6363636363636
+ 21
+247.0
+ 31
+0.0
+  0
+LINE
+  5
+168
+330
+17
+100
+AcDbEntity
+  8
+TABLE
+100
+AcDbLine
+ 10
+805.0
+ 20
+535.0
+ 30
+0.0
+ 11
+805.0
+ 21
+247.0
+ 31
+0.0
+  0
+TEXT
+  5
+169
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+44.09090909090909
+ 20
+526.0
+ 30
+0.0
+ 40
+3.0
+  1
+序号
+  7
+CN_TEXT
+ 72
+1
+ 11
+44.09090909090909
+ 21
+526.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+TEXT
+  5
+16A
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+128.63636363636363
+ 20
+526.0
+ 30
+0.0
+ 40
+3.0
+  1
+柜体名称
+  7
+CN_TEXT
+ 72
+1
+ 11
+128.63636363636363
+ 21
+526.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+TEXT
+  5
+16B
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+278.6363636363636
+ 20
+526.0
+ 30
+0.0
+ 40
+3.0
+  1
+主要功能
+  7
+CN_TEXT
+ 72
+1
+ 11
+278.6363636363636
+ 21
+526.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+TEXT
+  5
+16C
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+439.5454545454545
+ 20
+526.0
+ 30
+0.0
+ 40
+3.0
+  1
+主要输入
+  7
+CN_TEXT
+ 72
+1
+ 11
+439.5454545454545
+ 21
+526.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+TEXT
+  5
+16D
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+592.2727272727273
+ 20
+526.0
+ 30
+0.0
+ 40
+3.0
+  1
+主要输出
+  7
+CN_TEXT
+ 72
+1
+ 11
+592.2727272727273
+ 21
+526.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+TEXT
+  5
+16E
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+736.8181818181818
+ 20
+526.0
+ 30
+0.0
+ 40
+3.0
+  1
+典型接口
+  7
+CN_TEXT
+ 72
+1
+ 11
+736.8181818181818
+ 21
+526.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+TEXT
+  5
+16F
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+27.0
+ 20
+505.84
+ 30
+0.0
+ 40
+2.6
+  1
+1
+  7
+CN_TEXT
+ 11
+27.0
+ 21
+505.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+170
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+65.18181818181819
+ 20
+505.84
+ 30
+0.0
+ 40
+2.6
+  1
+监控主机柜
+  7
+CN_TEXT
+ 11
+65.18181818181819
+ 21
+505.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+171
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+196.0909090909091
+ 20
+505.84
+ 30
+0.0
+ 40
+2.6
+  1
+SCADA服务器与操作站
+  7
+CN_TEXT
+ 11
+196.0909090909091
+ 21
+505.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+172
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+365.18181818181813
+ 20
+505.84
+ 30
+0.0
+ 40
+2.6
+  1
+PCS/BMS/保护/计量
+  7
+CN_TEXT
+ 11
+365.18181818181813
+ 21
+505.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+173
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+517.9090909090909
+ 20
+505.84
+ 30
+0.0
+ 40
+2.6
+  1
+调度与运行人员
+  7
+CN_TEXT
+ 11
+517.9090909090909
+ 21
+505.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+174
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+670.6363636363636
+ 20
+505.84
+ 30
+0.0
+ 40
+2.6
+  1
+IEC 104/OPC UA/厂商协议
+  7
+CN_TEXT
+ 11
+670.6363636363636
+ 21
+505.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+175
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+27.0
+ 20
+487.84
+ 30
+0.0
+ 40
+2.6
+  1
+2
+  7
+CN_TEXT
+ 11
+27.0
+ 21
+487.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+176
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+65.18181818181819
+ 20
+487.84
+ 30
+0.0
+ 40
+2.6
+  1
+综合应用服务器及管理信息柜
+  7
+CN_TEXT
+ 11
+65.18181818181819
+ 21
+487.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+177
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+196.0909090909091
+ 20
+487.84
+ 30
+0.0
+ 40
+2.6
+  1
+历史库、报表、管理信息
+  7
+CN_TEXT
+ 11
+196.0909090909091
+ 21
+487.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+178
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+365.18181818181813
+ 20
+487.84
+ 30
+0.0
+ 40
+2.6
+  1
+SCADA/数据库
+  7
+CN_TEXT
+ 11
+365.18181818181813
+ 21
+487.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+179
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+517.9090909090909
+ 20
+487.84
+ 30
+0.0
+ 40
+2.6
+  1
+管理网
+  7
+CN_TEXT
+ 11
+517.9090909090909
+ 21
+487.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+17A
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+670.6363636363636
+ 20
+487.84
+ 30
+0.0
+ 40
+2.6
+  1
+TCP/IP
+  7
+CN_TEXT
+ 11
+670.6363636363636
+ 21
+487.84
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+17B
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+27.0
+ 20
+469.84000000000003
+ 30
+0.0
+ 40
+2.6
+  1
+3
+  7
+CN_TEXT
+ 11
+27.0
+ 21
+469.84000000000003
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+17C
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+65.18181818181819
+ 20
+469.84000000000003
+ 30
+0.0
+ 40
+2.6
+  1
+储能信息子站柜
+  7
+CN_TEXT
+ 11
+65.18181818181819
+ 21
+469.84000000000003
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+17D
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+196.0909090909091
+ 20
+469.84000000000003
+ 30
+0.0
+ 40
+2.6
+  1
+储能信息汇聚
+  7
+CN_TEXT
+ 11
+196.0909090909091
+ 21
+469.84000000000003
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+17E
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+365.18181818181813
+ 20
+469.84000000000003
+ 30
+0.0
+ 40
+2.6
+  1
+BMS/PCS/PMS
+  7
+CN_TEXT
+ 11
+365.18181818181813
+ 21
+469.84000000000003
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+17F
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+517.9090909090909
+ 20
+469.84000000000003
+ 30
+0.0
+ 40
+2.6
+  1
+监控主机
+  7
+CN_TEXT
+ 11
+517.9090909090909
+ 21
+469.84000000000003
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+180
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+670.6363636363636
+ 20
+469.84000000000003
+ 30
+0.0
+ 40
+2.6
+  1
+IEC 61850/Modbus TCP
+  7
+CN_TEXT
+ 11
+670.6363636363636
+ 21
+469.84000000000003
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+181
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+27.0
+ 20
+451.84000000000003
+ 30
+0.0
+ 40
+2.6
+  1
+4
+  7
+CN_TEXT
+ 11
+27.0
+ 21
+451.84000000000003
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+182
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+65.18181818181819
+ 20
+451.84000000000003
+ 30
+0.0
+ 40
+2.6
+  1
+远动通信柜
+  7
+CN_TEXT
+ 11
+65.18181818181819
+ 21
+451.84000000000003
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+183
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+196.0909090909091
+ 20
+451.84000000000003
+ 30
+0.0
+ 40
+2.6
+  1
+调度远动
+  7
+CN_TEXT
+ 11
+196.0909090909091
+ 21
+451.84000000000003
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+184
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+365.18181818181813
+ 20
+451.84000000000003
+ 30
+0.0
+ 40
+2.6
+  1
+站控层数据
+  7
+CN_TEXT
+ 11
+365.18181818181813
+ 21
+451.84000000000003
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+185
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+517.9090909090909
+ 20
+451.84000000000003
+ 30
+0.0
+ 40
+2.6
+  1
+调度主站
+  7
+CN_TEXT
+ 11
+517.9090909090909
+ 21
+451.84000000000003
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+186
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+670.6363636363636
+ 20
+451.84000000000003
+ 30
+0.0
+ 40
+2.6
+  1
+IEC 104
+  7
+CN_TEXT
+ 11
+670.6363636363636
+ 21
+451.84000000000003
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+187
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+27.0
+ 20
+433.84000000000003
+ 30
+0.0
+ 40
+2.6
+  1
+5
+  7
+CN_TEXT
+ 11
+27.0
+ 21
+433.84000000000003
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+188
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+65.18181818181819
+ 20
+433.84000000000003
+ 30
+0.0
+ 40
+2.6
+  1
+调度数据网设备柜
+  7
+CN_TEXT
+ 11
+65.18181818181819
+ 21
+433.84000000000003
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+189
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+196.0909090909091
+ 20
+433.84000000000003
+ 30
+0.0
+ 40
+2.6
+  1
+调度数据通信
+  7
+CN_TEXT
+ 11
+196.0909090909091
+ 21
+433.84000000000003
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+18A
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+365.18181818181813
+ 20
+433.84000000000003
+ 30
+0.0
+ 40
+2.6
+  1
+远动/保护信息
+  7
+CN_TEXT
+ 11
+365.18181818181813
+ 21
+433.84000000000003
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+18B
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+517.9090909090909
+ 20
+433.84000000000003
+ 30
+0.0
+ 40
+2.6
+  1
+调度数据网
+  7
+CN_TEXT
+ 11
+517.9090909090909
+ 21
+433.84000000000003
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+18C
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+670.6363636363636
+ 20
+433.84000000000003
+ 30
+0.0
+ 40
+2.6
+  1
+以太网
+  7
+CN_TEXT
+ 11
+670.6363636363636
+ 21
+433.84000000000003
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+18D
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+27.0
+ 20
+415.84000000000003
+ 30
+0.0
+ 40
+2.6
+  1
+6
+  7
+CN_TEXT
+ 11
+27.0
+ 21
+415.84000000000003
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+18E
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+65.18181818181819
+ 20
+415.84000000000003
+ 30
+0.0
+ 40
+2.6
+  1
+时间同步系统柜
+  7
+CN_TEXT
+ 11
+65.18181818181819
+ 21
+415.84000000000003
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+18F
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+196.0909090909091
+ 20
+415.84000000000003
+ 30
+0.0
+ 40
+2.6
+  1
+统一时钟
+  7
+CN_TEXT
+ 11
+196.0909090909091
+ 21
+415.84000000000003
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+190
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+365.18181818181813
+ 20
+415.84000000000003
+ 30
+0.0
+ 40
+2.6
+  1
+卫星/上级时钟
+  7
+CN_TEXT
+ 11
+365.18181818181813
+ 21
+415.84000000000003
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+191
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+517.9090909090909
+ 20
+415.84000000000003
+ 30
+0.0
+ 40
+2.6
+  1
+保护/监控/录波
+  7
+CN_TEXT
+ 11
+517.9090909090909
+ 21
+415.84000000000003
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+192
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+670.6363636363636
+ 20
+415.84000000000003
+ 30
+0.0
+ 40
+2.6
+  1
+IRIG-B/NTP/PTP
+  7
+CN_TEXT
+ 11
+670.6363636363636
+ 21
+415.84000000000003
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+193
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+27.0
+ 20
+397.84000000000003
+ 30
+0.0
+ 40
+2.6
+  1
+7
+  7
+CN_TEXT
+ 11
+27.0
+ 21
+397.84000000000003
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+194
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+65.18181818181819
+ 20
+397.84000000000003
+ 30
+0.0
+ 40
+2.6
+  1
+母线保护柜
+  7
+CN_TEXT
+ 11
+65.18181818181819
+ 21
+397.84000000000003
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+195
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+196.0909090909091
+ 20
+397.84000000000003
+ 30
+0.0
+ 40
+2.6
+  1
+10kV母线保护
+  7
+CN_TEXT
+ 11
+196.0909090909091
+ 21
+397.84000000000003
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+196
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+365.18181818181813
+ 20
+397.84000000000003
+ 30
+0.0
+ 40
+2.6
+  1
+CT/开关量
+  7
+CN_TEXT
+ 11
+365.18181818181813
+ 21
+397.84000000000003
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+197
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+517.9090909090909
+ 20
+397.84000000000003
+ 30
+0.0
+ 40
+2.6
+  1
+断路器跳闸
+  7
+CN_TEXT
+ 11
+517.9090909090909
+ 21
+397.84000000000003
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+198
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+670.6363636363636
+ 20
+397.84000000000003
+ 30
+0.0
+ 40
+2.6
+  1
+硬接点/IEC 61850
+  7
+CN_TEXT
+ 11
+670.6363636363636
+ 21
+397.84000000000003
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+199
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+27.0
+ 20
+379.84000000000003
+ 30
+0.0
+ 40
+2.6
+  1
+8
+  7
+CN_TEXT
+ 11
+27.0
+ 21
+379.84000000000003
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+19A
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+65.18181818181819
+ 20
+379.84000000000003
+ 30
+0.0
+ 40
+2.6
+  1
+防孤岛保护柜
+  7
+CN_TEXT
+ 11
+65.18181818181819
+ 21
+379.84000000000003
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+19B
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+196.0909090909091
+ 20
+379.84000000000003
+ 30
+0.0
+ 40
+2.6
+  1
+并网安全保护
+  7
+CN_TEXT
+ 11
+196.0909090909091
+ 21
+379.84000000000003
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+19C
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+365.18181818181813
+ 20
+379.84000000000003
+ 30
+0.0
+ 40
+2.6
+  1
+电压/频率
+  7
+CN_TEXT
+ 11
+365.18181818181813
+ 21
+379.84000000000003
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+19D
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+517.9090909090909
+ 20
+379.84000000000003
+ 30
+0.0
+ 40
+2.6
+  1
+并网开关跳闸
+  7
+CN_TEXT
+ 11
+517.9090909090909
+ 21
+379.84000000000003
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+19E
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+670.6363636363636
+ 20
+379.84000000000003
+ 30
+0.0
+ 40
+2.6
+  1
+硬接点
+  7
+CN_TEXT
+ 11
+670.6363636363636
+ 21
+379.84000000000003
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+19F
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+27.0
+ 20
+361.84000000000003
+ 30
+0.0
+ 40
+2.6
+  1
+9
+  7
+CN_TEXT
+ 11
+27.0
+ 21
+361.84000000000003
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+1A0
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+65.18181818181819
+ 20
+361.84000000000003
+ 30
+0.0
+ 40
+2.6
+  1
+故障录波柜
+  7
+CN_TEXT
+ 11
+65.18181818181819
+ 21
+361.84000000000003
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+1A1
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+196.0909090909091
+ 20
+361.84000000000003
+ 30
+0.0
+ 40
+2.6
+  1
+故障波形记录
+  7
+CN_TEXT
+ 11
+196.0909090909091
+ 21
+361.84000000000003
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+1A2
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+365.18181818181813
+ 20
+361.84000000000003
+ 30
+0.0
+ 40
+2.6
+  1
+电流/电压/开关量
+  7
+CN_TEXT
+ 11
+365.18181818181813
+ 21
+361.84000000000003
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+1A3
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+517.9090909090909
+ 20
+361.84000000000003
+ 30
+0.0
+ 40
+2.6
+  1
+分析系统
+  7
+CN_TEXT
+ 11
+517.9090909090909
+ 21
+361.84000000000003
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+1A4
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+670.6363636363636
+ 20
+361.84000000000003
+ 30
+0.0
+ 40
+2.6
+  1
+IEC 61850/文件传输
+  7
+CN_TEXT
+ 11
+670.6363636363636
+ 21
+361.84000000000003
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+1A5
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+27.0
+ 20
+343.84000000000003
+ 30
+0.0
+ 40
+2.6
+  1
+10
+  7
+CN_TEXT
+ 11
+27.0
+ 21
+343.84000000000003
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+1A6
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+65.18181818181819
+ 20
+343.84000000000003
+ 30
+0.0
+ 40
+2.6
+  1
+计量及PMU/电能质量柜
+  7
+CN_TEXT
+ 11
+65.18181818181819
+ 21
+343.84000000000003
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+1A7
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+196.0909090909091
+ 20
+343.84000000000003
+ 30
+0.0
+ 40
+2.6
+  1
+计量、相量和电能质量
+  7
+CN_TEXT
+ 11
+196.0909090909091
+ 21
+343.84000000000003
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+1A8
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+365.18181818181813
+ 20
+343.84000000000003
+ 30
+0.0
+ 40
+2.6
+  1
+CT/VT
+  7
+CN_TEXT
+ 11
+365.18181818181813
+ 21
+343.84000000000003
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+1A9
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+517.9090909090909
+ 20
+343.84000000000003
+ 30
+0.0
+ 40
+2.6
+  1
+调度/计量系统
+  7
+CN_TEXT
+ 11
+517.9090909090909
+ 21
+343.84000000000003
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+1AA
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+670.6363636363636
+ 20
+343.84000000000003
+ 30
+0.0
+ 40
+2.6
+  1
+IEC 104/专网
+  7
+CN_TEXT
+ 11
+670.6363636363636
+ 21
+343.84000000000003
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+1AB
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+27.0
+ 20
+325.84000000000003
+ 30
+0.0
+ 40
+2.6
+  1
+11
+  7
+CN_TEXT
+ 11
+27.0
+ 21
+325.84000000000003
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+1AC
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+65.18181818181819
+ 20
+325.84000000000003
+ 30
+0.0
+ 40
+2.6
+  1
+智能辅助控制系统柜
+  7
+CN_TEXT
+ 11
+65.18181818181819
+ 21
+325.84000000000003
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+1AD
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+196.0909090909091
+ 20
+325.84000000000003
+ 30
+0.0
+ 40
+2.6
+  1
+消防、环境、安防联动
+  7
+CN_TEXT
+ 11
+196.0909090909091
+ 21
+325.84000000000003
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+1AE
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+365.18181818181813
+ 20
+325.84000000000003
+ 30
+0.0
+ 40
+2.6
+  1
+消防/HVAC/视频/门禁
+  7
+CN_TEXT
+ 11
+365.18181818181813
+ 21
+325.84000000000003
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+1AF
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+517.9090909090909
+ 20
+325.84000000000003
+ 30
+0.0
+ 40
+2.6
+  1
+监控主机
+  7
+CN_TEXT
+ 11
+517.9090909090909
+ 21
+325.84000000000003
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+1B0
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+670.6363636363636
+ 20
+325.84000000000003
+ 30
+0.0
+ 40
+2.6
+  1
+Modbus TCP/干接点
+  7
+CN_TEXT
+ 11
+670.6363636363636
+ 21
+325.84000000000003
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+1B1
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+27.0
+ 20
+307.84000000000003
+ 30
+0.0
+ 40
+2.6
+  1
+12
+  7
+CN_TEXT
+ 11
+27.0
+ 21
+307.84000000000003
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+1B2
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+65.18181818181819
+ 20
+307.84000000000003
+ 30
+0.0
+ 40
+2.6
+  1
+源网荷设备柜
+  7
+CN_TEXT
+ 11
+65.18181818181819
+ 21
+307.84000000000003
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+1B3
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+196.0909090909091
+ 20
+307.84000000000003
+ 30
+0.0
+ 40
+2.6
+  1
+源网荷协调
+  7
+CN_TEXT
+ 11
+196.0909090909091
+ 21
+307.84000000000003
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+1B4
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+365.18181818181813
+ 20
+307.84000000000003
+ 30
+0.0
+ 40
+2.6
+  1
+PMS/AGC/AVC
+  7
+CN_TEXT
+ 11
+365.18181818181813
+ 21
+307.84000000000003
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+1B5
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+517.9090909090909
+ 20
+307.84000000000003
+ 30
+0.0
+ 40
+2.6
+  1
+调度/控制系统
+  7
+CN_TEXT
+ 11
+517.9090909090909
+ 21
+307.84000000000003
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+1B6
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+670.6363636363636
+ 20
+307.84000000000003
+ 30
+0.0
+ 40
+2.6
+  1
+IEC 104/厂商协议
+  7
+CN_TEXT
+ 11
+670.6363636363636
+ 21
+307.84000000000003
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+1B7
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+27.0
+ 20
+289.84000000000003
+ 30
+0.0
+ 40
+2.6
+  1
+13
+  7
+CN_TEXT
+ 11
+27.0
+ 21
+289.84000000000003
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+1B8
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+65.18181818181819
+ 20
+289.84000000000003
+ 30
+0.0
+ 40
+2.6
+  1
+通信设备柜
+  7
+CN_TEXT
+ 11
+65.18181818181819
+ 21
+289.84000000000003
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+1B9
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+196.0909090909091
+ 20
+289.84000000000003
+ 30
+0.0
+ 40
+2.6
+  1
+站内及外部通信
+  7
+CN_TEXT
+ 11
+196.0909090909091
+ 21
+289.84000000000003
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+1BA
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+365.18181818181813
+ 20
+289.84000000000003
+ 30
+0.0
+ 40
+2.6
+  1
+交换机/光纤
+  7
+CN_TEXT
+ 11
+365.18181818181813
+ 21
+289.84000000000003
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+1BB
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+517.9090909090909
+ 20
+289.84000000000003
+ 30
+0.0
+ 40
+2.6
+  1
+各业务系统
+  7
+CN_TEXT
+ 11
+517.9090909090909
+ 21
+289.84000000000003
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+1BC
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+670.6363636363636
+ 20
+289.84000000000003
+ 30
+0.0
+ 40
+2.6
+  1
+Ethernet
+  7
+CN_TEXT
+ 11
+670.6363636363636
+ 21
+289.84000000000003
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+1BD
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+27.0
+ 20
+271.84000000000003
+ 30
+0.0
+ 40
+2.6
+  1
+14
+  7
+CN_TEXT
+ 11
+27.0
+ 21
+271.84000000000003
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+1BE
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+65.18181818181819
+ 20
+271.84000000000003
+ 30
+0.0
+ 40
+2.6
+  1
+UPS及通信电源柜
+  7
+CN_TEXT
+ 11
+65.18181818181819
+ 21
+271.84000000000003
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+1BF
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+196.0909090909091
+ 20
+271.84000000000003
+ 30
+0.0
+ 40
+2.6
+  1
+不间断供电
+  7
+CN_TEXT
+ 11
+196.0909090909091
+ 21
+271.84000000000003
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+1C0
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+365.18181818181813
+ 20
+271.84000000000003
+ 30
+0.0
+ 40
+2.6
+  1
+AC/DC输入
+  7
+CN_TEXT
+ 11
+365.18181818181813
+ 21
+271.84000000000003
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+1C1
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+517.9090909090909
+ 20
+271.84000000000003
+ 30
+0.0
+ 40
+2.6
+  1
+二次设备
+  7
+CN_TEXT
+ 11
+517.9090909090909
+ 21
+271.84000000000003
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+1C2
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+670.6363636363636
+ 20
+271.84000000000003
+ 30
+0.0
+ 40
+2.6
+  1
+电源回路
+  7
+CN_TEXT
+ 11
+670.6363636363636
+ 21
+271.84000000000003
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+1C3
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+27.0
+ 20
+253.84000000000003
+ 30
+0.0
+ 40
+2.6
+  1
+15
+  7
+CN_TEXT
+ 11
+27.0
+ 21
+253.84000000000003
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+1C4
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+65.18181818181819
+ 20
+253.84000000000003
+ 30
+0.0
+ 40
+2.6
+  1
+交直流馈线/充电/蓄电池柜
+  7
+CN_TEXT
+ 11
+65.18181818181819
+ 21
+253.84000000000003
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+1C5
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+196.0909090909091
+ 20
+253.84000000000003
+ 30
+0.0
+ 40
+2.6
+  1
+控制电源和直流系统
+  7
+CN_TEXT
+ 11
+196.0909090909091
+ 21
+253.84000000000003
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+1C6
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+365.18181818181813
+ 20
+253.84000000000003
+ 30
+0.0
+ 40
+2.6
+  1
+站用AC
+  7
+CN_TEXT
+ 11
+365.18181818181813
+ 21
+253.84000000000003
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+1C7
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+517.9090909090909
+ 20
+253.84000000000003
+ 30
+0.0
+ 40
+2.6
+  1
+保护/控制/通信
+  7
+CN_TEXT
+ 11
+517.9090909090909
+ 21
+253.84000000000003
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+1C8
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+670.6363636363636
+ 20
+253.84000000000003
+ 30
+0.0
+ 40
+2.6
+  1
+DC220V/110V待确认
+  7
+CN_TEXT
+ 11
+670.6363636363636
+ 21
+253.84000000000003
+ 31
+0.0
+100
+AcDbText
+  0
+LWPOLYLINE
+  5
+1C9
+330
+17
+100
+AcDbEntity
+  8
+FRAME
+100
+AcDbPolyline
+ 90
+4
+ 70
+1
+ 10
+910.0
+ 20
+10.0
+ 10
+1731.0
+ 20
+10.0
+ 10
+1731.0
+ 20
+584.0
+ 10
+910.0
+ 20
+584.0
+  0
+LWPOLYLINE
+  5
+1CA
+330
+17
+100
+AcDbEntity
+  8
+FRAME
+100
+AcDbPolyline
+ 90
+4
+ 70
+1
+ 10
+1465.0
+ 20
+10.0
+ 10
+1731.0
+ 20
+10.0
+ 10
+1731.0
+ 20
+55.0
+ 10
+1465.0
+ 20
+55.0
+  0
+LINE
+  5
+1CB
+330
+17
+100
+AcDbEntity
+  8
+FRAME
+100
+AcDbLine
+ 10
+1465.0
+ 20
+35.0
+ 30
+0.0
+ 11
+1731.0
+ 21
+35.0
+ 31
+0.0
+  0
+LINE
+  5
+1CC
+330
+17
+100
+AcDbEntity
+  8
+FRAME
+100
+AcDbLine
+ 10
+1600.0
+ 20
+10.0
+ 30
+0.0
+ 11
+1600.0
+ 21
+55.0
+ 31
+0.0
+  0
+TEXT
+  5
+1CD
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1475.0
+ 20
+44.0
+ 30
+0.0
+ 40
+4.0
+  1
+16MW/32MWh 储能电站 简化主接线图
+  7
+CN_TEXT
+ 11
+1475.0
+ 21
+44.0
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+1CE
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1610.0
+ 20
+44.0
+ 30
+0.0
+ 40
+3.0
+  1
+图号: BESS-SLD-001
+  7
+CN_TEXT
+ 11
+1610.0
+ 21
+44.0
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+1CF
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1475.0
+ 20
+23.0
+ 30
+0.0
+ 40
+3.0
+  1
+阶段: 学习/概念设计
+  7
+CN_TEXT
+ 11
+1475.0
+ 21
+23.0
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+1D0
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1610.0
+ 20
+23.0
+ 30
+0.0
+ 40
+3.0
+  1
+比例: NTS
+  7
+CN_TEXT
+ 11
+1610.0
+ 21
+23.0
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+1D1
+330
+17
+100
+AcDbEntity
+  8
+ANNOT
+100
+AcDbText
+ 10
+920.0
+ 20
+20.0
+ 30
+0.0
+ 40
+3.0
+  1
+注意：参数须按公司受控图纸和设备资料复核
+  7
+CN_TEXT
+ 11
+920.0
+ 21
+20.0
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+1D2
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1320.0
+ 20
+565.0
+ 30
+0.0
+ 40
+7.0
+  1
+16MW/32MWh 储能电站 简化主接线图
+  7
+CN_TEXT
+ 72
+1
+ 11
+1320.0
+ 21
+565.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+LINE
+  5
+1D3
+330
+17
+100
+AcDbEntity
+  8
+BUS
+100
+AcDbLine
+ 10
+1040.0
+ 20
+485.0
+ 30
+0.0
+ 11
+1370.0
+ 21
+485.0
+ 31
+0.0
+  0
+LINE
+  5
+1D4
+330
+17
+100
+AcDbEntity
+  8
+BUS
+100
+AcDbLine
+ 10
+1400.0
+ 20
+485.0
+ 30
+0.0
+ 11
+1710.0
+ 21
+485.0
+ 31
+0.0
+  0
+TEXT
+  5
+1D5
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1040.0
+ 20
+548.0
+ 30
+0.0
+ 40
+3.0
+  1
+既有110kV变电站10kV侧 - 1号进线
+  7
+CN_TEXT
+ 72
+1
+ 11
+1040.0
+ 21
+548.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+LINE
+  5
+1D6
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1040.0
+ 20
+535.0
+ 30
+0.0
+ 11
+1040.0
+ 21
+526.0
+ 31
+0.0
+  0
+LINE
+  5
+1D7
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1040.0
+ 20
+523.0
+ 30
+0.0
+ 11
+1040.0
+ 21
+518.0
+ 31
+0.0
+  0
+LWPOLYLINE
+  5
+1D8
+330
+17
+100
+AcDbEntity
+  8
+EQUIP
+100
+AcDbPolyline
+ 90
+4
+ 70
+1
+ 10
+1036.0
+ 20
+512.0
+ 10
+1044.0
+ 20
+512.0
+ 10
+1044.0
+ 20
+518.0
+ 10
+1036.0
+ 20
+518.0
+  0
+LINE
+  5
+1D9
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1037.5
+ 20
+513.5
+ 30
+0.0
+ 11
+1042.5
+ 21
+516.5
+ 31
+0.0
+  0
+LINE
+  5
+1DA
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1040.0
+ 20
+512.0
+ 30
+0.0
+ 11
+1040.0
+ 21
+507.0
+ 31
+0.0
+  0
+TEXT
+  5
+1DB
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1046.0
+ 20
+514.0
+ 30
+0.0
+ 40
+2.1
+  1
+QF-IN1
+  7
+CN_TEXT
+ 11
+1046.0
+ 21
+514.0
+ 31
+0.0
+100
+AcDbText
+  0
+LINE
+  5
+1DC
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1040.0
+ 20
+504.0
+ 30
+0.0
+ 11
+1040.0
+ 21
+485.0
+ 31
+0.0
+  0
+TEXT
+  5
+1DD
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1690.0
+ 20
+548.0
+ 30
+0.0
+ 40
+3.0
+  1
+既有110kV变电站10kV侧 - 2号进线
+  7
+CN_TEXT
+ 72
+1
+ 11
+1690.0
+ 21
+548.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+LINE
+  5
+1DE
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1690.0
+ 20
+535.0
+ 30
+0.0
+ 11
+1690.0
+ 21
+526.0
+ 31
+0.0
+  0
+LINE
+  5
+1DF
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1690.0
+ 20
+523.0
+ 30
+0.0
+ 11
+1690.0
+ 21
+518.0
+ 31
+0.0
+  0
+LWPOLYLINE
+  5
+1E0
+330
+17
+100
+AcDbEntity
+  8
+EQUIP
+100
+AcDbPolyline
+ 90
+4
+ 70
+1
+ 10
+1686.0
+ 20
+512.0
+ 10
+1694.0
+ 20
+512.0
+ 10
+1694.0
+ 20
+518.0
+ 10
+1686.0
+ 20
+518.0
+  0
+LINE
+  5
+1E1
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1687.5
+ 20
+513.5
+ 30
+0.0
+ 11
+1692.5
+ 21
+516.5
+ 31
+0.0
+  0
+LINE
+  5
+1E2
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1690.0
+ 20
+512.0
+ 30
+0.0
+ 11
+1690.0
+ 21
+507.0
+ 31
+0.0
+  0
+TEXT
+  5
+1E3
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1696.0
+ 20
+514.0
+ 30
+0.0
+ 40
+2.1
+  1
+QF-IN2
+  7
+CN_TEXT
+ 11
+1696.0
+ 21
+514.0
+ 31
+0.0
+100
+AcDbText
+  0
+LINE
+  5
+1E4
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1690.0
+ 20
+504.0
+ 30
+0.0
+ 11
+1690.0
+ 21
+485.0
+ 31
+0.0
+  0
+LINE
+  5
+1E5
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1385.0
+ 20
+493.0
+ 30
+0.0
+ 11
+1385.0
+ 21
+488.0
+ 31
+0.0
+  0
+LWPOLYLINE
+  5
+1E6
+330
+17
+100
+AcDbEntity
+  8
+EQUIP
+100
+AcDbPolyline
+ 90
+4
+ 70
+1
+ 10
+1381.0
+ 20
+482.0
+ 10
+1389.0
+ 20
+482.0
+ 10
+1389.0
+ 20
+488.0
+ 10
+1381.0
+ 20
+488.0
+  0
+LINE
+  5
+1E7
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1382.5
+ 20
+483.5
+ 30
+0.0
+ 11
+1387.5
+ 21
+486.5
+ 31
+0.0
+  0
+LINE
+  5
+1E8
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1385.0
+ 20
+482.0
+ 30
+0.0
+ 11
+1385.0
+ 21
+477.0
+ 31
+0.0
+  0
+TEXT
+  5
+1E9
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1391.0
+ 20
+484.0
+ 30
+0.0
+ 40
+2.1
+  1
+QF-BC
+  7
+CN_TEXT
+ 11
+1391.0
+ 21
+484.0
+ 31
+0.0
+100
+AcDbText
+  0
+LINE
+  5
+1EA
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1370.0
+ 20
+485.0
+ 30
+0.0
+ 11
+1377.0
+ 21
+485.0
+ 31
+0.0
+  0
+LINE
+  5
+1EB
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1393.0
+ 20
+485.0
+ 30
+0.0
+ 11
+1400.0
+ 21
+485.0
+ 31
+0.0
+  0
+TEXT
+  5
+1EC
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1205.0
+ 20
+500.0
+ 30
+0.0
+ 40
+3.2
+  1
+10kV I段母线
+  7
+CN_TEXT
+ 72
+1
+ 11
+1205.0
+ 21
+500.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+TEXT
+  5
+1ED
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1555.0
+ 20
+500.0
+ 30
+0.0
+ 40
+3.2
+  1
+10kV II段母线
+  7
+CN_TEXT
+ 72
+1
+ 11
+1555.0
+ 21
+500.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+LINE
+  5
+1EE
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1100.0
+ 20
+485.0
+ 30
+0.0
+ 11
+1100.0
+ 21
+477.0
+ 31
+0.0
+  0
+LINE
+  5
+1EF
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1100.0
+ 20
+475.0
+ 30
+0.0
+ 11
+1100.0
+ 21
+470.0
+ 31
+0.0
+  0
+LWPOLYLINE
+  5
+1F0
+330
+17
+100
+AcDbEntity
+  8
+EQUIP
+100
+AcDbPolyline
+ 90
+4
+ 70
+1
+ 10
+1096.0
+ 20
+464.0
+ 10
+1104.0
+ 20
+464.0
+ 10
+1104.0
+ 20
+470.0
+ 10
+1096.0
+ 20
+470.0
+  0
+LINE
+  5
+1F1
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1097.5
+ 20
+465.5
+ 30
+0.0
+ 11
+1102.5
+ 21
+468.5
+ 31
+0.0
+  0
+LINE
+  5
+1F2
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1100.0
+ 20
+464.0
+ 30
+0.0
+ 11
+1100.0
+ 21
+459.0
+ 31
+0.0
+  0
+TEXT
+  5
+1F3
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1106.0
+ 20
+466.0
+ 30
+0.0
+ 40
+2.1
+  1
+F01
+  7
+CN_TEXT
+ 11
+1106.0
+ 21
+466.0
+ 31
+0.0
+100
+AcDbText
+  0
+LINE
+  5
+1F4
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1100.0
+ 20
+456.0
+ 30
+0.0
+ 11
+1100.0
+ 21
+440.0
+ 31
+0.0
+  0
+LINE
+  5
+1F5
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1040.0
+ 20
+440.0
+ 30
+0.0
+ 11
+1160.0
+ 21
+440.0
+ 31
+0.0
+  0
+TEXT
+  5
+1F6
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1100.0
+ 20
+448.0
+ 30
+0.0
+ 40
+2.4
+  1
+4MW/8MWh馈线组
+  7
+CN_TEXT
+ 72
+1
+ 11
+1100.0
+ 21
+448.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+LINE
+  5
+1F7
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1040.0
+ 20
+440.0
+ 30
+0.0
+ 11
+1040.0
+ 21
+430.0
+ 31
+0.0
+  0
+LINE
+  5
+1F8
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1040.0
+ 20
+430.0
+ 30
+0.0
+ 11
+1040.0
+ 21
+425.0
+ 31
+0.0
+  0
+LWPOLYLINE
+  5
+1F9
+330
+17
+100
+AcDbEntity
+  8
+EQUIP
+100
+AcDbPolyline
+ 90
+4
+ 70
+1
+ 10
+1036.0
+ 20
+419.0
+ 10
+1044.0
+ 20
+419.0
+ 10
+1044.0
+ 20
+425.0
+ 10
+1036.0
+ 20
+425.0
+  0
+LINE
+  5
+1FA
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1037.5
+ 20
+420.5
+ 30
+0.0
+ 11
+1042.5
+ 21
+423.5
+ 31
+0.0
+  0
+LINE
+  5
+1FB
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1040.0
+ 20
+419.0
+ 30
+0.0
+ 11
+1040.0
+ 21
+414.0
+ 31
+0.0
+  0
+TEXT
+  5
+1FC
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1046.0
+ 20
+421.0
+ 30
+0.0
+ 40
+2.1
+  1
+QF01
+  7
+CN_TEXT
+ 11
+1046.0
+ 21
+421.0
+ 31
+0.0
+100
+AcDbText
+  0
+LINE
+  5
+1FD
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1040.0
+ 20
+411.0
+ 30
+0.0
+ 11
+1040.0
+ 21
+395.0
+ 31
+0.0
+  0
+CIRCLE
+  5
+1FE
+330
+17
+100
+AcDbEntity
+  8
+EQUIP
+100
+AcDbCircle
+ 10
+1040.0
+ 20
+390.0
+ 30
+0.0
+ 40
+5.0
+  0
+CIRCLE
+  5
+1FF
+330
+17
+100
+AcDbEntity
+  8
+EQUIP
+100
+AcDbCircle
+ 10
+1040.0
+ 20
+382.0
+ 30
+0.0
+ 40
+5.0
+  0
+TEXT
+  5
+200
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1048.0
+ 20
+385.0
+ 30
+0.0
+ 40
+2.1
+  1
+T01
+  7
+CN_TEXT
+ 11
+1048.0
+ 21
+385.0
+ 31
+0.0
+100
+AcDbText
+  0
+LINE
+  5
+201
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1040.0
+ 20
+377.0
+ 30
+0.0
+ 11
+1040.0
+ 21
+363.0
+ 31
+0.0
+  0
+LWPOLYLINE
+  5
+202
+330
+17
+100
+AcDbEntity
+  8
+EQUIP
+100
+AcDbPolyline
+ 90
+4
+ 70
+1
+ 10
+1025.0
+ 20
+335.0
+ 10
+1055.0
+ 20
+335.0
+ 10
+1055.0
+ 20
+363.0
+ 10
+1025.0
+ 20
+363.0
+  0
+TEXT
+  5
+203
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1040.0
+ 20
+355.0
+ 30
+0.0
+ 40
+2.5
+  1
+PCS
+  7
+CN_TEXT
+ 72
+1
+ 11
+1040.0
+ 21
+355.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+TEXT
+  5
+204
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1040.0
+ 20
+346.0
+ 30
+0.0
+ 40
+2.2
+  1
+2x500kW
+  7
+CN_TEXT
+ 72
+1
+ 11
+1040.0
+ 21
+346.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+LINE
+  5
+205
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1040.0
+ 20
+335.0
+ 30
+0.0
+ 11
+1040.0
+ 21
+323.0
+ 31
+0.0
+  0
+LWPOLYLINE
+  5
+206
+330
+17
+100
+AcDbEntity
+  8
+EQUIP
+100
+AcDbPolyline
+ 90
+4
+ 70
+1
+ 10
+1023.0
+ 20
+297.0
+ 10
+1057.0
+ 20
+297.0
+ 10
+1057.0
+ 20
+323.0
+ 10
+1023.0
+ 20
+323.0
+  0
+TEXT
+  5
+207
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1040.0
+ 20
+314.0
+ 30
+0.0
+ 40
+2.4
+  1
+BESS-01
+  7
+CN_TEXT
+ 72
+1
+ 11
+1040.0
+ 21
+314.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+TEXT
+  5
+208
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1040.0
+ 20
+305.0
+ 30
+0.0
+ 40
+2.2
+  1
+2MWh
+  7
+CN_TEXT
+ 72
+1
+ 11
+1040.0
+ 21
+305.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+LINE
+  5
+209
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1080.0
+ 20
+440.0
+ 30
+0.0
+ 11
+1080.0
+ 21
+430.0
+ 31
+0.0
+  0
+LINE
+  5
+20A
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1080.0
+ 20
+430.0
+ 30
+0.0
+ 11
+1080.0
+ 21
+425.0
+ 31
+0.0
+  0
+LWPOLYLINE
+  5
+20B
+330
+17
+100
+AcDbEntity
+  8
+EQUIP
+100
+AcDbPolyline
+ 90
+4
+ 70
+1
+ 10
+1076.0
+ 20
+419.0
+ 10
+1084.0
+ 20
+419.0
+ 10
+1084.0
+ 20
+425.0
+ 10
+1076.0
+ 20
+425.0
+  0
+LINE
+  5
+20C
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1077.5
+ 20
+420.5
+ 30
+0.0
+ 11
+1082.5
+ 21
+423.5
+ 31
+0.0
+  0
+LINE
+  5
+20D
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1080.0
+ 20
+419.0
+ 30
+0.0
+ 11
+1080.0
+ 21
+414.0
+ 31
+0.0
+  0
+TEXT
+  5
+20E
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1086.0
+ 20
+421.0
+ 30
+0.0
+ 40
+2.1
+  1
+QF02
+  7
+CN_TEXT
+ 11
+1086.0
+ 21
+421.0
+ 31
+0.0
+100
+AcDbText
+  0
+LINE
+  5
+20F
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1080.0
+ 20
+411.0
+ 30
+0.0
+ 11
+1080.0
+ 21
+395.0
+ 31
+0.0
+  0
+CIRCLE
+  5
+210
+330
+17
+100
+AcDbEntity
+  8
+EQUIP
+100
+AcDbCircle
+ 10
+1080.0
+ 20
+390.0
+ 30
+0.0
+ 40
+5.0
+  0
+CIRCLE
+  5
+211
+330
+17
+100
+AcDbEntity
+  8
+EQUIP
+100
+AcDbCircle
+ 10
+1080.0
+ 20
+382.0
+ 30
+0.0
+ 40
+5.0
+  0
+TEXT
+  5
+212
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1088.0
+ 20
+385.0
+ 30
+0.0
+ 40
+2.1
+  1
+T02
+  7
+CN_TEXT
+ 11
+1088.0
+ 21
+385.0
+ 31
+0.0
+100
+AcDbText
+  0
+LINE
+  5
+213
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1080.0
+ 20
+377.0
+ 30
+0.0
+ 11
+1080.0
+ 21
+363.0
+ 31
+0.0
+  0
+LWPOLYLINE
+  5
+214
+330
+17
+100
+AcDbEntity
+  8
+EQUIP
+100
+AcDbPolyline
+ 90
+4
+ 70
+1
+ 10
+1065.0
+ 20
+335.0
+ 10
+1095.0
+ 20
+335.0
+ 10
+1095.0
+ 20
+363.0
+ 10
+1065.0
+ 20
+363.0
+  0
+TEXT
+  5
+215
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1080.0
+ 20
+355.0
+ 30
+0.0
+ 40
+2.5
+  1
+PCS
+  7
+CN_TEXT
+ 72
+1
+ 11
+1080.0
+ 21
+355.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+TEXT
+  5
+216
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1080.0
+ 20
+346.0
+ 30
+0.0
+ 40
+2.2
+  1
+2x500kW
+  7
+CN_TEXT
+ 72
+1
+ 11
+1080.0
+ 21
+346.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+LINE
+  5
+217
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1080.0
+ 20
+335.0
+ 30
+0.0
+ 11
+1080.0
+ 21
+323.0
+ 31
+0.0
+  0
+LWPOLYLINE
+  5
+218
+330
+17
+100
+AcDbEntity
+  8
+EQUIP
+100
+AcDbPolyline
+ 90
+4
+ 70
+1
+ 10
+1063.0
+ 20
+297.0
+ 10
+1097.0
+ 20
+297.0
+ 10
+1097.0
+ 20
+323.0
+ 10
+1063.0
+ 20
+323.0
+  0
+TEXT
+  5
+219
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1080.0
+ 20
+314.0
+ 30
+0.0
+ 40
+2.4
+  1
+BESS-02
+  7
+CN_TEXT
+ 72
+1
+ 11
+1080.0
+ 21
+314.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+TEXT
+  5
+21A
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1080.0
+ 20
+305.0
+ 30
+0.0
+ 40
+2.2
+  1
+2MWh
+  7
+CN_TEXT
+ 72
+1
+ 11
+1080.0
+ 21
+305.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+LINE
+  5
+21B
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1120.0
+ 20
+440.0
+ 30
+0.0
+ 11
+1120.0
+ 21
+430.0
+ 31
+0.0
+  0
+LINE
+  5
+21C
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1120.0
+ 20
+430.0
+ 30
+0.0
+ 11
+1120.0
+ 21
+425.0
+ 31
+0.0
+  0
+LWPOLYLINE
+  5
+21D
+330
+17
+100
+AcDbEntity
+  8
+EQUIP
+100
+AcDbPolyline
+ 90
+4
+ 70
+1
+ 10
+1116.0
+ 20
+419.0
+ 10
+1124.0
+ 20
+419.0
+ 10
+1124.0
+ 20
+425.0
+ 10
+1116.0
+ 20
+425.0
+  0
+LINE
+  5
+21E
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1117.5
+ 20
+420.5
+ 30
+0.0
+ 11
+1122.5
+ 21
+423.5
+ 31
+0.0
+  0
+LINE
+  5
+21F
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1120.0
+ 20
+419.0
+ 30
+0.0
+ 11
+1120.0
+ 21
+414.0
+ 31
+0.0
+  0
+TEXT
+  5
+220
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1126.0
+ 20
+421.0
+ 30
+0.0
+ 40
+2.1
+  1
+QF03
+  7
+CN_TEXT
+ 11
+1126.0
+ 21
+421.0
+ 31
+0.0
+100
+AcDbText
+  0
+LINE
+  5
+221
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1120.0
+ 20
+411.0
+ 30
+0.0
+ 11
+1120.0
+ 21
+395.0
+ 31
+0.0
+  0
+CIRCLE
+  5
+222
+330
+17
+100
+AcDbEntity
+  8
+EQUIP
+100
+AcDbCircle
+ 10
+1120.0
+ 20
+390.0
+ 30
+0.0
+ 40
+5.0
+  0
+CIRCLE
+  5
+223
+330
+17
+100
+AcDbEntity
+  8
+EQUIP
+100
+AcDbCircle
+ 10
+1120.0
+ 20
+382.0
+ 30
+0.0
+ 40
+5.0
+  0
+TEXT
+  5
+224
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1128.0
+ 20
+385.0
+ 30
+0.0
+ 40
+2.1
+  1
+T03
+  7
+CN_TEXT
+ 11
+1128.0
+ 21
+385.0
+ 31
+0.0
+100
+AcDbText
+  0
+LINE
+  5
+225
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1120.0
+ 20
+377.0
+ 30
+0.0
+ 11
+1120.0
+ 21
+363.0
+ 31
+0.0
+  0
+LWPOLYLINE
+  5
+226
+330
+17
+100
+AcDbEntity
+  8
+EQUIP
+100
+AcDbPolyline
+ 90
+4
+ 70
+1
+ 10
+1105.0
+ 20
+335.0
+ 10
+1135.0
+ 20
+335.0
+ 10
+1135.0
+ 20
+363.0
+ 10
+1105.0
+ 20
+363.0
+  0
+TEXT
+  5
+227
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1120.0
+ 20
+355.0
+ 30
+0.0
+ 40
+2.5
+  1
+PCS
+  7
+CN_TEXT
+ 72
+1
+ 11
+1120.0
+ 21
+355.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+TEXT
+  5
+228
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1120.0
+ 20
+346.0
+ 30
+0.0
+ 40
+2.2
+  1
+2x500kW
+  7
+CN_TEXT
+ 72
+1
+ 11
+1120.0
+ 21
+346.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+LINE
+  5
+229
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1120.0
+ 20
+335.0
+ 30
+0.0
+ 11
+1120.0
+ 21
+323.0
+ 31
+0.0
+  0
+LWPOLYLINE
+  5
+22A
+330
+17
+100
+AcDbEntity
+  8
+EQUIP
+100
+AcDbPolyline
+ 90
+4
+ 70
+1
+ 10
+1103.0
+ 20
+297.0
+ 10
+1137.0
+ 20
+297.0
+ 10
+1137.0
+ 20
+323.0
+ 10
+1103.0
+ 20
+323.0
+  0
+TEXT
+  5
+22B
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1120.0
+ 20
+314.0
+ 30
+0.0
+ 40
+2.4
+  1
+BESS-03
+  7
+CN_TEXT
+ 72
+1
+ 11
+1120.0
+ 21
+314.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+TEXT
+  5
+22C
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1120.0
+ 20
+305.0
+ 30
+0.0
+ 40
+2.2
+  1
+2MWh
+  7
+CN_TEXT
+ 72
+1
+ 11
+1120.0
+ 21
+305.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+LINE
+  5
+22D
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1160.0
+ 20
+440.0
+ 30
+0.0
+ 11
+1160.0
+ 21
+430.0
+ 31
+0.0
+  0
+LINE
+  5
+22E
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1160.0
+ 20
+430.0
+ 30
+0.0
+ 11
+1160.0
+ 21
+425.0
+ 31
+0.0
+  0
+LWPOLYLINE
+  5
+22F
+330
+17
+100
+AcDbEntity
+  8
+EQUIP
+100
+AcDbPolyline
+ 90
+4
+ 70
+1
+ 10
+1156.0
+ 20
+419.0
+ 10
+1164.0
+ 20
+419.0
+ 10
+1164.0
+ 20
+425.0
+ 10
+1156.0
+ 20
+425.0
+  0
+LINE
+  5
+230
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1157.5
+ 20
+420.5
+ 30
+0.0
+ 11
+1162.5
+ 21
+423.5
+ 31
+0.0
+  0
+LINE
+  5
+231
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1160.0
+ 20
+419.0
+ 30
+0.0
+ 11
+1160.0
+ 21
+414.0
+ 31
+0.0
+  0
+TEXT
+  5
+232
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1166.0
+ 20
+421.0
+ 30
+0.0
+ 40
+2.1
+  1
+QF04
+  7
+CN_TEXT
+ 11
+1166.0
+ 21
+421.0
+ 31
+0.0
+100
+AcDbText
+  0
+LINE
+  5
+233
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1160.0
+ 20
+411.0
+ 30
+0.0
+ 11
+1160.0
+ 21
+395.0
+ 31
+0.0
+  0
+CIRCLE
+  5
+234
+330
+17
+100
+AcDbEntity
+  8
+EQUIP
+100
+AcDbCircle
+ 10
+1160.0
+ 20
+390.0
+ 30
+0.0
+ 40
+5.0
+  0
+CIRCLE
+  5
+235
+330
+17
+100
+AcDbEntity
+  8
+EQUIP
+100
+AcDbCircle
+ 10
+1160.0
+ 20
+382.0
+ 30
+0.0
+ 40
+5.0
+  0
+TEXT
+  5
+236
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1168.0
+ 20
+385.0
+ 30
+0.0
+ 40
+2.1
+  1
+T04
+  7
+CN_TEXT
+ 11
+1168.0
+ 21
+385.0
+ 31
+0.0
+100
+AcDbText
+  0
+LINE
+  5
+237
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1160.0
+ 20
+377.0
+ 30
+0.0
+ 11
+1160.0
+ 21
+363.0
+ 31
+0.0
+  0
+LWPOLYLINE
+  5
+238
+330
+17
+100
+AcDbEntity
+  8
+EQUIP
+100
+AcDbPolyline
+ 90
+4
+ 70
+1
+ 10
+1145.0
+ 20
+335.0
+ 10
+1175.0
+ 20
+335.0
+ 10
+1175.0
+ 20
+363.0
+ 10
+1145.0
+ 20
+363.0
+  0
+TEXT
+  5
+239
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1160.0
+ 20
+355.0
+ 30
+0.0
+ 40
+2.5
+  1
+PCS
+  7
+CN_TEXT
+ 72
+1
+ 11
+1160.0
+ 21
+355.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+TEXT
+  5
+23A
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1160.0
+ 20
+346.0
+ 30
+0.0
+ 40
+2.2
+  1
+2x500kW
+  7
+CN_TEXT
+ 72
+1
+ 11
+1160.0
+ 21
+346.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+LINE
+  5
+23B
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1160.0
+ 20
+335.0
+ 30
+0.0
+ 11
+1160.0
+ 21
+323.0
+ 31
+0.0
+  0
+LWPOLYLINE
+  5
+23C
+330
+17
+100
+AcDbEntity
+  8
+EQUIP
+100
+AcDbPolyline
+ 90
+4
+ 70
+1
+ 10
+1143.0
+ 20
+297.0
+ 10
+1177.0
+ 20
+297.0
+ 10
+1177.0
+ 20
+323.0
+ 10
+1143.0
+ 20
+323.0
+  0
+TEXT
+  5
+23D
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1160.0
+ 20
+314.0
+ 30
+0.0
+ 40
+2.4
+  1
+BESS-04
+  7
+CN_TEXT
+ 72
+1
+ 11
+1160.0
+ 21
+314.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+TEXT
+  5
+23E
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1160.0
+ 20
+305.0
+ 30
+0.0
+ 40
+2.2
+  1
+2MWh
+  7
+CN_TEXT
+ 72
+1
+ 11
+1160.0
+ 21
+305.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+LINE
+  5
+23F
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1290.0
+ 20
+485.0
+ 30
+0.0
+ 11
+1290.0
+ 21
+477.0
+ 31
+0.0
+  0
+LINE
+  5
+240
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1290.0
+ 20
+475.0
+ 30
+0.0
+ 11
+1290.0
+ 21
+470.0
+ 31
+0.0
+  0
+LWPOLYLINE
+  5
+241
+330
+17
+100
+AcDbEntity
+  8
+EQUIP
+100
+AcDbPolyline
+ 90
+4
+ 70
+1
+ 10
+1286.0
+ 20
+464.0
+ 10
+1294.0
+ 20
+464.0
+ 10
+1294.0
+ 20
+470.0
+ 10
+1286.0
+ 20
+470.0
+  0
+LINE
+  5
+242
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1287.5
+ 20
+465.5
+ 30
+0.0
+ 11
+1292.5
+ 21
+468.5
+ 31
+0.0
+  0
+LINE
+  5
+243
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1290.0
+ 20
+464.0
+ 30
+0.0
+ 11
+1290.0
+ 21
+459.0
+ 31
+0.0
+  0
+TEXT
+  5
+244
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1296.0
+ 20
+466.0
+ 30
+0.0
+ 40
+2.1
+  1
+F02
+  7
+CN_TEXT
+ 11
+1296.0
+ 21
+466.0
+ 31
+0.0
+100
+AcDbText
+  0
+LINE
+  5
+245
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1290.0
+ 20
+456.0
+ 30
+0.0
+ 11
+1290.0
+ 21
+440.0
+ 31
+0.0
+  0
+LINE
+  5
+246
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1230.0
+ 20
+440.0
+ 30
+0.0
+ 11
+1350.0
+ 21
+440.0
+ 31
+0.0
+  0
+TEXT
+  5
+247
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1290.0
+ 20
+448.0
+ 30
+0.0
+ 40
+2.4
+  1
+4MW/8MWh馈线组
+  7
+CN_TEXT
+ 72
+1
+ 11
+1290.0
+ 21
+448.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+LINE
+  5
+248
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1230.0
+ 20
+440.0
+ 30
+0.0
+ 11
+1230.0
+ 21
+430.0
+ 31
+0.0
+  0
+LINE
+  5
+249
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1230.0
+ 20
+430.0
+ 30
+0.0
+ 11
+1230.0
+ 21
+425.0
+ 31
+0.0
+  0
+LWPOLYLINE
+  5
+24A
+330
+17
+100
+AcDbEntity
+  8
+EQUIP
+100
+AcDbPolyline
+ 90
+4
+ 70
+1
+ 10
+1226.0
+ 20
+419.0
+ 10
+1234.0
+ 20
+419.0
+ 10
+1234.0
+ 20
+425.0
+ 10
+1226.0
+ 20
+425.0
+  0
+LINE
+  5
+24B
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1227.5
+ 20
+420.5
+ 30
+0.0
+ 11
+1232.5
+ 21
+423.5
+ 31
+0.0
+  0
+LINE
+  5
+24C
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1230.0
+ 20
+419.0
+ 30
+0.0
+ 11
+1230.0
+ 21
+414.0
+ 31
+0.0
+  0
+TEXT
+  5
+24D
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1236.0
+ 20
+421.0
+ 30
+0.0
+ 40
+2.1
+  1
+QF05
+  7
+CN_TEXT
+ 11
+1236.0
+ 21
+421.0
+ 31
+0.0
+100
+AcDbText
+  0
+LINE
+  5
+24E
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1230.0
+ 20
+411.0
+ 30
+0.0
+ 11
+1230.0
+ 21
+395.0
+ 31
+0.0
+  0
+CIRCLE
+  5
+24F
+330
+17
+100
+AcDbEntity
+  8
+EQUIP
+100
+AcDbCircle
+ 10
+1230.0
+ 20
+390.0
+ 30
+0.0
+ 40
+5.0
+  0
+CIRCLE
+  5
+250
+330
+17
+100
+AcDbEntity
+  8
+EQUIP
+100
+AcDbCircle
+ 10
+1230.0
+ 20
+382.0
+ 30
+0.0
+ 40
+5.0
+  0
+TEXT
+  5
+251
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1238.0
+ 20
+385.0
+ 30
+0.0
+ 40
+2.1
+  1
+T05
+  7
+CN_TEXT
+ 11
+1238.0
+ 21
+385.0
+ 31
+0.0
+100
+AcDbText
+  0
+LINE
+  5
+252
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1230.0
+ 20
+377.0
+ 30
+0.0
+ 11
+1230.0
+ 21
+363.0
+ 31
+0.0
+  0
+LWPOLYLINE
+  5
+253
+330
+17
+100
+AcDbEntity
+  8
+EQUIP
+100
+AcDbPolyline
+ 90
+4
+ 70
+1
+ 10
+1215.0
+ 20
+335.0
+ 10
+1245.0
+ 20
+335.0
+ 10
+1245.0
+ 20
+363.0
+ 10
+1215.0
+ 20
+363.0
+  0
+TEXT
+  5
+254
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1230.0
+ 20
+355.0
+ 30
+0.0
+ 40
+2.5
+  1
+PCS
+  7
+CN_TEXT
+ 72
+1
+ 11
+1230.0
+ 21
+355.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+TEXT
+  5
+255
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1230.0
+ 20
+346.0
+ 30
+0.0
+ 40
+2.2
+  1
+2x500kW
+  7
+CN_TEXT
+ 72
+1
+ 11
+1230.0
+ 21
+346.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+LINE
+  5
+256
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1230.0
+ 20
+335.0
+ 30
+0.0
+ 11
+1230.0
+ 21
+323.0
+ 31
+0.0
+  0
+LWPOLYLINE
+  5
+257
+330
+17
+100
+AcDbEntity
+  8
+EQUIP
+100
+AcDbPolyline
+ 90
+4
+ 70
+1
+ 10
+1213.0
+ 20
+297.0
+ 10
+1247.0
+ 20
+297.0
+ 10
+1247.0
+ 20
+323.0
+ 10
+1213.0
+ 20
+323.0
+  0
+TEXT
+  5
+258
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1230.0
+ 20
+314.0
+ 30
+0.0
+ 40
+2.4
+  1
+BESS-05
+  7
+CN_TEXT
+ 72
+1
+ 11
+1230.0
+ 21
+314.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+TEXT
+  5
+259
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1230.0
+ 20
+305.0
+ 30
+0.0
+ 40
+2.2
+  1
+2MWh
+  7
+CN_TEXT
+ 72
+1
+ 11
+1230.0
+ 21
+305.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+LINE
+  5
+25A
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1270.0
+ 20
+440.0
+ 30
+0.0
+ 11
+1270.0
+ 21
+430.0
+ 31
+0.0
+  0
+LINE
+  5
+25B
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1270.0
+ 20
+430.0
+ 30
+0.0
+ 11
+1270.0
+ 21
+425.0
+ 31
+0.0
+  0
+LWPOLYLINE
+  5
+25C
+330
+17
+100
+AcDbEntity
+  8
+EQUIP
+100
+AcDbPolyline
+ 90
+4
+ 70
+1
+ 10
+1266.0
+ 20
+419.0
+ 10
+1274.0
+ 20
+419.0
+ 10
+1274.0
+ 20
+425.0
+ 10
+1266.0
+ 20
+425.0
+  0
+LINE
+  5
+25D
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1267.5
+ 20
+420.5
+ 30
+0.0
+ 11
+1272.5
+ 21
+423.5
+ 31
+0.0
+  0
+LINE
+  5
+25E
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1270.0
+ 20
+419.0
+ 30
+0.0
+ 11
+1270.0
+ 21
+414.0
+ 31
+0.0
+  0
+TEXT
+  5
+25F
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1276.0
+ 20
+421.0
+ 30
+0.0
+ 40
+2.1
+  1
+QF06
+  7
+CN_TEXT
+ 11
+1276.0
+ 21
+421.0
+ 31
+0.0
+100
+AcDbText
+  0
+LINE
+  5
+260
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1270.0
+ 20
+411.0
+ 30
+0.0
+ 11
+1270.0
+ 21
+395.0
+ 31
+0.0
+  0
+CIRCLE
+  5
+261
+330
+17
+100
+AcDbEntity
+  8
+EQUIP
+100
+AcDbCircle
+ 10
+1270.0
+ 20
+390.0
+ 30
+0.0
+ 40
+5.0
+  0
+CIRCLE
+  5
+262
+330
+17
+100
+AcDbEntity
+  8
+EQUIP
+100
+AcDbCircle
+ 10
+1270.0
+ 20
+382.0
+ 30
+0.0
+ 40
+5.0
+  0
+TEXT
+  5
+263
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1278.0
+ 20
+385.0
+ 30
+0.0
+ 40
+2.1
+  1
+T06
+  7
+CN_TEXT
+ 11
+1278.0
+ 21
+385.0
+ 31
+0.0
+100
+AcDbText
+  0
+LINE
+  5
+264
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1270.0
+ 20
+377.0
+ 30
+0.0
+ 11
+1270.0
+ 21
+363.0
+ 31
+0.0
+  0
+LWPOLYLINE
+  5
+265
+330
+17
+100
+AcDbEntity
+  8
+EQUIP
+100
+AcDbPolyline
+ 90
+4
+ 70
+1
+ 10
+1255.0
+ 20
+335.0
+ 10
+1285.0
+ 20
+335.0
+ 10
+1285.0
+ 20
+363.0
+ 10
+1255.0
+ 20
+363.0
+  0
+TEXT
+  5
+266
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1270.0
+ 20
+355.0
+ 30
+0.0
+ 40
+2.5
+  1
+PCS
+  7
+CN_TEXT
+ 72
+1
+ 11
+1270.0
+ 21
+355.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+TEXT
+  5
+267
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1270.0
+ 20
+346.0
+ 30
+0.0
+ 40
+2.2
+  1
+2x500kW
+  7
+CN_TEXT
+ 72
+1
+ 11
+1270.0
+ 21
+346.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+LINE
+  5
+268
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1270.0
+ 20
+335.0
+ 30
+0.0
+ 11
+1270.0
+ 21
+323.0
+ 31
+0.0
+  0
+LWPOLYLINE
+  5
+269
+330
+17
+100
+AcDbEntity
+  8
+EQUIP
+100
+AcDbPolyline
+ 90
+4
+ 70
+1
+ 10
+1253.0
+ 20
+297.0
+ 10
+1287.0
+ 20
+297.0
+ 10
+1287.0
+ 20
+323.0
+ 10
+1253.0
+ 20
+323.0
+  0
+TEXT
+  5
+26A
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1270.0
+ 20
+314.0
+ 30
+0.0
+ 40
+2.4
+  1
+BESS-06
+  7
+CN_TEXT
+ 72
+1
+ 11
+1270.0
+ 21
+314.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+TEXT
+  5
+26B
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1270.0
+ 20
+305.0
+ 30
+0.0
+ 40
+2.2
+  1
+2MWh
+  7
+CN_TEXT
+ 72
+1
+ 11
+1270.0
+ 21
+305.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+LINE
+  5
+26C
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1310.0
+ 20
+440.0
+ 30
+0.0
+ 11
+1310.0
+ 21
+430.0
+ 31
+0.0
+  0
+LINE
+  5
+26D
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1310.0
+ 20
+430.0
+ 30
+0.0
+ 11
+1310.0
+ 21
+425.0
+ 31
+0.0
+  0
+LWPOLYLINE
+  5
+26E
+330
+17
+100
+AcDbEntity
+  8
+EQUIP
+100
+AcDbPolyline
+ 90
+4
+ 70
+1
+ 10
+1306.0
+ 20
+419.0
+ 10
+1314.0
+ 20
+419.0
+ 10
+1314.0
+ 20
+425.0
+ 10
+1306.0
+ 20
+425.0
+  0
+LINE
+  5
+26F
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1307.5
+ 20
+420.5
+ 30
+0.0
+ 11
+1312.5
+ 21
+423.5
+ 31
+0.0
+  0
+LINE
+  5
+270
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1310.0
+ 20
+419.0
+ 30
+0.0
+ 11
+1310.0
+ 21
+414.0
+ 31
+0.0
+  0
+TEXT
+  5
+271
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1316.0
+ 20
+421.0
+ 30
+0.0
+ 40
+2.1
+  1
+QF07
+  7
+CN_TEXT
+ 11
+1316.0
+ 21
+421.0
+ 31
+0.0
+100
+AcDbText
+  0
+LINE
+  5
+272
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1310.0
+ 20
+411.0
+ 30
+0.0
+ 11
+1310.0
+ 21
+395.0
+ 31
+0.0
+  0
+CIRCLE
+  5
+273
+330
+17
+100
+AcDbEntity
+  8
+EQUIP
+100
+AcDbCircle
+ 10
+1310.0
+ 20
+390.0
+ 30
+0.0
+ 40
+5.0
+  0
+CIRCLE
+  5
+274
+330
+17
+100
+AcDbEntity
+  8
+EQUIP
+100
+AcDbCircle
+ 10
+1310.0
+ 20
+382.0
+ 30
+0.0
+ 40
+5.0
+  0
+TEXT
+  5
+275
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1318.0
+ 20
+385.0
+ 30
+0.0
+ 40
+2.1
+  1
+T07
+  7
+CN_TEXT
+ 11
+1318.0
+ 21
+385.0
+ 31
+0.0
+100
+AcDbText
+  0
+LINE
+  5
+276
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1310.0
+ 20
+377.0
+ 30
+0.0
+ 11
+1310.0
+ 21
+363.0
+ 31
+0.0
+  0
+LWPOLYLINE
+  5
+277
+330
+17
+100
+AcDbEntity
+  8
+EQUIP
+100
+AcDbPolyline
+ 90
+4
+ 70
+1
+ 10
+1295.0
+ 20
+335.0
+ 10
+1325.0
+ 20
+335.0
+ 10
+1325.0
+ 20
+363.0
+ 10
+1295.0
+ 20
+363.0
+  0
+TEXT
+  5
+278
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1310.0
+ 20
+355.0
+ 30
+0.0
+ 40
+2.5
+  1
+PCS
+  7
+CN_TEXT
+ 72
+1
+ 11
+1310.0
+ 21
+355.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+TEXT
+  5
+279
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1310.0
+ 20
+346.0
+ 30
+0.0
+ 40
+2.2
+  1
+2x500kW
+  7
+CN_TEXT
+ 72
+1
+ 11
+1310.0
+ 21
+346.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+LINE
+  5
+27A
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1310.0
+ 20
+335.0
+ 30
+0.0
+ 11
+1310.0
+ 21
+323.0
+ 31
+0.0
+  0
+LWPOLYLINE
+  5
+27B
+330
+17
+100
+AcDbEntity
+  8
+EQUIP
+100
+AcDbPolyline
+ 90
+4
+ 70
+1
+ 10
+1293.0
+ 20
+297.0
+ 10
+1327.0
+ 20
+297.0
+ 10
+1327.0
+ 20
+323.0
+ 10
+1293.0
+ 20
+323.0
+  0
+TEXT
+  5
+27C
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1310.0
+ 20
+314.0
+ 30
+0.0
+ 40
+2.4
+  1
+BESS-07
+  7
+CN_TEXT
+ 72
+1
+ 11
+1310.0
+ 21
+314.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+TEXT
+  5
+27D
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1310.0
+ 20
+305.0
+ 30
+0.0
+ 40
+2.2
+  1
+2MWh
+  7
+CN_TEXT
+ 72
+1
+ 11
+1310.0
+ 21
+305.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+LINE
+  5
+27E
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1350.0
+ 20
+440.0
+ 30
+0.0
+ 11
+1350.0
+ 21
+430.0
+ 31
+0.0
+  0
+LINE
+  5
+27F
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1350.0
+ 20
+430.0
+ 30
+0.0
+ 11
+1350.0
+ 21
+425.0
+ 31
+0.0
+  0
+LWPOLYLINE
+  5
+280
+330
+17
+100
+AcDbEntity
+  8
+EQUIP
+100
+AcDbPolyline
+ 90
+4
+ 70
+1
+ 10
+1346.0
+ 20
+419.0
+ 10
+1354.0
+ 20
+419.0
+ 10
+1354.0
+ 20
+425.0
+ 10
+1346.0
+ 20
+425.0
+  0
+LINE
+  5
+281
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1347.5
+ 20
+420.5
+ 30
+0.0
+ 11
+1352.5
+ 21
+423.5
+ 31
+0.0
+  0
+LINE
+  5
+282
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1350.0
+ 20
+419.0
+ 30
+0.0
+ 11
+1350.0
+ 21
+414.0
+ 31
+0.0
+  0
+TEXT
+  5
+283
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1356.0
+ 20
+421.0
+ 30
+0.0
+ 40
+2.1
+  1
+QF08
+  7
+CN_TEXT
+ 11
+1356.0
+ 21
+421.0
+ 31
+0.0
+100
+AcDbText
+  0
+LINE
+  5
+284
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1350.0
+ 20
+411.0
+ 30
+0.0
+ 11
+1350.0
+ 21
+395.0
+ 31
+0.0
+  0
+CIRCLE
+  5
+285
+330
+17
+100
+AcDbEntity
+  8
+EQUIP
+100
+AcDbCircle
+ 10
+1350.0
+ 20
+390.0
+ 30
+0.0
+ 40
+5.0
+  0
+CIRCLE
+  5
+286
+330
+17
+100
+AcDbEntity
+  8
+EQUIP
+100
+AcDbCircle
+ 10
+1350.0
+ 20
+382.0
+ 30
+0.0
+ 40
+5.0
+  0
+TEXT
+  5
+287
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1358.0
+ 20
+385.0
+ 30
+0.0
+ 40
+2.1
+  1
+T08
+  7
+CN_TEXT
+ 11
+1358.0
+ 21
+385.0
+ 31
+0.0
+100
+AcDbText
+  0
+LINE
+  5
+288
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1350.0
+ 20
+377.0
+ 30
+0.0
+ 11
+1350.0
+ 21
+363.0
+ 31
+0.0
+  0
+LWPOLYLINE
+  5
+289
+330
+17
+100
+AcDbEntity
+  8
+EQUIP
+100
+AcDbPolyline
+ 90
+4
+ 70
+1
+ 10
+1335.0
+ 20
+335.0
+ 10
+1365.0
+ 20
+335.0
+ 10
+1365.0
+ 20
+363.0
+ 10
+1335.0
+ 20
+363.0
+  0
+TEXT
+  5
+28A
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1350.0
+ 20
+355.0
+ 30
+0.0
+ 40
+2.5
+  1
+PCS
+  7
+CN_TEXT
+ 72
+1
+ 11
+1350.0
+ 21
+355.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+TEXT
+  5
+28B
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1350.0
+ 20
+346.0
+ 30
+0.0
+ 40
+2.2
+  1
+2x500kW
+  7
+CN_TEXT
+ 72
+1
+ 11
+1350.0
+ 21
+346.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+LINE
+  5
+28C
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1350.0
+ 20
+335.0
+ 30
+0.0
+ 11
+1350.0
+ 21
+323.0
+ 31
+0.0
+  0
+LWPOLYLINE
+  5
+28D
+330
+17
+100
+AcDbEntity
+  8
+EQUIP
+100
+AcDbPolyline
+ 90
+4
+ 70
+1
+ 10
+1333.0
+ 20
+297.0
+ 10
+1367.0
+ 20
+297.0
+ 10
+1367.0
+ 20
+323.0
+ 10
+1333.0
+ 20
+323.0
+  0
+TEXT
+  5
+28E
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1350.0
+ 20
+314.0
+ 30
+0.0
+ 40
+2.4
+  1
+BESS-08
+  7
+CN_TEXT
+ 72
+1
+ 11
+1350.0
+ 21
+314.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+TEXT
+  5
+28F
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1350.0
+ 20
+305.0
+ 30
+0.0
+ 40
+2.2
+  1
+2MWh
+  7
+CN_TEXT
+ 72
+1
+ 11
+1350.0
+ 21
+305.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+LINE
+  5
+290
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1480.0
+ 20
+485.0
+ 30
+0.0
+ 11
+1480.0
+ 21
+477.0
+ 31
+0.0
+  0
+LINE
+  5
+291
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1480.0
+ 20
+475.0
+ 30
+0.0
+ 11
+1480.0
+ 21
+470.0
+ 31
+0.0
+  0
+LWPOLYLINE
+  5
+292
+330
+17
+100
+AcDbEntity
+  8
+EQUIP
+100
+AcDbPolyline
+ 90
+4
+ 70
+1
+ 10
+1476.0
+ 20
+464.0
+ 10
+1484.0
+ 20
+464.0
+ 10
+1484.0
+ 20
+470.0
+ 10
+1476.0
+ 20
+470.0
+  0
+LINE
+  5
+293
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1477.5
+ 20
+465.5
+ 30
+0.0
+ 11
+1482.5
+ 21
+468.5
+ 31
+0.0
+  0
+LINE
+  5
+294
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1480.0
+ 20
+464.0
+ 30
+0.0
+ 11
+1480.0
+ 21
+459.0
+ 31
+0.0
+  0
+TEXT
+  5
+295
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1486.0
+ 20
+466.0
+ 30
+0.0
+ 40
+2.1
+  1
+F03
+  7
+CN_TEXT
+ 11
+1486.0
+ 21
+466.0
+ 31
+0.0
+100
+AcDbText
+  0
+LINE
+  5
+296
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1480.0
+ 20
+456.0
+ 30
+0.0
+ 11
+1480.0
+ 21
+440.0
+ 31
+0.0
+  0
+LINE
+  5
+297
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1420.0
+ 20
+440.0
+ 30
+0.0
+ 11
+1540.0
+ 21
+440.0
+ 31
+0.0
+  0
+TEXT
+  5
+298
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1480.0
+ 20
+448.0
+ 30
+0.0
+ 40
+2.4
+  1
+4MW/8MWh馈线组
+  7
+CN_TEXT
+ 72
+1
+ 11
+1480.0
+ 21
+448.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+LINE
+  5
+299
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1420.0
+ 20
+440.0
+ 30
+0.0
+ 11
+1420.0
+ 21
+430.0
+ 31
+0.0
+  0
+LINE
+  5
+29A
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1420.0
+ 20
+430.0
+ 30
+0.0
+ 11
+1420.0
+ 21
+425.0
+ 31
+0.0
+  0
+LWPOLYLINE
+  5
+29B
+330
+17
+100
+AcDbEntity
+  8
+EQUIP
+100
+AcDbPolyline
+ 90
+4
+ 70
+1
+ 10
+1416.0
+ 20
+419.0
+ 10
+1424.0
+ 20
+419.0
+ 10
+1424.0
+ 20
+425.0
+ 10
+1416.0
+ 20
+425.0
+  0
+LINE
+  5
+29C
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1417.5
+ 20
+420.5
+ 30
+0.0
+ 11
+1422.5
+ 21
+423.5
+ 31
+0.0
+  0
+LINE
+  5
+29D
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1420.0
+ 20
+419.0
+ 30
+0.0
+ 11
+1420.0
+ 21
+414.0
+ 31
+0.0
+  0
+TEXT
+  5
+29E
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1426.0
+ 20
+421.0
+ 30
+0.0
+ 40
+2.1
+  1
+QF09
+  7
+CN_TEXT
+ 11
+1426.0
+ 21
+421.0
+ 31
+0.0
+100
+AcDbText
+  0
+LINE
+  5
+29F
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1420.0
+ 20
+411.0
+ 30
+0.0
+ 11
+1420.0
+ 21
+395.0
+ 31
+0.0
+  0
+CIRCLE
+  5
+2A0
+330
+17
+100
+AcDbEntity
+  8
+EQUIP
+100
+AcDbCircle
+ 10
+1420.0
+ 20
+390.0
+ 30
+0.0
+ 40
+5.0
+  0
+CIRCLE
+  5
+2A1
+330
+17
+100
+AcDbEntity
+  8
+EQUIP
+100
+AcDbCircle
+ 10
+1420.0
+ 20
+382.0
+ 30
+0.0
+ 40
+5.0
+  0
+TEXT
+  5
+2A2
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1428.0
+ 20
+385.0
+ 30
+0.0
+ 40
+2.1
+  1
+T09
+  7
+CN_TEXT
+ 11
+1428.0
+ 21
+385.0
+ 31
+0.0
+100
+AcDbText
+  0
+LINE
+  5
+2A3
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1420.0
+ 20
+377.0
+ 30
+0.0
+ 11
+1420.0
+ 21
+363.0
+ 31
+0.0
+  0
+LWPOLYLINE
+  5
+2A4
+330
+17
+100
+AcDbEntity
+  8
+EQUIP
+100
+AcDbPolyline
+ 90
+4
+ 70
+1
+ 10
+1405.0
+ 20
+335.0
+ 10
+1435.0
+ 20
+335.0
+ 10
+1435.0
+ 20
+363.0
+ 10
+1405.0
+ 20
+363.0
+  0
+TEXT
+  5
+2A5
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1420.0
+ 20
+355.0
+ 30
+0.0
+ 40
+2.5
+  1
+PCS
+  7
+CN_TEXT
+ 72
+1
+ 11
+1420.0
+ 21
+355.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+TEXT
+  5
+2A6
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1420.0
+ 20
+346.0
+ 30
+0.0
+ 40
+2.2
+  1
+2x500kW
+  7
+CN_TEXT
+ 72
+1
+ 11
+1420.0
+ 21
+346.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+LINE
+  5
+2A7
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1420.0
+ 20
+335.0
+ 30
+0.0
+ 11
+1420.0
+ 21
+323.0
+ 31
+0.0
+  0
+LWPOLYLINE
+  5
+2A8
+330
+17
+100
+AcDbEntity
+  8
+EQUIP
+100
+AcDbPolyline
+ 90
+4
+ 70
+1
+ 10
+1403.0
+ 20
+297.0
+ 10
+1437.0
+ 20
+297.0
+ 10
+1437.0
+ 20
+323.0
+ 10
+1403.0
+ 20
+323.0
+  0
+TEXT
+  5
+2A9
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1420.0
+ 20
+314.0
+ 30
+0.0
+ 40
+2.4
+  1
+BESS-09
+  7
+CN_TEXT
+ 72
+1
+ 11
+1420.0
+ 21
+314.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+TEXT
+  5
+2AA
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1420.0
+ 20
+305.0
+ 30
+0.0
+ 40
+2.2
+  1
+2MWh
+  7
+CN_TEXT
+ 72
+1
+ 11
+1420.0
+ 21
+305.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+LINE
+  5
+2AB
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1460.0
+ 20
+440.0
+ 30
+0.0
+ 11
+1460.0
+ 21
+430.0
+ 31
+0.0
+  0
+LINE
+  5
+2AC
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1460.0
+ 20
+430.0
+ 30
+0.0
+ 11
+1460.0
+ 21
+425.0
+ 31
+0.0
+  0
+LWPOLYLINE
+  5
+2AD
+330
+17
+100
+AcDbEntity
+  8
+EQUIP
+100
+AcDbPolyline
+ 90
+4
+ 70
+1
+ 10
+1456.0
+ 20
+419.0
+ 10
+1464.0
+ 20
+419.0
+ 10
+1464.0
+ 20
+425.0
+ 10
+1456.0
+ 20
+425.0
+  0
+LINE
+  5
+2AE
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1457.5
+ 20
+420.5
+ 30
+0.0
+ 11
+1462.5
+ 21
+423.5
+ 31
+0.0
+  0
+LINE
+  5
+2AF
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1460.0
+ 20
+419.0
+ 30
+0.0
+ 11
+1460.0
+ 21
+414.0
+ 31
+0.0
+  0
+TEXT
+  5
+2B0
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1466.0
+ 20
+421.0
+ 30
+0.0
+ 40
+2.1
+  1
+QF10
+  7
+CN_TEXT
+ 11
+1466.0
+ 21
+421.0
+ 31
+0.0
+100
+AcDbText
+  0
+LINE
+  5
+2B1
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1460.0
+ 20
+411.0
+ 30
+0.0
+ 11
+1460.0
+ 21
+395.0
+ 31
+0.0
+  0
+CIRCLE
+  5
+2B2
+330
+17
+100
+AcDbEntity
+  8
+EQUIP
+100
+AcDbCircle
+ 10
+1460.0
+ 20
+390.0
+ 30
+0.0
+ 40
+5.0
+  0
+CIRCLE
+  5
+2B3
+330
+17
+100
+AcDbEntity
+  8
+EQUIP
+100
+AcDbCircle
+ 10
+1460.0
+ 20
+382.0
+ 30
+0.0
+ 40
+5.0
+  0
+TEXT
+  5
+2B4
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1468.0
+ 20
+385.0
+ 30
+0.0
+ 40
+2.1
+  1
+T10
+  7
+CN_TEXT
+ 11
+1468.0
+ 21
+385.0
+ 31
+0.0
+100
+AcDbText
+  0
+LINE
+  5
+2B5
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1460.0
+ 20
+377.0
+ 30
+0.0
+ 11
+1460.0
+ 21
+363.0
+ 31
+0.0
+  0
+LWPOLYLINE
+  5
+2B6
+330
+17
+100
+AcDbEntity
+  8
+EQUIP
+100
+AcDbPolyline
+ 90
+4
+ 70
+1
+ 10
+1445.0
+ 20
+335.0
+ 10
+1475.0
+ 20
+335.0
+ 10
+1475.0
+ 20
+363.0
+ 10
+1445.0
+ 20
+363.0
+  0
+TEXT
+  5
+2B7
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1460.0
+ 20
+355.0
+ 30
+0.0
+ 40
+2.5
+  1
+PCS
+  7
+CN_TEXT
+ 72
+1
+ 11
+1460.0
+ 21
+355.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+TEXT
+  5
+2B8
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1460.0
+ 20
+346.0
+ 30
+0.0
+ 40
+2.2
+  1
+2x500kW
+  7
+CN_TEXT
+ 72
+1
+ 11
+1460.0
+ 21
+346.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+LINE
+  5
+2B9
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1460.0
+ 20
+335.0
+ 30
+0.0
+ 11
+1460.0
+ 21
+323.0
+ 31
+0.0
+  0
+LWPOLYLINE
+  5
+2BA
+330
+17
+100
+AcDbEntity
+  8
+EQUIP
+100
+AcDbPolyline
+ 90
+4
+ 70
+1
+ 10
+1443.0
+ 20
+297.0
+ 10
+1477.0
+ 20
+297.0
+ 10
+1477.0
+ 20
+323.0
+ 10
+1443.0
+ 20
+323.0
+  0
+TEXT
+  5
+2BB
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1460.0
+ 20
+314.0
+ 30
+0.0
+ 40
+2.4
+  1
+BESS-10
+  7
+CN_TEXT
+ 72
+1
+ 11
+1460.0
+ 21
+314.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+TEXT
+  5
+2BC
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1460.0
+ 20
+305.0
+ 30
+0.0
+ 40
+2.2
+  1
+2MWh
+  7
+CN_TEXT
+ 72
+1
+ 11
+1460.0
+ 21
+305.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+LINE
+  5
+2BD
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1500.0
+ 20
+440.0
+ 30
+0.0
+ 11
+1500.0
+ 21
+430.0
+ 31
+0.0
+  0
+LINE
+  5
+2BE
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1500.0
+ 20
+430.0
+ 30
+0.0
+ 11
+1500.0
+ 21
+425.0
+ 31
+0.0
+  0
+LWPOLYLINE
+  5
+2BF
+330
+17
+100
+AcDbEntity
+  8
+EQUIP
+100
+AcDbPolyline
+ 90
+4
+ 70
+1
+ 10
+1496.0
+ 20
+419.0
+ 10
+1504.0
+ 20
+419.0
+ 10
+1504.0
+ 20
+425.0
+ 10
+1496.0
+ 20
+425.0
+  0
+LINE
+  5
+2C0
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1497.5
+ 20
+420.5
+ 30
+0.0
+ 11
+1502.5
+ 21
+423.5
+ 31
+0.0
+  0
+LINE
+  5
+2C1
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1500.0
+ 20
+419.0
+ 30
+0.0
+ 11
+1500.0
+ 21
+414.0
+ 31
+0.0
+  0
+TEXT
+  5
+2C2
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1506.0
+ 20
+421.0
+ 30
+0.0
+ 40
+2.1
+  1
+QF11
+  7
+CN_TEXT
+ 11
+1506.0
+ 21
+421.0
+ 31
+0.0
+100
+AcDbText
+  0
+LINE
+  5
+2C3
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1500.0
+ 20
+411.0
+ 30
+0.0
+ 11
+1500.0
+ 21
+395.0
+ 31
+0.0
+  0
+CIRCLE
+  5
+2C4
+330
+17
+100
+AcDbEntity
+  8
+EQUIP
+100
+AcDbCircle
+ 10
+1500.0
+ 20
+390.0
+ 30
+0.0
+ 40
+5.0
+  0
+CIRCLE
+  5
+2C5
+330
+17
+100
+AcDbEntity
+  8
+EQUIP
+100
+AcDbCircle
+ 10
+1500.0
+ 20
+382.0
+ 30
+0.0
+ 40
+5.0
+  0
+TEXT
+  5
+2C6
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1508.0
+ 20
+385.0
+ 30
+0.0
+ 40
+2.1
+  1
+T11
+  7
+CN_TEXT
+ 11
+1508.0
+ 21
+385.0
+ 31
+0.0
+100
+AcDbText
+  0
+LINE
+  5
+2C7
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1500.0
+ 20
+377.0
+ 30
+0.0
+ 11
+1500.0
+ 21
+363.0
+ 31
+0.0
+  0
+LWPOLYLINE
+  5
+2C8
+330
+17
+100
+AcDbEntity
+  8
+EQUIP
+100
+AcDbPolyline
+ 90
+4
+ 70
+1
+ 10
+1485.0
+ 20
+335.0
+ 10
+1515.0
+ 20
+335.0
+ 10
+1515.0
+ 20
+363.0
+ 10
+1485.0
+ 20
+363.0
+  0
+TEXT
+  5
+2C9
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1500.0
+ 20
+355.0
+ 30
+0.0
+ 40
+2.5
+  1
+PCS
+  7
+CN_TEXT
+ 72
+1
+ 11
+1500.0
+ 21
+355.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+TEXT
+  5
+2CA
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1500.0
+ 20
+346.0
+ 30
+0.0
+ 40
+2.2
+  1
+2x500kW
+  7
+CN_TEXT
+ 72
+1
+ 11
+1500.0
+ 21
+346.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+LINE
+  5
+2CB
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1500.0
+ 20
+335.0
+ 30
+0.0
+ 11
+1500.0
+ 21
+323.0
+ 31
+0.0
+  0
+LWPOLYLINE
+  5
+2CC
+330
+17
+100
+AcDbEntity
+  8
+EQUIP
+100
+AcDbPolyline
+ 90
+4
+ 70
+1
+ 10
+1483.0
+ 20
+297.0
+ 10
+1517.0
+ 20
+297.0
+ 10
+1517.0
+ 20
+323.0
+ 10
+1483.0
+ 20
+323.0
+  0
+TEXT
+  5
+2CD
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1500.0
+ 20
+314.0
+ 30
+0.0
+ 40
+2.4
+  1
+BESS-11
+  7
+CN_TEXT
+ 72
+1
+ 11
+1500.0
+ 21
+314.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+TEXT
+  5
+2CE
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1500.0
+ 20
+305.0
+ 30
+0.0
+ 40
+2.2
+  1
+2MWh
+  7
+CN_TEXT
+ 72
+1
+ 11
+1500.0
+ 21
+305.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+LINE
+  5
+2CF
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1540.0
+ 20
+440.0
+ 30
+0.0
+ 11
+1540.0
+ 21
+430.0
+ 31
+0.0
+  0
+LINE
+  5
+2D0
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1540.0
+ 20
+430.0
+ 30
+0.0
+ 11
+1540.0
+ 21
+425.0
+ 31
+0.0
+  0
+LWPOLYLINE
+  5
+2D1
+330
+17
+100
+AcDbEntity
+  8
+EQUIP
+100
+AcDbPolyline
+ 90
+4
+ 70
+1
+ 10
+1536.0
+ 20
+419.0
+ 10
+1544.0
+ 20
+419.0
+ 10
+1544.0
+ 20
+425.0
+ 10
+1536.0
+ 20
+425.0
+  0
+LINE
+  5
+2D2
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1537.5
+ 20
+420.5
+ 30
+0.0
+ 11
+1542.5
+ 21
+423.5
+ 31
+0.0
+  0
+LINE
+  5
+2D3
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1540.0
+ 20
+419.0
+ 30
+0.0
+ 11
+1540.0
+ 21
+414.0
+ 31
+0.0
+  0
+TEXT
+  5
+2D4
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1546.0
+ 20
+421.0
+ 30
+0.0
+ 40
+2.1
+  1
+QF12
+  7
+CN_TEXT
+ 11
+1546.0
+ 21
+421.0
+ 31
+0.0
+100
+AcDbText
+  0
+LINE
+  5
+2D5
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1540.0
+ 20
+411.0
+ 30
+0.0
+ 11
+1540.0
+ 21
+395.0
+ 31
+0.0
+  0
+CIRCLE
+  5
+2D6
+330
+17
+100
+AcDbEntity
+  8
+EQUIP
+100
+AcDbCircle
+ 10
+1540.0
+ 20
+390.0
+ 30
+0.0
+ 40
+5.0
+  0
+CIRCLE
+  5
+2D7
+330
+17
+100
+AcDbEntity
+  8
+EQUIP
+100
+AcDbCircle
+ 10
+1540.0
+ 20
+382.0
+ 30
+0.0
+ 40
+5.0
+  0
+TEXT
+  5
+2D8
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1548.0
+ 20
+385.0
+ 30
+0.0
+ 40
+2.1
+  1
+T12
+  7
+CN_TEXT
+ 11
+1548.0
+ 21
+385.0
+ 31
+0.0
+100
+AcDbText
+  0
+LINE
+  5
+2D9
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1540.0
+ 20
+377.0
+ 30
+0.0
+ 11
+1540.0
+ 21
+363.0
+ 31
+0.0
+  0
+LWPOLYLINE
+  5
+2DA
+330
+17
+100
+AcDbEntity
+  8
+EQUIP
+100
+AcDbPolyline
+ 90
+4
+ 70
+1
+ 10
+1525.0
+ 20
+335.0
+ 10
+1555.0
+ 20
+335.0
+ 10
+1555.0
+ 20
+363.0
+ 10
+1525.0
+ 20
+363.0
+  0
+TEXT
+  5
+2DB
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1540.0
+ 20
+355.0
+ 30
+0.0
+ 40
+2.5
+  1
+PCS
+  7
+CN_TEXT
+ 72
+1
+ 11
+1540.0
+ 21
+355.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+TEXT
+  5
+2DC
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1540.0
+ 20
+346.0
+ 30
+0.0
+ 40
+2.2
+  1
+2x500kW
+  7
+CN_TEXT
+ 72
+1
+ 11
+1540.0
+ 21
+346.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+LINE
+  5
+2DD
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1540.0
+ 20
+335.0
+ 30
+0.0
+ 11
+1540.0
+ 21
+323.0
+ 31
+0.0
+  0
+LWPOLYLINE
+  5
+2DE
+330
+17
+100
+AcDbEntity
+  8
+EQUIP
+100
+AcDbPolyline
+ 90
+4
+ 70
+1
+ 10
+1523.0
+ 20
+297.0
+ 10
+1557.0
+ 20
+297.0
+ 10
+1557.0
+ 20
+323.0
+ 10
+1523.0
+ 20
+323.0
+  0
+TEXT
+  5
+2DF
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1540.0
+ 20
+314.0
+ 30
+0.0
+ 40
+2.4
+  1
+BESS-12
+  7
+CN_TEXT
+ 72
+1
+ 11
+1540.0
+ 21
+314.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+TEXT
+  5
+2E0
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1540.0
+ 20
+305.0
+ 30
+0.0
+ 40
+2.2
+  1
+2MWh
+  7
+CN_TEXT
+ 72
+1
+ 11
+1540.0
+ 21
+305.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+LINE
+  5
+2E1
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1650.0
+ 20
+485.0
+ 30
+0.0
+ 11
+1650.0
+ 21
+477.0
+ 31
+0.0
+  0
+LINE
+  5
+2E2
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1650.0
+ 20
+475.0
+ 30
+0.0
+ 11
+1650.0
+ 21
+470.0
+ 31
+0.0
+  0
+LWPOLYLINE
+  5
+2E3
+330
+17
+100
+AcDbEntity
+  8
+EQUIP
+100
+AcDbPolyline
+ 90
+4
+ 70
+1
+ 10
+1646.0
+ 20
+464.0
+ 10
+1654.0
+ 20
+464.0
+ 10
+1654.0
+ 20
+470.0
+ 10
+1646.0
+ 20
+470.0
+  0
+LINE
+  5
+2E4
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1647.5
+ 20
+465.5
+ 30
+0.0
+ 11
+1652.5
+ 21
+468.5
+ 31
+0.0
+  0
+LINE
+  5
+2E5
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1650.0
+ 20
+464.0
+ 30
+0.0
+ 11
+1650.0
+ 21
+459.0
+ 31
+0.0
+  0
+TEXT
+  5
+2E6
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1656.0
+ 20
+466.0
+ 30
+0.0
+ 40
+2.1
+  1
+F04
+  7
+CN_TEXT
+ 11
+1656.0
+ 21
+466.0
+ 31
+0.0
+100
+AcDbText
+  0
+LINE
+  5
+2E7
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1650.0
+ 20
+456.0
+ 30
+0.0
+ 11
+1650.0
+ 21
+440.0
+ 31
+0.0
+  0
+LINE
+  5
+2E8
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1590.0
+ 20
+440.0
+ 30
+0.0
+ 11
+1710.0
+ 21
+440.0
+ 31
+0.0
+  0
+TEXT
+  5
+2E9
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1650.0
+ 20
+448.0
+ 30
+0.0
+ 40
+2.4
+  1
+4MW/8MWh馈线组
+  7
+CN_TEXT
+ 72
+1
+ 11
+1650.0
+ 21
+448.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+LINE
+  5
+2EA
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1590.0
+ 20
+440.0
+ 30
+0.0
+ 11
+1590.0
+ 21
+430.0
+ 31
+0.0
+  0
+LINE
+  5
+2EB
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1590.0
+ 20
+430.0
+ 30
+0.0
+ 11
+1590.0
+ 21
+425.0
+ 31
+0.0
+  0
+LWPOLYLINE
+  5
+2EC
+330
+17
+100
+AcDbEntity
+  8
+EQUIP
+100
+AcDbPolyline
+ 90
+4
+ 70
+1
+ 10
+1586.0
+ 20
+419.0
+ 10
+1594.0
+ 20
+419.0
+ 10
+1594.0
+ 20
+425.0
+ 10
+1586.0
+ 20
+425.0
+  0
+LINE
+  5
+2ED
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1587.5
+ 20
+420.5
+ 30
+0.0
+ 11
+1592.5
+ 21
+423.5
+ 31
+0.0
+  0
+LINE
+  5
+2EE
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1590.0
+ 20
+419.0
+ 30
+0.0
+ 11
+1590.0
+ 21
+414.0
+ 31
+0.0
+  0
+TEXT
+  5
+2EF
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1596.0
+ 20
+421.0
+ 30
+0.0
+ 40
+2.1
+  1
+QF13
+  7
+CN_TEXT
+ 11
+1596.0
+ 21
+421.0
+ 31
+0.0
+100
+AcDbText
+  0
+LINE
+  5
+2F0
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1590.0
+ 20
+411.0
+ 30
+0.0
+ 11
+1590.0
+ 21
+395.0
+ 31
+0.0
+  0
+CIRCLE
+  5
+2F1
+330
+17
+100
+AcDbEntity
+  8
+EQUIP
+100
+AcDbCircle
+ 10
+1590.0
+ 20
+390.0
+ 30
+0.0
+ 40
+5.0
+  0
+CIRCLE
+  5
+2F2
+330
+17
+100
+AcDbEntity
+  8
+EQUIP
+100
+AcDbCircle
+ 10
+1590.0
+ 20
+382.0
+ 30
+0.0
+ 40
+5.0
+  0
+TEXT
+  5
+2F3
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1598.0
+ 20
+385.0
+ 30
+0.0
+ 40
+2.1
+  1
+T13
+  7
+CN_TEXT
+ 11
+1598.0
+ 21
+385.0
+ 31
+0.0
+100
+AcDbText
+  0
+LINE
+  5
+2F4
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1590.0
+ 20
+377.0
+ 30
+0.0
+ 11
+1590.0
+ 21
+363.0
+ 31
+0.0
+  0
+LWPOLYLINE
+  5
+2F5
+330
+17
+100
+AcDbEntity
+  8
+EQUIP
+100
+AcDbPolyline
+ 90
+4
+ 70
+1
+ 10
+1575.0
+ 20
+335.0
+ 10
+1605.0
+ 20
+335.0
+ 10
+1605.0
+ 20
+363.0
+ 10
+1575.0
+ 20
+363.0
+  0
+TEXT
+  5
+2F6
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1590.0
+ 20
+355.0
+ 30
+0.0
+ 40
+2.5
+  1
+PCS
+  7
+CN_TEXT
+ 72
+1
+ 11
+1590.0
+ 21
+355.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+TEXT
+  5
+2F7
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1590.0
+ 20
+346.0
+ 30
+0.0
+ 40
+2.2
+  1
+2x500kW
+  7
+CN_TEXT
+ 72
+1
+ 11
+1590.0
+ 21
+346.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+LINE
+  5
+2F8
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1590.0
+ 20
+335.0
+ 30
+0.0
+ 11
+1590.0
+ 21
+323.0
+ 31
+0.0
+  0
+LWPOLYLINE
+  5
+2F9
+330
+17
+100
+AcDbEntity
+  8
+EQUIP
+100
+AcDbPolyline
+ 90
+4
+ 70
+1
+ 10
+1573.0
+ 20
+297.0
+ 10
+1607.0
+ 20
+297.0
+ 10
+1607.0
+ 20
+323.0
+ 10
+1573.0
+ 20
+323.0
+  0
+TEXT
+  5
+2FA
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1590.0
+ 20
+314.0
+ 30
+0.0
+ 40
+2.4
+  1
+BESS-13
+  7
+CN_TEXT
+ 72
+1
+ 11
+1590.0
+ 21
+314.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+TEXT
+  5
+2FB
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1590.0
+ 20
+305.0
+ 30
+0.0
+ 40
+2.2
+  1
+2MWh
+  7
+CN_TEXT
+ 72
+1
+ 11
+1590.0
+ 21
+305.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+LINE
+  5
+2FC
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1630.0
+ 20
+440.0
+ 30
+0.0
+ 11
+1630.0
+ 21
+430.0
+ 31
+0.0
+  0
+LINE
+  5
+2FD
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1630.0
+ 20
+430.0
+ 30
+0.0
+ 11
+1630.0
+ 21
+425.0
+ 31
+0.0
+  0
+LWPOLYLINE
+  5
+2FE
+330
+17
+100
+AcDbEntity
+  8
+EQUIP
+100
+AcDbPolyline
+ 90
+4
+ 70
+1
+ 10
+1626.0
+ 20
+419.0
+ 10
+1634.0
+ 20
+419.0
+ 10
+1634.0
+ 20
+425.0
+ 10
+1626.0
+ 20
+425.0
+  0
+LINE
+  5
+2FF
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1627.5
+ 20
+420.5
+ 30
+0.0
+ 11
+1632.5
+ 21
+423.5
+ 31
+0.0
+  0
+LINE
+  5
+300
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1630.0
+ 20
+419.0
+ 30
+0.0
+ 11
+1630.0
+ 21
+414.0
+ 31
+0.0
+  0
+TEXT
+  5
+301
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1636.0
+ 20
+421.0
+ 30
+0.0
+ 40
+2.1
+  1
+QF14
+  7
+CN_TEXT
+ 11
+1636.0
+ 21
+421.0
+ 31
+0.0
+100
+AcDbText
+  0
+LINE
+  5
+302
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1630.0
+ 20
+411.0
+ 30
+0.0
+ 11
+1630.0
+ 21
+395.0
+ 31
+0.0
+  0
+CIRCLE
+  5
+303
+330
+17
+100
+AcDbEntity
+  8
+EQUIP
+100
+AcDbCircle
+ 10
+1630.0
+ 20
+390.0
+ 30
+0.0
+ 40
+5.0
+  0
+CIRCLE
+  5
+304
+330
+17
+100
+AcDbEntity
+  8
+EQUIP
+100
+AcDbCircle
+ 10
+1630.0
+ 20
+382.0
+ 30
+0.0
+ 40
+5.0
+  0
+TEXT
+  5
+305
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1638.0
+ 20
+385.0
+ 30
+0.0
+ 40
+2.1
+  1
+T14
+  7
+CN_TEXT
+ 11
+1638.0
+ 21
+385.0
+ 31
+0.0
+100
+AcDbText
+  0
+LINE
+  5
+306
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1630.0
+ 20
+377.0
+ 30
+0.0
+ 11
+1630.0
+ 21
+363.0
+ 31
+0.0
+  0
+LWPOLYLINE
+  5
+307
+330
+17
+100
+AcDbEntity
+  8
+EQUIP
+100
+AcDbPolyline
+ 90
+4
+ 70
+1
+ 10
+1615.0
+ 20
+335.0
+ 10
+1645.0
+ 20
+335.0
+ 10
+1645.0
+ 20
+363.0
+ 10
+1615.0
+ 20
+363.0
+  0
+TEXT
+  5
+308
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1630.0
+ 20
+355.0
+ 30
+0.0
+ 40
+2.5
+  1
+PCS
+  7
+CN_TEXT
+ 72
+1
+ 11
+1630.0
+ 21
+355.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+TEXT
+  5
+309
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1630.0
+ 20
+346.0
+ 30
+0.0
+ 40
+2.2
+  1
+2x500kW
+  7
+CN_TEXT
+ 72
+1
+ 11
+1630.0
+ 21
+346.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+LINE
+  5
+30A
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1630.0
+ 20
+335.0
+ 30
+0.0
+ 11
+1630.0
+ 21
+323.0
+ 31
+0.0
+  0
+LWPOLYLINE
+  5
+30B
+330
+17
+100
+AcDbEntity
+  8
+EQUIP
+100
+AcDbPolyline
+ 90
+4
+ 70
+1
+ 10
+1613.0
+ 20
+297.0
+ 10
+1647.0
+ 20
+297.0
+ 10
+1647.0
+ 20
+323.0
+ 10
+1613.0
+ 20
+323.0
+  0
+TEXT
+  5
+30C
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1630.0
+ 20
+314.0
+ 30
+0.0
+ 40
+2.4
+  1
+BESS-14
+  7
+CN_TEXT
+ 72
+1
+ 11
+1630.0
+ 21
+314.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+TEXT
+  5
+30D
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1630.0
+ 20
+305.0
+ 30
+0.0
+ 40
+2.2
+  1
+2MWh
+  7
+CN_TEXT
+ 72
+1
+ 11
+1630.0
+ 21
+305.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+LINE
+  5
+30E
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1670.0
+ 20
+440.0
+ 30
+0.0
+ 11
+1670.0
+ 21
+430.0
+ 31
+0.0
+  0
+LINE
+  5
+30F
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1670.0
+ 20
+430.0
+ 30
+0.0
+ 11
+1670.0
+ 21
+425.0
+ 31
+0.0
+  0
+LWPOLYLINE
+  5
+310
+330
+17
+100
+AcDbEntity
+  8
+EQUIP
+100
+AcDbPolyline
+ 90
+4
+ 70
+1
+ 10
+1666.0
+ 20
+419.0
+ 10
+1674.0
+ 20
+419.0
+ 10
+1674.0
+ 20
+425.0
+ 10
+1666.0
+ 20
+425.0
+  0
+LINE
+  5
+311
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1667.5
+ 20
+420.5
+ 30
+0.0
+ 11
+1672.5
+ 21
+423.5
+ 31
+0.0
+  0
+LINE
+  5
+312
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1670.0
+ 20
+419.0
+ 30
+0.0
+ 11
+1670.0
+ 21
+414.0
+ 31
+0.0
+  0
+TEXT
+  5
+313
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1676.0
+ 20
+421.0
+ 30
+0.0
+ 40
+2.1
+  1
+QF15
+  7
+CN_TEXT
+ 11
+1676.0
+ 21
+421.0
+ 31
+0.0
+100
+AcDbText
+  0
+LINE
+  5
+314
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1670.0
+ 20
+411.0
+ 30
+0.0
+ 11
+1670.0
+ 21
+395.0
+ 31
+0.0
+  0
+CIRCLE
+  5
+315
+330
+17
+100
+AcDbEntity
+  8
+EQUIP
+100
+AcDbCircle
+ 10
+1670.0
+ 20
+390.0
+ 30
+0.0
+ 40
+5.0
+  0
+CIRCLE
+  5
+316
+330
+17
+100
+AcDbEntity
+  8
+EQUIP
+100
+AcDbCircle
+ 10
+1670.0
+ 20
+382.0
+ 30
+0.0
+ 40
+5.0
+  0
+TEXT
+  5
+317
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1678.0
+ 20
+385.0
+ 30
+0.0
+ 40
+2.1
+  1
+T15
+  7
+CN_TEXT
+ 11
+1678.0
+ 21
+385.0
+ 31
+0.0
+100
+AcDbText
+  0
+LINE
+  5
+318
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1670.0
+ 20
+377.0
+ 30
+0.0
+ 11
+1670.0
+ 21
+363.0
+ 31
+0.0
+  0
+LWPOLYLINE
+  5
+319
+330
+17
+100
+AcDbEntity
+  8
+EQUIP
+100
+AcDbPolyline
+ 90
+4
+ 70
+1
+ 10
+1655.0
+ 20
+335.0
+ 10
+1685.0
+ 20
+335.0
+ 10
+1685.0
+ 20
+363.0
+ 10
+1655.0
+ 20
+363.0
+  0
+TEXT
+  5
+31A
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1670.0
+ 20
+355.0
+ 30
+0.0
+ 40
+2.5
+  1
+PCS
+  7
+CN_TEXT
+ 72
+1
+ 11
+1670.0
+ 21
+355.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+TEXT
+  5
+31B
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1670.0
+ 20
+346.0
+ 30
+0.0
+ 40
+2.2
+  1
+2x500kW
+  7
+CN_TEXT
+ 72
+1
+ 11
+1670.0
+ 21
+346.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+LINE
+  5
+31C
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1670.0
+ 20
+335.0
+ 30
+0.0
+ 11
+1670.0
+ 21
+323.0
+ 31
+0.0
+  0
+LWPOLYLINE
+  5
+31D
+330
+17
+100
+AcDbEntity
+  8
+EQUIP
+100
+AcDbPolyline
+ 90
+4
+ 70
+1
+ 10
+1653.0
+ 20
+297.0
+ 10
+1687.0
+ 20
+297.0
+ 10
+1687.0
+ 20
+323.0
+ 10
+1653.0
+ 20
+323.0
+  0
+TEXT
+  5
+31E
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1670.0
+ 20
+314.0
+ 30
+0.0
+ 40
+2.4
+  1
+BESS-15
+  7
+CN_TEXT
+ 72
+1
+ 11
+1670.0
+ 21
+314.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+TEXT
+  5
+31F
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1670.0
+ 20
+305.0
+ 30
+0.0
+ 40
+2.2
+  1
+2MWh
+  7
+CN_TEXT
+ 72
+1
+ 11
+1670.0
+ 21
+305.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+LINE
+  5
+320
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1710.0
+ 20
+440.0
+ 30
+0.0
+ 11
+1710.0
+ 21
+430.0
+ 31
+0.0
+  0
+LINE
+  5
+321
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1710.0
+ 20
+430.0
+ 30
+0.0
+ 11
+1710.0
+ 21
+425.0
+ 31
+0.0
+  0
+LWPOLYLINE
+  5
+322
+330
+17
+100
+AcDbEntity
+  8
+EQUIP
+100
+AcDbPolyline
+ 90
+4
+ 70
+1
+ 10
+1706.0
+ 20
+419.0
+ 10
+1714.0
+ 20
+419.0
+ 10
+1714.0
+ 20
+425.0
+ 10
+1706.0
+ 20
+425.0
+  0
+LINE
+  5
+323
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1707.5
+ 20
+420.5
+ 30
+0.0
+ 11
+1712.5
+ 21
+423.5
+ 31
+0.0
+  0
+LINE
+  5
+324
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1710.0
+ 20
+419.0
+ 30
+0.0
+ 11
+1710.0
+ 21
+414.0
+ 31
+0.0
+  0
+TEXT
+  5
+325
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1716.0
+ 20
+421.0
+ 30
+0.0
+ 40
+2.1
+  1
+QF16
+  7
+CN_TEXT
+ 11
+1716.0
+ 21
+421.0
+ 31
+0.0
+100
+AcDbText
+  0
+LINE
+  5
+326
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1710.0
+ 20
+411.0
+ 30
+0.0
+ 11
+1710.0
+ 21
+395.0
+ 31
+0.0
+  0
+CIRCLE
+  5
+327
+330
+17
+100
+AcDbEntity
+  8
+EQUIP
+100
+AcDbCircle
+ 10
+1710.0
+ 20
+390.0
+ 30
+0.0
+ 40
+5.0
+  0
+CIRCLE
+  5
+328
+330
+17
+100
+AcDbEntity
+  8
+EQUIP
+100
+AcDbCircle
+ 10
+1710.0
+ 20
+382.0
+ 30
+0.0
+ 40
+5.0
+  0
+TEXT
+  5
+329
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1718.0
+ 20
+385.0
+ 30
+0.0
+ 40
+2.1
+  1
+T16
+  7
+CN_TEXT
+ 11
+1718.0
+ 21
+385.0
+ 31
+0.0
+100
+AcDbText
+  0
+LINE
+  5
+32A
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1710.0
+ 20
+377.0
+ 30
+0.0
+ 11
+1710.0
+ 21
+363.0
+ 31
+0.0
+  0
+LWPOLYLINE
+  5
+32B
+330
+17
+100
+AcDbEntity
+  8
+EQUIP
+100
+AcDbPolyline
+ 90
+4
+ 70
+1
+ 10
+1695.0
+ 20
+335.0
+ 10
+1725.0
+ 20
+335.0
+ 10
+1725.0
+ 20
+363.0
+ 10
+1695.0
+ 20
+363.0
+  0
+TEXT
+  5
+32C
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1710.0
+ 20
+355.0
+ 30
+0.0
+ 40
+2.5
+  1
+PCS
+  7
+CN_TEXT
+ 72
+1
+ 11
+1710.0
+ 21
+355.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+TEXT
+  5
+32D
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1710.0
+ 20
+346.0
+ 30
+0.0
+ 40
+2.2
+  1
+2x500kW
+  7
+CN_TEXT
+ 72
+1
+ 11
+1710.0
+ 21
+346.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+LINE
+  5
+32E
+330
+17
+100
+AcDbEntity
+  8
+PRIMARY
+100
+AcDbLine
+ 10
+1710.0
+ 20
+335.0
+ 30
+0.0
+ 11
+1710.0
+ 21
+323.0
+ 31
+0.0
+  0
+LWPOLYLINE
+  5
+32F
+330
+17
+100
+AcDbEntity
+  8
+EQUIP
+100
+AcDbPolyline
+ 90
+4
+ 70
+1
+ 10
+1693.0
+ 20
+297.0
+ 10
+1727.0
+ 20
+297.0
+ 10
+1727.0
+ 20
+323.0
+ 10
+1693.0
+ 20
+323.0
+  0
+TEXT
+  5
+330
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1710.0
+ 20
+314.0
+ 30
+0.0
+ 40
+2.4
+  1
+BESS-16
+  7
+CN_TEXT
+ 72
+1
+ 11
+1710.0
+ 21
+314.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+TEXT
+  5
+331
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1710.0
+ 20
+305.0
+ 30
+0.0
+ 40
+2.2
+  1
+2MWh
+  7
+CN_TEXT
+ 72
+1
+ 11
+1710.0
+ 21
+305.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+LWPOLYLINE
+  5
+332
+330
+17
+100
+AcDbEntity
+  8
+EQUIP
+100
+AcDbPolyline
+ 90
+4
+ 70
+1
+ 10
+970.0
+ 20
+90.0
+ 10
+1170.0
+ 20
+90.0
+ 10
+1170.0
+ 20
+170.0
+ 10
+970.0
+ 20
+170.0
+  0
+TEXT
+  5
+333
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1070.0
+ 20
+157.0
+ 30
+0.0
+ 40
+3.5
+  1
+站用电系统
+  7
+CN_TEXT
+ 72
+1
+ 11
+1070.0
+ 21
+157.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+TEXT
+  5
+334
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1070.0
+ 20
+137.0
+ 30
+0.0
+ 40
+2.8
+  1
+2x 10/0.4kV 630kVA站用变
+  7
+CN_TEXT
+ 72
+1
+ 11
+1070.0
+ 21
+137.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+TEXT
+  5
+335
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1070.0
+ 20
+117.0
+ 30
+0.0
+ 40
+2.8
+  1
+AC配电 / DC系统 / UPS
+  7
+CN_TEXT
+ 72
+1
+ 11
+1070.0
+ 21
+117.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+LWPOLYLINE
+  5
+336
+330
+17
+100
+AcDbEntity
+  8
+EQUIP
+100
+AcDbPolyline
+ 90
+4
+ 70
+1
+ 10
+1210.0
+ 20
+90.0
+ 10
+1430.0
+ 20
+90.0
+ 10
+1430.0
+ 20
+170.0
+ 10
+1210.0
+ 20
+170.0
+  0
+TEXT
+  5
+337
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1320.0
+ 20
+157.0
+ 30
+0.0
+ 40
+3.5
+  1
+总控预制舱
+  7
+CN_TEXT
+ 72
+1
+ 11
+1320.0
+ 21
+157.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+TEXT
+  5
+338
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1320.0
+ 20
+137.0
+ 30
+0.0
+ 40
+2.8
+  1
+BMS / PCS控制 / PMS(EMS)
+  7
+CN_TEXT
+ 72
+1
+ 11
+1320.0
+ 21
+137.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+TEXT
+  5
+339
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1320.0
+ 20
+117.0
+ 30
+0.0
+ 40
+2.8
+  1
+SCADA / AGC-AVC / 通信
+  7
+CN_TEXT
+ 72
+1
+ 11
+1320.0
+ 21
+117.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+LWPOLYLINE
+  5
+33A
+330
+17
+100
+AcDbEntity
+  8
+EQUIP
+100
+AcDbPolyline
+ 90
+4
+ 70
+1
+ 10
+1470.0
+ 20
+90.0
+ 10
+1680.0
+ 20
+90.0
+ 10
+1680.0
+ 20
+170.0
+ 10
+1470.0
+ 20
+170.0
+  0
+TEXT
+  5
+33B
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1575.0
+ 20
+157.0
+ 30
+0.0
+ 40
+3.5
+  1
+二次及辅助系统
+  7
+CN_TEXT
+ 72
+1
+ 11
+1575.0
+ 21
+157.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+TEXT
+  5
+33C
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1575.0
+ 20
+137.0
+ 30
+0.0
+ 40
+2.8
+  1
+保护 / 计量 / PMU / PQ
+  7
+CN_TEXT
+ 72
+1
+ 11
+1575.0
+ 21
+137.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+TEXT
+  5
+33D
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+1575.0
+ 20
+117.0
+ 30
+0.0
+ 40
+2.8
+  1
+消防 / HVAC / 视频 / 门禁
+  7
+CN_TEXT
+ 72
+1
+ 11
+1575.0
+ 21
+117.0
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+LINE
+  5
+33E
+330
+17
+100
+AcDbEntity
+  8
+ANNOT
+  6
+DASHED
+100
+AcDbLine
+ 10
+1320.0
+ 20
+170.0
+ 30
+0.0
+ 11
+1320.0
+ 21
+205.0
+ 31
+0.0
+  0
+LINE
+  5
+33F
+330
+17
+100
+AcDbEntity
+  8
+ANNOT
+  6
+DASHED
+100
+AcDbLine
+ 10
+1000.0
+ 20
+205.0
+ 30
+0.0
+ 11
+1660.0
+ 21
+205.0
+ 31
+0.0
+  0
+TEXT
+  5
+340
+330
+17
+100
+AcDbEntity
+  8
+ANNOT
+100
+AcDbText
+ 10
+1330.0
+ 20
+212.0
+ 30
+0.0
+ 40
+2.5
+  1
+通信/监控网络（概念表示）
+  7
+CN_TEXT
+ 11
+1330.0
+ 21
+212.0
+ 31
+0.0
+100
+AcDbText
+  0
+ENDSEC
+  0
+SECTION
+  2
+OBJECTS
+  0
+DICTIONARY
+  5
+A
+330
+0
+100
+AcDbDictionary
+281
+1
+  3
+ACAD_COLOR
+350
+B
+  3
+ACAD_GROUP
+350
+C
+  3
+ACAD_LAYOUT
+350
+D
+  3
+ACAD_MATERIAL
+350
+E
+  3
+ACAD_MLEADERSTYLE
+350
+F
+  3
+ACAD_MLINESTYLE
+350
+10
+  3
+ACAD_PLOTSETTINGS
+350
+11
+  3
+ACAD_PLOTSTYLENAME
+350
+12
+  3
+ACAD_SCALELIST
+350
+14
+  3
+ACAD_TABLESTYLE
+350
+15
+  3
+ACAD_VISUALSTYLE
+350
+16
+  3
+EZDXF_META
+350
+2D
+  0
+DICTIONARY
+  5
+B
+330
+A
+100
+AcDbDictionary
+281
+1
+  0
+DICTIONARY
+  5
+C
+330
+A
+100
+AcDbDictionary
+281
+1
+  0
+DICTIONARY
+  5
+D
+330
+A
+100
+AcDbDictionary
+281
+1
+  3
+Model
+350
+1A
+  3
+Layout1
+350
+1E
+  0
+DICTIONARY
+  5
+E
+330
+A
+100
+AcDbDictionary
+281
+1
+  3
+ByBlock
+350
+1F
+  3
+ByLayer
+350
+20
+  3
+Global
+350
+21
+  0
+DICTIONARY
+  5
+F
+330
+A
+100
+AcDbDictionary
+281
+1
+  3
+Standard
+350
+2C
+  0
+DICTIONARY
+  5
+10
+330
+A
+100
+AcDbDictionary
+281
+1
+  3
+Standard
+350
+22
+  0
+DICTIONARY
+  5
+11
+330
+A
+100
+AcDbDictionary
+281
+1
+  0
+ACDBDICTIONARYWDFLT
+  5
+12
+330
+A
+100
+AcDbDictionary
+281
+1
+  3
+Normal
+350
+13
+100
+AcDbDictionaryWithDefault
+340
+13
+  0
+ACDBPLACEHOLDER
+  5
+13
+330
+12
+  0
+DICTIONARY
+  5
+14
+330
+A
+100
+AcDbDictionary
+281
+1
+  0
+DICTIONARY
+  5
+15
+330
+A
+100
+AcDbDictionary
+281
+1
+  0
+DICTIONARY
+  5
+16
+330
+A
+100
+AcDbDictionary
+281
+1
+  0
+LAYOUT
+  5
+1A
+330
+D
+100
+AcDbPlotSettings
+  1
+
+  4
+A3
+  6
+
+ 40
+7.5
+ 41
+20.0
+ 42
+7.5
+ 43
+20.0
+ 44
+420.0
+ 45
+297.0
+ 46
+0.0
+ 47
+0.0
+ 48
+0.0
+ 49
+0.0
+140
+0.0
+141
+0.0
+142
+1.0
+143
+1.0
+ 70
+1024
+ 72
+1
+ 73
+0
+ 74
+5
+  7
+
+ 75
+16
+ 76
+0
+ 77
+2
+ 78
+300
+147
+1.0
+148
+0.0
+149
+0.0
+100
+AcDbLayout
+  1
+Model
+ 70
+1
+ 71
+0
+ 10
+0.0
+ 20
+0.0
+ 11
+420.0
+ 21
+297.0
+ 12
+0.0
+ 22
+0.0
+ 32
+0.0
+ 14
+1e+20
+ 24
+1e+20
+ 34
+1e+20
+ 15
+-1e+20
+ 25
+-1e+20
+ 35
+-1e+20
+146
+0.0
+ 13
+0.0
+ 23
+0.0
+ 33
+0.0
+ 16
+1.0
+ 26
+0.0
+ 36
+0.0
+ 17
+0.0
+ 27
+1.0
+ 37
+0.0
+ 76
+1
+330
+17
+  0
+LAYOUT
+  5
+1E
+330
+D
+100
+AcDbPlotSettings
+  1
+
+  4
+A3
+  6
+
+ 40
+7.5
+ 41
+20.0
+ 42
+7.5
+ 43
+20.0
+ 44
+420.0
+ 45
+297.0
+ 46
+0.0
+ 47
+0.0
+ 48
+0.0
+ 49
+0.0
+140
+0.0
+141
+0.0
+142
+1.0
+143
+1.0
+ 70
+0
+ 72
+1
+ 73
+0
+ 74
+5
+  7
+
+ 75
+16
+ 76
+0
+ 77
+2
+ 78
+300
+147
+1.0
+148
+0.0
+149
+0.0
+100
+AcDbLayout
+  1
+Layout1
+ 70
+1
+ 71
+1
+ 10
+0.0
+ 20
+0.0
+ 11
+420.0
+ 21
+297.0
+ 12
+0.0
+ 22
+0.0
+ 32
+0.0
+ 14
+1e+20
+ 24
+1e+20
+ 34
+1e+20
+ 15
+-1e+20
+ 25
+-1e+20
+ 35
+-1e+20
+146
+0.0
+ 13
+0.0
+ 23
+0.0
+ 33
+0.0
+ 16
+1.0
+ 26
+0.0
+ 36
+0.0
+ 17
+0.0
+ 27
+1.0
+ 37
+0.0
+ 76
+1
+330
+1B
+  0
+MATERIAL
+  5
+1F
+102
+{ACAD_REACTORS
+330
+E
+102
+}
+330
+E
+100
+AcDbMaterial
+  1
+ByBlock
+  2
+
+ 70
+0
+ 40
+1.0
+ 71
+1
+ 41
+1.0
+ 91
+-1023410177
+ 42
+1.0
+ 72
+1
+  3
+
+ 73
+1
+ 74
+1
+ 75
+1
+ 44
+0.5
+ 73
+0
+ 45
+1.0
+ 46
+1.0
+ 77
+1
+  4
+
+ 78
+1
+ 79
+1
+170
+1
+ 48
+1.0
+171
+1
+  6
+
+172
+1
+173
+1
+174
+1
+140
+1.0
+141
+1.0
+175
+1
+  7
+
+176
+1
+177
+1
+178
+1
+143
+1.0
+179
+1
+  8
+
+270
+1
+271
+1
+272
+1
+145
+1.0
+146
+1.0
+273
+1
+  9
+
+274
+1
+275
+1
+276
+1
+ 42
+1.0
+ 72
+1
+  3
+
+ 73
+1
+ 74
+1
+ 75
+1
+ 94
+63
+  0
+MATERIAL
+  5
+20
+102
+{ACAD_REACTORS
+330
+E
+102
+}
+330
+E
+100
+AcDbMaterial
+  1
+ByLayer
+  2
+
+ 70
+0
+ 40
+1.0
+ 71
+1
+ 41
+1.0
+ 91
+-1023410177
+ 42
+1.0
+ 72
+1
+  3
+
+ 73
+1
+ 74
+1
+ 75
+1
+ 44
+0.5
+ 73
+0
+ 45
+1.0
+ 46
+1.0
+ 77
+1
+  4
+
+ 78
+1
+ 79
+1
+170
+1
+ 48
+1.0
+171
+1
+  6
+
+172
+1
+173
+1
+174
+1
+140
+1.0
+141
+1.0
+175
+1
+  7
+
+176
+1
+177
+1
+178
+1
+143
+1.0
+179
+1
+  8
+
+270
+1
+271
+1
+272
+1
+145
+1.0
+146
+1.0
+273
+1
+  9
+
+274
+1
+275
+1
+276
+1
+ 42
+1.0
+ 72
+1
+  3
+
+ 73
+1
+ 74
+1
+ 75
+1
+ 94
+63
+  0
+MATERIAL
+  5
+21
+102
+{ACAD_REACTORS
+330
+E
+102
+}
+330
+E
+100
+AcDbMaterial
+  1
+Global
+  2
+
+ 70
+0
+ 40
+1.0
+ 71
+1
+ 41
+1.0
+ 91
+-1023410177
+ 42
+1.0
+ 72
+1
+  3
+
+ 73
+1
+ 74
+1
+ 75
+1
+ 44
+0.5
+ 73
+0
+ 45
+1.0
+ 46
+1.0
+ 77
+1
+  4
+
+ 78
+1
+ 79
+1
+170
+1
+ 48
+1.0
+171
+1
+  6
+
+172
+1
+173
+1
+174
+1
+140
+1.0
+141
+1.0
+175
+1
+  7
+
+176
+1
+177
+1
+178
+1
+143
+1.0
+179
+1
+  8
+
+270
+1
+271
+1
+272
+1
+145
+1.0
+146
+1.0
+273
+1
+  9
+
+274
+1
+275
+1
+276
+1
+ 42
+1.0
+ 72
+1
+  3
+
+ 73
+1
+ 74
+1
+ 75
+1
+ 94
+63
+  0
+MLINESTYLE
+  5
+22
+102
+{ACAD_REACTORS
+330
+10
+102
+}
+330
+10
+100
+AcDbMlineStyle
+  2
+Standard
+ 70
+0
+  3
+
+ 62
+256
+ 51
+90.0
+ 52
+90.0
+ 71
+2
+ 49
+0.5
+ 62
+256
+  6
+BYLAYER
+ 49
+-0.5
+ 62
+256
+  6
+BYLAYER
+  0
+MLEADERSTYLE
+  5
+2C
+102
+{ACAD_REACTORS
+330
+F
+102
+}
+330
+F
+100
+AcDbMLeaderStyle
+179
+2
+170
+2
+171
+1
+172
+0
+ 90
+2
+ 40
+0.0
+ 41
+0.0
+173
+1
+ 91
+-1056964608
+ 92
+-2
+290
+1
+ 42
+2.0
+291
+1
+ 43
+8.0
+  3
+Standard
+ 44
+4.0
+300
+
+342
+29
+174
+1
+175
+1
+176
+0
+178
+1
+ 93
+-1056964608
+ 45
+4.0
+292
+0
+297
+0
+ 46
+4.0
+ 94
+-1056964608
+ 47
+1.0
+ 49
+1.0
+140
+1.0
+294
+1
+141
+0.0
+177
+0
+142
+1.0
+295
+0
+296
+0
+143
+3.75
+271
+0
+272
+9
+273
+9
+  0
+DICTIONARY
+  5
+2D
+330
+A
+100
+AcDbDictionary
+280
+1
+281
+1
+  3
+CREATED_BY_EZDXF
+350
+2E
+  3
+WRITTEN_BY_EZDXF
+350
+343
+  0
+DICTIONARYVAR
+  5
+2E
+330
+2D
+100
+DictionaryVariables
+280
+0
+  1
+1.4.4 @ 2026-08-07T07:53:00.658153+00:00
+  0
+DICTIONARYVAR
+  5
+343
+330
+2D
+100
+DictionaryVariables
+280
+0
+  1
+1.4.4 @ 2026-08-07T07:53:00.748974+00:00
+  0
+ENDSEC
+  0
+EOF
