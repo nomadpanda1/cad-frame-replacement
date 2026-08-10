@@ -205,7 +205,19 @@ class App:
             sys.stdout = old_stdout
         self.root.after(0, self.on_done)
 
+    def _drain_now(self):
+        """同步把后台线程残留日志刷进文本框（避免 on_done 早于定时 drain 而漏判 [ERROR]）。"""
+        try:
+            while True:
+                self.log.insert(END, log_q.get_nowait())
+            self.log.see(END)
+        except queue.Empty:
+            pass
+
     def on_done(self):
+        # 先把后台线程可能还没刷入文本框的日志（含最后的 [ERROR]/Traceback）排干，
+        # 否则检查日志时这些行还在队列里，会误弹「完成」。
+        self._drain_now()
         self.running = False
         self.btn_start.config(state="normal")
         self.log.insert(END, "\n=== 处理结束 ===\n")
@@ -213,10 +225,15 @@ class App:
         if ("[ERROR]" in text) or ("未检测到" in text) or ("失败" in text) or ("Traceback" in text):
             messagebox.showwarning(
                 "有文件未成功处理",
-                "处理结束，但日志中存在失败项（见日志框中的 [ERROR]）。\n"
-                "常见原因：输入了 .DWG 但本机未安装 DWG 转换器"
-                "（ODA File Converter / LibreCAD）。\n"
-                "解决：安装转换器后重试，或先把 DWG 另存为 DXF 再处理。\n\n"
+                "处理结束，但日志中存在失败项（见日志框中的 [ERROR] / Traceback）。\n\n"
+                "常见原因与对策：\n"
+                "1) 输入了 .DWG 但本机未检测到 DWG 转换器\n"
+                "   —— 先打开 AutoCAD，或安装 ODA File Converter / LibreCAD，\n"
+                "      或先把 DWG 另存为 DXF 再处理。\n"
+                "2) 输出目录下的 Execution_Log.csv 被其它程序（或另一个未退出的\n"
+                "   本程序实例）占用锁死，导致写入失败\n"
+                "   —— 关闭其它占用该文件的程序/窗口后重试，本程序会自动换用\n"
+                "      带时间戳的备用日志名而不再中断。\n\n"
                 "结果目录：" + self.outdir.get())
         else:
             messagebox.showinfo("完成", "处理结束。\n结果在输出目录：\n" + self.outdir.get())
