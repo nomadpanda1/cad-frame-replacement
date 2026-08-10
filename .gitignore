@@ -53,3 +53,4 @@ _06b_learn.dxf
 dist/
 build/
 *.exe
+*.spec
