@@ -24,7 +24,7 @@ import shutil
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
-from lib import template_learn, finder, extract, mapper, block_replace, acad, logbook, raw_replace  # noqa
+from lib import template_learn, finder, extract, mapper, block_replace, acad, logbook, raw_replace, acad_pipeline, acad_com  # noqa
 
 
 def _count_entities(doc):
@@ -119,6 +119,118 @@ def _process_multiframe(doc, template, targets, override, fit):
     return mappings, all_written, total_del
 
 
+A_SIZES = [("A0", 1189, 841), ("A1", 841, 594), ("A2", 594, 420),
+           ("A3", 420, 297), ("A4", 297, 210)]
+
+
+def _guess_size(bbox):
+    """按外框尺寸推断幅面（返回 A0/A1/A2/A3/A4）。"""
+    w = bbox[2] - bbox[0]
+    h = bbox[3] - bbox[1]
+    best, best_err = None, 1e9
+    for name, sw, sh in A_SIZES:
+        for cand in [(sw, sh), (sh, sw)]:
+            err = abs(w - cand[0]) / cand[0] + abs(h - cand[1]) / cand[1]
+            if err < best_err:
+                best_err, best = err, name
+    return best if best_err < 0.15 else "A3"
+
+
+def _values_to_fields(template_fields, values):
+    """把 mapper 返回的 values 列表转成 {tag: value} dict，跳过空值。"""
+    out = {}
+    for f, v in zip(template_fields, values):
+        if v:
+            out[f["tag"]] = v
+    return out
+
+
+def _process_one_acad(app, src, doc, args, template, override, tpl_dwgs):
+    """当本机有 AutoCAD 且请求 DWG 输出时，用 ezdxf 做计划、AutoCAD COM 执行替换。
+
+    返回 (rec, out_dwg_path)。
+    """
+    rec = {"src": os.path.basename(src)}
+    base = os.path.splitext(os.path.basename(src))[0]
+    out_dwg = os.path.join(args.out, base + args.suffix + ".dwg")
+
+    use_multi, sheet_bbox, targets = _plan_frames(doc, args.mode)
+    plan = {"frames": []}
+
+    if use_multi:
+        rec["mode"] = "multi"
+        rec["found"] = len(targets)
+        rec["sheet"] = [round(v, 1) for v in sheet_bbox] if sheet_bbox else None
+        for i, fb in enumerate(targets):
+            fields = finder.extract_frame_fields(doc, fb)
+            values, unmatched, unused = mapper.map_fields(
+                template["fields"], fields, override)
+            size_name = _guess_size(fb)
+            tpl_dwg = tpl_dwgs.get(size_name) or tpl_dwgs.get("A3") or next(iter(tpl_dwgs.values()))
+            plan["frames"].append({
+                "frame": [float(v) for v in fb],
+                "titleblock": [float(v) for v in fb],
+                "tpl_dwg": tpl_dwg,
+                "fields": _values_to_fields(template["fields"], values),
+                "mode": "multiframe",
+            })
+            print("   帧%d bbox=%s 字段=%s 回填=%s" % (
+                i + 1, [float(round(v, 1)) for v in fb], fields,
+                [f["tag"] for f, v in zip(template["fields"], values) if v]))
+
+    else:
+        regions = finder.find_titleblocks(doc)
+        rec["found"] = len(regions)
+        print("   检测到标题栏(块式): %d 个" % len(regions))
+        if regions:
+            rec["mode"] = "single-block"
+            for i, r in enumerate(regions):
+                print("     [%d] 置信度 %.2f 方法=%s 源=%s bbox=%s" % (
+                    i, r["confidence"], r["method"], r["source"],
+                    [round(x, 1) for x in r["bbox"]]))
+                old = extract.extract_fields(doc, r)
+                values, unmatched, unused = mapper.map_fields(
+                    template["fields"], old, override)
+                size_name = _guess_size(r["bbox"])
+                tpl_dwg = tpl_dwgs.get(size_name) or tpl_dwgs.get("A3") or next(iter(tpl_dwgs.values()))
+                plan["frames"].append({
+                    "frame": [float(v) for v in r["bbox"]],
+                    "titleblock": [float(v) for v in r["bbox"]],
+                    "tpl_dwg": tpl_dwg,
+                    "fields": _values_to_fields(template["fields"], values),
+                    "mode": "block",
+                })
+        else:
+            # 线框检测回退（SolidWorks 打散图框）
+            frames = finder.detect_frames(doc)
+            if not frames:
+                raise RuntimeError("未检测到图框")
+            outer = max(frames, key=lambda r: (r[2] - r[0]) * (r[3] - r[1]))
+            tb = finder.detect_titleblock(doc, outer)
+            old = extract.extract_fields(doc, {"bbox": tb, "method": "keyword", "entity": None})
+            values, unmatched, unused = mapper.map_fields(
+                template["fields"], old, override)
+            size_name = _guess_size(outer)
+            tpl_dwg = tpl_dwgs.get(size_name) or tpl_dwgs.get("A3") or next(iter(tpl_dwgs.values()))
+            plan["frames"].append({
+                "frame": [float(v) for v in outer],
+                "titleblock": [float(v) for v in tb],
+                "tpl_dwg": tpl_dwg,
+                "fields": _values_to_fields(template["fields"], values),
+                "mode": "raw-frame",
+            })
+            rec["mode"] = "raw-frame"
+            rec["found"] = 1
+            print("   块式 0 命中 → 回退线框检测：外框 %s" % [tuple(round(v, 1) for v in frames)])
+
+    results = acad_pipeline.process_file(app, src, out_dwg, plan)
+    rec["status"] = "ok"
+    rec["out"] = os.path.basename(out_dwg)
+    rec["acad_results"] = results
+    print("   输出 DWG (AutoCAD COM 直接处理):", out_dwg)
+    return rec, out_dwg
+
+
 def main():
     ap = argparse.ArgumentParser(description="CAD 图框批量置换")
     ap.add_argument("inputs", nargs="+", help="源图纸（支持 *.dxf / *.dwg 或通配符）")
@@ -153,8 +265,25 @@ def main():
     # 转换器
     conv = acad.find_converter()
     conv_info = conv is not None
-    if args.dwg and not conv_info:
-        print("[WARN] 请求输出 DWG 但本机无转换器，将只输出 DXF。")
+    use_acad_direct = False
+    acad_app = None
+    tpl_dwgs = {}
+    if args.dwg:
+        if not conv_info:
+            print("[WARN] 请求输出 DWG 但本机无转换器，将只输出 DXF。")
+        elif conv[0] == "AutoCAD":
+            try:
+                import win32com.client
+                acad_app = win32com.client.Dispatch("AutoCAD.Application")
+                time.sleep(2)
+                print("== AutoCAD COM 直接处理模式:", acad_app.Caption)
+                tpl_dir = os.path.join(HERE, "templates")
+                tpl_dwgs_dir = os.path.join(HERE, "tpl_dwgs")
+                tpl_dwgs = acad_com.prepare_templates(acad_app, tpl_dir, tpl_dwgs_dir)
+                print("   模板 DWG:", list(tpl_dwgs.keys()))
+                use_acad_direct = True
+            except Exception as e:
+                print("[WARN] AutoCAD COM 连接失败，回退为 DXF+dxf_to_dwg:", e)
 
     # 学习模板（一次）
     print("== 学习模板:", args.template)
@@ -175,6 +304,22 @@ def main():
             doc, work_path, is_dwg_in = _load_doc(src, conv_info)
             before = _count_entities(doc)
             raw_done = False
+
+            # AutoCAD COM 直接处理原文件（绕过 ezdxf saveas 兼容性问题）
+            if use_acad_direct and not args.detect_only and not args.dry_run:
+                rec, out_dwg = _process_one_acad(
+                    acad_app, src, doc, args, template, override, tpl_dwgs)
+                report["files"].append(rec)
+                written_tags = [tag for fr in rec.get("acad_results", [])
+                                for tag in fr.get("fields", {})]
+                logbook.log(lb, src, "ok", rec.get("found", 0), 0,
+                            written_tags, out_dwg, "AutoCAD COM 直接处理")
+                if is_dwg_in and work_path != src:
+                    try:
+                        os.remove(work_path)
+                    except Exception:
+                        pass
+                continue
 
             use_multi, sheet_bbox, targets = _plan_frames(doc, args.mode)
             rec["mode"] = "multi" if use_multi else "single"
@@ -200,30 +345,33 @@ def main():
                     frames = finder.detect_frames(doc)
                     if frames:
                         print("   块式 0 命中 → 回退线框检测：外框 %d 个" % len(frames))
-                        outer = frames[0]
+                        # #5：取面积最大的框作为最外框，双线图框（外框+内框）时不会被内框误导
+                        outer = max(frames, key=lambda r: (r[2] - r[0]) * (r[3] - r[1]))
                         tb = finder.detect_titleblock(doc, outer)
-                        sheet = raw_replace.sheet_extents(doc)
-                        if sheet is not None:
-                            old = extract.extract_fields(doc, {"bbox": tb, "method": "keyword", "entity": None})
-                            values, unmatched, unused = mapper.map_fields(template["fields"], old, override)
-                            if args.dry_run:
-                                rec["written"] = [f["tag"] for f, v in zip(template["fields"], values) if v]
-                                rec["deleted"] = 0
-                            else:
-                                maxdim = max(sheet[2] - sheet[0], sheet[3] - sheet[1])
-                                n_edge = raw_replace.delete_frame_lines(doc, frames)
-                                n_tb = raw_replace.delete_titleblock(doc, tb, maxdim)
-                                n_mark = raw_replace.delete_edge_markers(doc, outer, strip=10.0)
-                                region = {"bbox": sheet, "confidence": 1.0, "method": "frame",
-                                          "source": "sheet", "entity": None}
-                                _, written = block_replace.insert_template(doc, template, region, values, fit="max")
-                                rec["written"] = list(dict.fromkeys(written))
-                                rec["deleted"] = n_edge + n_tb + n_mark
-                            rec["found"] = 1
-                            rec["method"] = "raw-frame"
-                            rec["mappings"] = [{"region": [round(x, 1) for x in sheet],
-                                                "extracted": old, "unmatched": unmatched, "unused": unused}]
-                            raw_done = True
+                        # #4：用检测到的 outer 框作为插入区域，而非全局 sheet_extents，
+                        #     避免图内 stray 远点实体把新公司图框撑大/错位
+                        maxdim = max(outer[2] - outer[0], outer[3] - outer[1])
+                        old = extract.extract_fields(doc, {"bbox": tb, "method": "keyword", "entity": None})
+                        values, unmatched, unused = mapper.map_fields(template["fields"], old, override)
+                        if args.dry_run:
+                            rec["written"] = [f["tag"] for f, v in zip(template["fields"], values) if v]
+                            rec["deleted"] = 0
+                        else:
+                            n_edge = raw_replace.delete_frame_lines(doc, frames)
+                            n_tb = raw_replace.delete_titleblock(doc, tb, maxdim)
+                            n_mark = raw_replace.delete_edge_markers(doc, outer, strip=10.0)
+                            region = {"bbox": outer, "confidence": 1.0, "method": "frame",
+                                      "source": "sheet", "entity": None}
+                            # #3：尊重 GUI「缩放」选择（args.fit），不再写死 "max"
+                            _, written = block_replace.insert_template(
+                                doc, template, region, values, fit=args.fit or "max")
+                            rec["written"] = list(dict.fromkeys(written))
+                            rec["deleted"] = n_edge + n_tb + n_mark
+                        rec["found"] = 1
+                        rec["method"] = "raw-frame"
+                        rec["mappings"] = [{"region": [round(x, 1) for x in outer],
+                                            "extracted": old, "unmatched": unmatched, "unused": unused}]
+                        raw_done = True
 
             if args.detect_only:
                 if regions:

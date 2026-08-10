@@ -169,3 +169,185 @@ def insert_frame(msp, frame, tpl_dwg, fields, size_table=None):
         print("    set attribs warn:", e)
 
     return insert, scale
+
+
+def prepare_templates(app, tpl_dir, out_dir):
+    """把 templates/ 下的 HH_FRAME_*.dxf 用 AutoCAD -WBLOCK 写成 *.dwg。
+
+    InsertBlock 不接受 DXF 源，必须用二进制 DWG。本函数幂等：已存在的 DWG 跳过。
+    返回 {size_name: dwg_path} 字典。
+    """
+    import glob
+    os.makedirs(out_dir, exist_ok=True)
+    result = {}
+    for src in sorted(glob.glob(os.path.join(tpl_dir, "HH_FRAME_*.dxf"))):
+        name = os.path.splitext(os.path.basename(src))[0]
+        size_name = name.replace("HH_FRAME_", "")
+        dst = os.path.join(out_dir, name + ".dwg")
+        result[size_name] = dst
+        if os.path.exists(dst):
+            continue
+        doc = app.Documents.Open(os.path.abspath(src))
+        time.sleep(0.5)
+        # -WBLOCK 命令：文件路径、块名、插入点（回车用空格）
+        cmd = '_.-WBLOCK\n"%s"\n%s\n ' % (dst, name)
+        doc.SendCommand(cmd)
+        time.sleep(1.0)
+        doc.Close(False)
+    return result
+
+
+def _entity_name(e):
+    """兼容 EntityName / EntityType 的实体类型读取。"""
+    try:
+        return e.EntityName
+    except Exception:
+        try:
+            return e.EntityType
+        except Exception:
+            return None
+
+
+def del_frame_lines_acad(msp, frames, margin=1.0):
+    """按坐标删除图框外框/内框矩形的边线（适用于 SolidWorks 打散图框）。
+
+    frames: [(x0,y0,x1,y1), ...]
+    返回删除数量。
+    """
+    edge_coords = {"v": set(), "h": set()}
+    for (x0, y0, x1, y1) in frames:
+        for c in (x0, x1):
+            edge_coords["v"].add(round(c, 1))
+        for c in (y0, y1):
+            edge_coords["h"].add(round(c, 1))
+
+    to_del = []
+    for i in range(msp.Count):
+        e = msp.Item(i)
+        et = _entity_name(e)
+        if et == "AcDbLine":
+            try:
+                s = e.StartPoint
+                en = e.EndPoint
+            except Exception:
+                continue
+            if abs(s[0] - en[0]) < 1e-3 and round(s[0], 1) in edge_coords["v"]:
+                to_del.append(e)
+            elif abs(s[1] - en[1]) < 1e-3 and round(s[1], 1) in edge_coords["h"]:
+                to_del.append(e)
+        elif et == "AcDbPolyline":
+            try:
+                coords = list(e.Coordinates)
+                pts = [(coords[j], coords[j + 1]) for j in range(0, len(coords), 2)]
+                closed = bool(e.Closed)
+            except Exception:
+                continue
+            if not (closed or (pts and pts[0] == pts[-1])):
+                continue
+            xs = [p[0] for p in pts]
+            ys = [p[1] for p in pts]
+            xmin, xmax, ymin, ymax = min(xs), max(xs), min(ys), max(ys)
+            for (x0, y0, x1, y1) in frames:
+                if (abs(xmin - x0) < margin and abs(xmax - x1) < margin and
+                        abs(ymin - y0) < margin and abs(ymax - y1) < margin):
+                    to_del.append(e)
+                    break
+        elif et == "AcDb2dPolyline":
+            # 老版本 2d 多段线：遍历顶点
+            try:
+                pts = []
+                for v in e:
+                    pts.append((v.Coordinate[0], v.Coordinate[1]))
+                closed = bool(e.Closed)
+            except Exception:
+                continue
+            if not (closed or (pts and pts[0] == pts[-1])):
+                continue
+            xs = [p[0] for p in pts]
+            ys = [p[1] for p in pts]
+            xmin, xmax, ymin, ymax = min(xs), max(xs), min(ys), max(ys)
+            for (x0, y0, x1, y1) in frames:
+                if (abs(xmin - x0) < margin and abs(xmax - x1) < margin and
+                        abs(ymin - y0) < margin and abs(ymax - y1) < margin):
+                    to_del.append(e)
+                    break
+
+    n = 0
+    for e in to_del:
+        try:
+            e.Delete()
+            n += 1
+        except Exception:
+            pass
+    return n
+
+
+def del_titleblock_acad(msp, tb, maxdim):
+    """删除标题栏区域内实体：文本全删；线只删短线（网格线），保留长线（可能是尺寸线）。
+
+    tb: (x0,y0,x1,y1)
+    返回删除数量。
+    """
+    x0, y0, x1, y1 = tb
+    thr = 0.30 * maxdim
+    to_del = []
+    for i in range(msp.Count):
+        e = msp.Item(i)
+        et = _entity_name(e)
+        if et == "AcDbBlockReference":
+            continue
+        bb = entity_bbox(e)
+        if bb is None:
+            continue
+        ex0, ey0, ex1, ey1 = bb
+        if ex1 < x0 or ex0 > x1 or ey1 < y0 or ey0 > y1:
+            continue
+        if et in ("AcDbLine", "AcDbPolyline", "AcDb2dPolyline"):
+            L = max(ex1 - ex0, ey1 - ey0)
+            if L > thr:
+                continue
+        to_del.append(e)
+
+    n = 0
+    for e in to_del:
+        try:
+            e.Delete()
+            n += 1
+        except Exception:
+            pass
+    return n
+
+
+def del_edge_markers_acad(msp, outer, strip=10.0):
+    """删除沿外框边缘的区号字母/数字（如 A/B/C 与 4/5/6）。"""
+    import re
+    x0, y0, x1, y1 = outer
+    to_del = []
+    for i in range(msp.Count):
+        e = msp.Item(i)
+        et = _entity_name(e)
+        if et not in ("AcDbText", "AcDbMText"):
+            continue
+        try:
+            raw = e.TextString
+        except Exception:
+            continue
+        if not raw or not re.fullmatch(r"[A-Za-z0-9]{1,2}", raw.strip()):
+            continue
+        bb = entity_bbox(e)
+        if bb is None:
+            continue
+        cx = (bb[0] + bb[2]) / 2.0
+        cy = (bb[1] + bb[3]) / 2.0
+        if abs(cx - x0) < strip or abs(cx - x1) < strip or \
+           abs(cy - y0) < strip or abs(cy - y1) < strip:
+            to_del.append(e)
+
+    n = 0
+    for e in to_del:
+        try:
+            e.Delete()
+            n += 1
+        except Exception:
+            pass
+    return n
