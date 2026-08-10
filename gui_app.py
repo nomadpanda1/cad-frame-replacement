@@ -11,9 +11,10 @@ import io
 import queue
 import threading
 from tkinter import (
-    Tk, Frame, Label, Button, Entry, Listbox, Combobox, Checkbutton,
+    Tk, Frame, Label, Button, Entry, Listbox, Checkbutton,
     StringVar, BooleanVar, filedialog, messagebox, scrolledtext, END,
 )
+from tkinter.ttk import Combobox
 
 # ---- 资源定位：frozen(exe) 与源码两种形态都兼容 ----
 if getattr(sys, "frozen", False):
