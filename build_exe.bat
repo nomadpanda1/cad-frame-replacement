@@ -20,7 +20,7 @@ if exist build rmdir /s /q build
 if exist dist\cad-frame-gui.exe del /q dist\cad-frame-gui.exe
 
 "%PY%" -m PyInstaller --noconfirm --onefile --windowed --name cad-frame-gui ^
-  --collect-all ezdxf --collect-all lib ^
+  --collect-all ezdxf --collect-all lib --collect-all win32com ^
   --add-data "templates;templates" ^
   gui_app.py
 

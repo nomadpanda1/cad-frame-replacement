@@ -37,7 +37,7 @@ def _load_doc(path, conv_info):
     """读入图纸：DWG 先转 DXF。返回 (doc, working_path, is_dwg_input)。"""
     if path.lower().endswith(".dwg"):
         if not conv_info:
-            raise RuntimeError("输入为 DWG，需要 DWG→DXF 转换器（ODA File Converter / LibreCAD），本机未检测到。请先转成 DXF，或安装转换器。")
+            raise RuntimeError("输入为 DWG，需要 DWG→DXF 转换器（AutoCAD / ODA File Converter / LibreCAD），本机未检测到。请先打开 AutoCAD，或安装 ODA/LibreCAD，或先把 DWG 转成 DXF。")
         tmp = tempfile.mktemp(suffix=".dxf")
         if not acad.dwg_to_dxf(path, tmp):
             raise RuntimeError("DWG→DXF 转换失败：" + path)

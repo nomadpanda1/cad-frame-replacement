@@ -54,3 +54,4 @@ dist/
 build/
 *.exe
 *.spec
+build_*_log*.txt

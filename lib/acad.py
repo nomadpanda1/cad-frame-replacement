@@ -1,8 +1,13 @@
 # -*- coding: utf-8 -*-
 """
 DWG 转换器探测与转换（ezdxf 只能读写 DXF）。
-优先级：ODA File Converter（免费）> LibreCAD > AutoCAD COM。
-本机若无转换器，则 DWG 输入回退为：提示用户先转 DXF；输出只给 DXF。
+
+优先级（从高到低）：
+  1) AutoCAD COM —— 本机装了且已打开 AutoCAD 即可直接读写 DWG（win32com 连接已运行实例，
+     不自动启动）。对设计院加密/代理实体图纸也比 ODA 更可靠，是 skill 策略二的核心通道。
+  2) ODA File Converter（免费）
+  3) LibreCAD
+本机若三者皆无，则 DWG 输入回退为：提示用户先转 DXF；输出只给 DXF。
 """
 import shutil
 import subprocess
@@ -22,15 +27,38 @@ def _which(name):
     return None
 
 
+def _get_acad():
+    """返回已打开的 AutoCAD COM 实例；连不上返回 None（不会自动启动 AutoCAD）。
+
+    用 GetActiveObject 而非 Dispatch：Dispatch 在 AutoCAD 未开时会自动启动一个实例，
+    而 SKILL 实测自动启动的实例 COM 不稳；这里要求用户手动打开 AutoCAD（与本机工作流一致）。
+    """
+    try:
+        import win32com.client
+        return win32com.client.GetActiveObject("AutoCAD.Application")
+    except Exception:
+        return None
+
+
 def find_converter():
     """返回 (name, path) 或 None。
 
-    检测顺序：PATH → 常见默认安装父目录递归。
-    ODA File Converter 默认装在 C:\\Program Files\\ODA\\ODAFileConverter 20xx\\ 子目录，
-    旧逻辑只查根目录会漏，这里改为递归扫描默认安装父目录。
-    （不递归 AppData/Program Files 巨树——权限/沙盒下 walk 不可靠且慢。）
+    检测顺序：
+      1) AutoCAD COM（已打开的实例）—— 直接读写 DWG，最优先；
+      2) PATH 中的 ODAFileConverter / LibreCAD（用户安装时勾选加入 PATH 的情况）；
+      3) 默认安装父目录递归扫描（ODA 默认装在 C:\\Program Files\\ODA\\ODAFileConverter 20xx\\
+         子目录，旧逻辑只查根目录会漏，这里递归扫描确定父目录）。
     """
-    # 1) PATH（含用户安装时勾选加入 PATH 的情况）
+    # 1) AutoCAD COM（已打开实例）
+    app = _get_acad()
+    if app is not None:
+        try:
+            _ = app.Caption  # 探活：能取到说明 COM 可用
+            return ("AutoCAD", None)
+        except Exception:
+            pass
+
+    # 2) PATH → ODA / LibreCAD
     oda = _which("ODAFileConverter.exe") or _which("ODAFileConverter")
     if oda:
         return ("ODAFileConverter", oda)
@@ -38,7 +66,7 @@ def find_converter():
     if lc:
         return ("LibreCAD", lc)
 
-    # 2) 默认安装父目录递归（ODA/LibreCAD 都装在这几个确定位置）
+    # 3) 默认安装父目录递归（ODA/LibreCAD 都装在这几个确定位置）
     for base in (r"C:\Program Files\ODA", r"C:\Program Files (x86)\ODA",
                  r"C:\Program Files\LibreCAD", r"C:\Program Files (x86)\LibreCAD"):
         if not os.path.isdir(base):
@@ -53,12 +81,32 @@ def find_converter():
     return None
 
 
+def _acad_saveas(src, dst):
+    """用已打开的 AutoCAD 把 src 另存为 dst（按 dst 扩展名推断 DXF/DWG）。
+
+    依赖：本机已打开 AutoCAD；win32com 可用。Documents.Open 后须 sleep 等加载，
+    否则 ModelSpace 报“被呼叫方拒绝接收呼叫”。SaveAs 的 format 参数在本机失效，
+    故不传 format，完全靠扩展名（.dxf→DXF，.dwg→DWG）。
+    """
+    import time
+    app = _get_acad()
+    if app is None:
+        return False
+    doc = app.Documents.Open(os.path.abspath(src))
+    time.sleep(2)
+    doc.SaveAs(os.path.abspath(dst))
+    doc.Close(False)
+    return os.path.exists(dst)
+
+
 def dwg_to_dxf(src, dst):
     """把 DWG 转成 DXF，成功返回 True。"""
     conv = find_converter()
     if not conv:
         return False
     name, path = conv
+    if name == "AutoCAD":
+        return _acad_saveas(src, dst)
     if name == "ODAFileConverter":
         indir = tempfile.mkdtemp()
         outdir = tempfile.mkdtemp()
@@ -79,6 +127,8 @@ def dxf_to_dwg(src, dst):
     if not conv:
         return False
     name, path = conv
+    if name == "AutoCAD":
+        return _acad_saveas(src, dst)
     if name == "ODAFileConverter":
         indir = tempfile.mkdtemp()
         outdir = tempfile.mkdtemp()
