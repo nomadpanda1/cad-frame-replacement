@@ -199,7 +199,8 @@ class App:
             run_skill.main()
         except Exception as e:  # noqa
             import traceback
-            traceback.print_exc()
+            print("   [ERROR]", e)
+            traceback.print_exc(file=sys.stdout)
         finally:
             sys.stdout = old_stdout
         self.root.after(0, self.on_done)
@@ -208,7 +209,17 @@ class App:
         self.running = False
         self.btn_start.config(state="normal")
         self.log.insert(END, "\n=== 处理结束 ===\n")
-        messagebox.showinfo("完成", "处理结束。\n结果在输出目录：\n" + self.outdir.get())
+        text = self.log.get("1.0", END)
+        if ("[ERROR]" in text) or ("未检测到" in text) or ("失败" in text) or ("Traceback" in text):
+            messagebox.showwarning(
+                "有文件未成功处理",
+                "处理结束，但日志中存在失败项（见日志框中的 [ERROR]）。\n"
+                "常见原因：输入了 .DWG 但本机未安装 DWG 转换器"
+                "（ODA File Converter / LibreCAD）。\n"
+                "解决：安装转换器后重试，或先把 DWG 另存为 DXF 再处理。\n\n"
+                "结果目录：" + self.outdir.get())
+        else:
+            messagebox.showinfo("完成", "处理结束。\n结果在输出目录：\n" + self.outdir.get())
 
 
 def main():
