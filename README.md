@@ -272,7 +272,7 @@ pip install -r requirements.txt
 # 2) 运行（仓库根目录，pytest.ini 已配好）
 pytest -q
 ```
-- 17 个用例，全部纯函数、内存构造最小 DXF，**不依赖任何外部图纸 / 模板**，秒级跑完。
+- 27 个用例，全部纯函数、内存构造最小 DXF，**不依赖任何外部图纸 / 模板**，秒级跑完。
 - 覆盖重点回归点：
   - `delete_title_strip` 白名单——**绝不误删尺寸线 / 几何 / 长格线**（最早出过 bug 的地方）；
   - `detect_frames_hierarchical` 多图框层级检测（单框 / 拼贴含子框 / 并排多框）；
@@ -287,3 +287,31 @@ pytest -q
 ```bash
 pip install -r requirements.txt -i https://pypi.org/simple
 ```
+
+---
+
+## 10. 打包与分发（免装 Python 的同事用）
+
+给不会用命令行的同事，把工具打成 **单个 exe**，双击即用，无需装任何 Python 环境。
+
+### 分发物
+- `dist/cad-frame-dist/cad-frame-gui.exe` —— 图文界面主程序（**推荐**，双击出现窗口，选图纸→选模板→开始）。
+- `dist/cad-frame-dist/templates/` —— 公司图框模板（HH_FRAME_A0~A4.dxf），想换公司图框时把新 `.dxf` 放这里再选即可。
+- `dist/cad-frame-dist/使用说明.txt` —— 给同事的图文使用指南。
+- `dist/cad-frame-cli.exe` —— 命令行版（会命令行的同事用，参数同 `run_skill.py`）。
+
+> exe 已内嵌模板与 ezdxf，拷走 `cad-frame-gui.exe` 单独也能跑；附 `templates/` 只是为了便于换模板。
+
+### 为什么打包要用系统 Python 3.14
+标准 managed venv（3.13）编译时未带 tcl/tk，`import tkinter` 会失败。本工具界面用 tkinter，
+故打包必须用**自带 tcl/tk 的 Python 3.14**（如 `C:\Python314\python.exe`），且已 `pip install ezdxf pyinstaller`。
+GUI 入口 `gui_app.py` 通过构造 `sys.argv` + 重定向 stdout **复用** 已验证的 `run_skill.main()`，核心逻辑零改动。
+
+### 重新打包
+代码改动后想重新生成 exe，双击仓库根目录的 `build_exe.bat`（先按里面注释改一下 `PY=` 为你的 Python 3.14 路径）。
+或直接：
+```bash
+C:\Python314\python.exe -m PyInstaller --noconfirm --onefile --windowed --name cad-frame-gui \
+  --collect-all ezdxf --collect-all lib --add-data "templates;templates" gui_app.py
+```
+生成的 `dist/cad-frame-gui.exe` 即为分发包。

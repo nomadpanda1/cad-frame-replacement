@@ -48,3 +48,8 @@ _06b_learn.dxf
 # 上面的 test_*.py 仅用于排除仓库根目录的调试脚本；tests/ 下的正式单测需纳入版本控制
 !tests/
 !tests/**/test_*.py
+
+# PyInstaller 构建产物（exe 体积大，不入库；用 build_exe.bat 重新生成）
+dist/
+build/
+*.exe
