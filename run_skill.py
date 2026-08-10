@@ -17,6 +17,7 @@ import os
 import sys
 import json
 import glob
+import time
 import argparse
 import tempfile
 import shutil
@@ -31,6 +32,35 @@ def _count_entities(doc):
     for _ in doc.modelspace():
         n += 1
     return n
+
+
+def _atomic_save_doc(doc, out_path):
+    """保存 DXF：先写临时文件，再 os.replace 原子替换到目标；目标被锁则退化为带时间戳的备用名。返回最终路径。"""
+    out_dir = os.path.dirname(os.path.abspath(out_path))
+    base_name = os.path.basename(out_path)
+    stem, ext = os.path.splitext(base_name)
+    tmp = None
+    try:
+        fd, tmp = tempfile.mkstemp(suffix=".tmp", prefix="._out_", dir=out_dir)
+        os.close(fd)
+        doc.saveas(tmp)
+        try:
+            os.replace(tmp, out_path)
+            tmp = None
+            return out_path
+        except PermissionError:
+            alt = os.path.join(out_dir, "%s_%d%s" % (stem, int(time.time()), ext))
+            os.replace(tmp, alt)
+            tmp = None
+            print("   警告：目标文件被占用，已改用备用输出名:", alt)
+            return alt
+    except Exception:
+        if tmp and os.path.exists(tmp):
+            try:
+                os.remove(tmp)
+            except Exception:
+                pass
+        raise
 
 
 def _load_doc(path, conv_info):
@@ -220,10 +250,10 @@ def main():
                 report["files"].append(rec)
                 continue
 
-            # 保存
+            # 保存（健壮：先临时文件再原子替换；目标被锁则退备用名）
             base = os.path.splitext(os.path.basename(src))[0]
             out_dxf = os.path.join(args.out, base + args.suffix + ".dxf")
-            doc.saveas(out_dxf)
+            out_dxf = _atomic_save_doc(doc, out_dxf)
             after = _count_entities(doc)
             rec["entities_before"] = before
             rec["entities_after"] = after
