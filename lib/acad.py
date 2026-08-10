@@ -87,16 +87,43 @@ def _acad_saveas(src, dst):
     依赖：本机已打开 AutoCAD；win32com 可用。Documents.Open 后须 sleep 等加载，
     否则 ModelSpace 报“被呼叫方拒绝接收呼叫”。SaveAs 的 format 参数在本机失效，
     故不传 format，完全靠扩展名（.dxf→DXF，.dwg→DWG）。
+
+    健壮性：AutoCAD COM 偶发“被呼叫方拒绝接收呼叫”(call rejected)，常在 AutoCAD
+    正忙/弹模态框时出现。这里用「重试 + 退避」兜底，单次失败不直接判死。
     """
     import time
     app = _get_acad()
     if app is None:
         return False
-    doc = app.Documents.Open(os.path.abspath(src))
-    time.sleep(2)
-    doc.SaveAs(os.path.abspath(dst))
-    doc.Close(False)
-    return os.path.exists(dst)
+    src = os.path.abspath(src)
+    dst = os.path.abspath(dst)
+    last_err = None
+    for attempt in range(5):
+        doc = None
+        try:
+            # 先把 AutoCAD 提到前台，避免它在后台弹模态框导致 COM 调用被拒
+            try:
+                app.Visible = True
+            except Exception:
+                pass
+            time.sleep(0.5 * (attempt + 1))
+            doc = app.Documents.Open(src)
+            time.sleep(2)
+            doc.SaveAs(dst)
+            doc.Close(False)
+            return os.path.exists(dst)
+        except Exception as e:
+            last_err = e
+            try:
+                if doc is not None:
+                    doc.Close(False)
+            except Exception:
+                pass
+            time.sleep(1.5 * (attempt + 1))
+    if last_err is not None:
+        import sys
+        sys.stderr.write("[WARN] AutoCAD 转换失败（已回退为只输出 DXF）: %s\n" % last_err)
+    return False
 
 
 def dwg_to_dxf(src, dst):

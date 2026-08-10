@@ -69,6 +69,7 @@ class App:
         self.fit = StringVar(value="min")
         self.detect_only = BooleanVar(value=False)
         self.dry_run = BooleanVar(value=False)
+        self.out_dwg = BooleanVar(value=False)
         self.running = False
 
         self._build()
@@ -121,6 +122,7 @@ class App:
                  values=["min", "max", "width", "height"], state="readonly").pack(side="left")
         Checkbutton(f4, text="仅检测(写 detection.json)", variable=self.detect_only).pack(side="left")
         Checkbutton(f4, text="仅提取不改图", variable=self.dry_run).pack(side="left")
+        Checkbutton(f4, text="输出 DWG(需 AutoCAD/ODA)", variable=self.out_dwg).pack(side="left")
 
         # 开始
         f5 = Frame(self.root)
@@ -189,6 +191,8 @@ class App:
             argv.append("--detect-only")
         if self.dry_run.get():
             argv.append("--dry-run")
+        if self.out_dwg.get():
+            argv.append("--dwg")
         argv += list(self.files)
 
         old_stdout = sys.stdout

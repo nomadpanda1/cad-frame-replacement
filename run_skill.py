@@ -24,7 +24,7 @@ import shutil
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
-from lib import template_learn, finder, extract, mapper, block_replace, acad, logbook  # noqa
+from lib import template_learn, finder, extract, mapper, block_replace, acad, logbook, raw_replace  # noqa
 
 
 def _count_entities(doc):
@@ -174,6 +174,7 @@ def main():
         try:
             doc, work_path, is_dwg_in = _load_doc(src, conv_info)
             before = _count_entities(doc)
+            raw_done = False
 
             use_multi, sheet_bbox, targets = _plan_frames(doc, args.mode)
             rec["mode"] = "multi" if use_multi else "single"
@@ -189,22 +190,57 @@ def main():
             else:
                 regions = finder.find_titleblocks(doc)
                 rec["found"] = len(regions)
-                print("   检测到标题栏: %d 个" % len(regions))
+                print("   检测到标题栏(块式): %d 个" % len(regions))
                 for i, r in enumerate(regions):
                     print("     [%d] 置信度 %.2f 方法=%s 源=%s bbox=%s" % (
                         i, r["confidence"], r["method"], r["source"], [round(x, 1) for x in r["bbox"]]))
 
+                # —— 线框检测回退：块式 0 命中 → SolidWorks「打散」图框（无 INSERT 块）——
+                if not regions:
+                    frames = finder.detect_frames(doc)
+                    if frames:
+                        print("   块式 0 命中 → 回退线框检测：外框 %d 个" % len(frames))
+                        outer = frames[0]
+                        tb = finder.detect_titleblock(doc, outer)
+                        sheet = raw_replace.sheet_extents(doc)
+                        if sheet is not None:
+                            old = extract.extract_fields(doc, {"bbox": tb, "method": "keyword", "entity": None})
+                            values, unmatched, unused = mapper.map_fields(template["fields"], old, override)
+                            if args.dry_run:
+                                rec["written"] = [f["tag"] for f, v in zip(template["fields"], values) if v]
+                                rec["deleted"] = 0
+                            else:
+                                maxdim = max(sheet[2] - sheet[0], sheet[3] - sheet[1])
+                                n_edge = raw_replace.delete_frame_lines(doc, frames)
+                                n_tb = raw_replace.delete_titleblock(doc, tb, maxdim)
+                                n_mark = raw_replace.delete_edge_markers(doc, outer, strip=10.0)
+                                region = {"bbox": sheet, "confidence": 1.0, "method": "frame",
+                                          "source": "sheet", "entity": None}
+                                _, written = block_replace.insert_template(doc, template, region, values, fit="max")
+                                rec["written"] = list(dict.fromkeys(written))
+                                rec["deleted"] = n_edge + n_tb + n_mark
+                            rec["found"] = 1
+                            rec["method"] = "raw-frame"
+                            rec["mappings"] = [{"region": [round(x, 1) for x in sheet],
+                                                "extracted": old, "unmatched": unmatched, "unused": unused}]
+                            raw_done = True
+
             if args.detect_only:
+                if regions:
+                    det = [{"bbox": r["bbox"], "confidence": r["confidence"],
+                            "method": r["method"], "source": r["source"], "confirmed": False} for r in regions]
+                elif raw_done:
+                    det = [{"bbox": rec["mappings"][0]["region"], "confidence": 1.0,
+                            "method": "frame", "source": "sheet", "confirmed": False}]
+                else:
+                    det = []
                 det_path = os.path.join(args.out, os.path.splitext(os.path.basename(src))[0] + "_detection.json")
                 with open(det_path, "w", encoding="utf-8") as f:
-                    json.dump({"mode": rec["mode"], "sheet": rec.get("sheet"),
-                               "frames": [{"bbox": r["bbox"], "confidence": r["confidence"],
-                                           "method": r["method"], "source": r["source"],
-                                           "confirmed": False} for r in regions]},
+                    json.dump({"mode": rec["mode"], "sheet": rec.get("sheet"), "frames": det},
                               f, ensure_ascii=False, indent=2)
                 rec["status"] = "detected"
                 rec["out"] = os.path.basename(det_path)
-                logbook.log(lb, src, "detected", len(regions), 0, [], det_path, "仅检测")
+                logbook.log(lb, src, "detected", rec["found"], 0, [], det_path, "仅检测")
                 report["files"].append(rec)
                 continue
 
@@ -240,13 +276,15 @@ def main():
                 all_written += written
                 print("   替换: 删 %d 旧实体, 回填 %d 字段 -> %s" % (ndel, len(written), written))
 
-            rec["mappings"] = mappings
-            rec["deleted"] = total_del
-            rec["written"] = list(dict.fromkeys(all_written))
+            # 线框回退(raw_done)已在前面完成 提取/删除/回填，这里不能再覆盖 rec 的结果
+            if not raw_done:
+                rec["mappings"] = mappings
+                rec["deleted"] = total_del
+                rec["written"] = list(dict.fromkeys(all_written))
 
             if args.dry_run:
                 rec["status"] = "dry-run"
-                logbook.log(lb, src, "dry-run", len(regions), 0, [], "", "未改图")
+                logbook.log(lb, src, "dry-run", rec.get("found", len(regions)), 0, [], "", "未改图")
                 report["files"].append(rec)
                 continue
 
@@ -270,7 +308,9 @@ def main():
             else:
                 rec["out"] = os.path.basename(out_dxf)
             print("   输出:", out_final, " 实体 %d -> %d" % (before, after))
-            logbook.log(lb, src, "ok", len(regions), total_del, list(dict.fromkeys(all_written)),
+            logbook.log(lb, src, "ok", rec.get("found", len(regions)),
+                        rec.get("deleted", total_del),
+                        list(dict.fromkeys(all_written)) or rec.get("written", []),
                         out_final, "")
             report["files"].append(rec)
 
