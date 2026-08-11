@@ -76,7 +76,7 @@ FOOTER = """
   <li>案例二输出（成品 DWG）：<a href="02_CNG_electrical/outputs/CNG_电气系统图_HH.dwg">CNG_电气系统图_HH.dwg</a></li>
   <li>案例三输出：<a href="03_ESS_cad/outputs/">03_ESS_cad/outputs/</a></li>
   <li>案例四输出（成品 DXF）：<a href="04_assembly/outputs/装配体图纸(1)_HH.dxf">装配体图纸(1)_HH.dxf</a></li>
-  <li>案例五输出（成品 DWG）：<a href="05_standard_dwg/outputs/92DZ1_xiaohuobeng_HH.dwg">92DZ1_xiaohuobeng_HH.dwg</a></li>
+  <li>案例五输出（成品 DWG，本地运行生成，体积大不入库）：<a href="05_standard_dwg/inputs/92DZ1_xiaohuobeng.dwg">92DZ1_xiaohuobeng.dwg（源）</a> / <a href="05_standard_dwg/outputs/92DZ1_xiaohuobeng_HH.png">92DZ1_xiaohuobeng_HH.png（效果图）</a></li>
   <li>案例六输出（合成样本 + 结论）：<a href="06_synth/outputs/index.html">06_synth/outputs/index.html</a> / <a href="06_synth/outputs/results.json">results.json</a></li>
   <li>案例七输出（多图框逐框替换）：<a href="07_multiframe/outputs/index.html">07_multiframe/outputs/index.html</a> / <a href="07_multiframe/outputs/results.json">results.json</a></li>
   <li>使用手册：<a href="../MANUAL.md">MANUAL.md</a></li>
