@@ -41,6 +41,8 @@ check_tpl.py
 cases/**/*_HH.dxf
 *_HH.dwg
 output_dwg/
+output_test/
+input_real_test/
 
 # 临时验证日志
 _fix_test.log

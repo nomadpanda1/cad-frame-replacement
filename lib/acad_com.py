@@ -16,6 +16,12 @@ COM 在原 DWG 副本上做：删旧图框/会签栏 → 插公司图框块 → 
 - Documents.Open 后必须 time.sleep(2) 等加载
 - 保存用 doc.Save()（本机 SaveAs 的 format 参数失效，会写出 DXF）
 - 模板块必须先用 WBLOCK 写成真正的二进制 DWG（magic=AC1032），InsertBlock 不支持 DXF 源
+
+性能/健壮性（本机实测修订）：
+- AutoCAD COM 调用偶发“被呼叫方拒绝接收呼叫”(RPC_E_CALL_REJECTED)，所有属性读取必须用
+  _retry 包裹，否则单帧一个瞬断就整轮崩溃。
+- 实体清单在 process_file 里**只采集一次**（collect_entities），逐帧只在 Python 里按区域
+  过滤，避免 9000 实体 × 帧数 的 COM 往返（原来跑一张图要 9 分钟且易崩）。
 """
 import os
 import shutil
@@ -64,27 +70,119 @@ def save_close(doc):
     doc.Close(False)
 
 
+def _retry(fn, tries=6, wait=1.5, label="op"):
+    """对 AutoCAD COM 调用做重试，容忍瞬时的“被呼叫方拒绝接收呼叫”(RPC_E_CALL_REJECTED)。"""
+    last = None
+    for i in range(tries):
+        try:
+            return fn()
+        except Exception as e:  # noqa: BLE001
+            last = e
+            if i < tries - 1:
+                time.sleep(wait)
+    raise last
+
+
 def entity_bbox(e):
-    """获取 AutoCAD COM 实体的 bbox，返回 (xmin,ymin,xmax,ymax) 或 None。"""
+    """计算实体包围盒（优先用轻量几何属性，避免 GetBoundingBox 的高 COM 开销与挂起风险）。
+
+    返回 (xmin,ymin,xmax,ymax) 或 None。批量采集时个别实体读不到几何则跳过（不参与删除即可）。
+
+    关键坑：GetBoundingBox 对部分实体（如 AcDbPoint）可能持续报错；若用 _retry 会 6×1.5s 挂起，
+    上千实体即数小时。这里改用各类型自身的轻量属性（StartPoint/Coordinates/InsertionPoint/
+    Center…），单次 COM 调用即可，几乎不会触发长挂起。
+    """
     try:
-        mn, mx = e.GetBoundingBox()
-        return (float(mn[0]), float(mn[1]), float(mx[0]), float(mx[1]))
+        et = e.EntityName if hasattr(e, "EntityName") else e.EntityType
+    except Exception:
+        et = None
+    try:
+        if et == "AcDbLine":
+            s = e.StartPoint
+            en = e.EndPoint
+            xs, ys = (s[0], en[0]), (s[1], en[1])
+        elif et in ("AcDbPolyline", "AcDbLWPolyline", "AcDb2dPolyline", "AcDb3dPolyline"):
+            c = e.Coordinates
+            if not c:
+                raise ValueError("no coords")
+            xs = [c[i] for i in range(0, len(c), 2)]
+            ys = [c[i + 1] for i in range(0, len(c), 2)]
+        elif et in ("AcDbText", "AcDbMText"):
+            p = e.InsertionPoint
+            xs, ys = (p[0],), (p[1],)
+        elif et == "AcDbPoint":
+            p = e.Coordinates
+            xs, ys = (p[0],), (p[1],)
+        elif et in ("AcDbCircle", "AcDbArc"):
+            c = e.Center
+            r = e.Radius
+            xs, ys = (c[0] - r, c[0] + r), (c[1] - r, c[1] + r)
+        elif et == "AcDbBlockReference":
+            p = e.InsertionPoint
+            xs, ys = (p[0],), (p[1],)
+        else:
+            # HATCH / DIMENSION / 未知类型：兜底用一次 GetBoundingBox
+            mn, mx = e.GetBoundingBox()
+            return (float(mn[0]), float(mn[1]), float(mx[0]), float(mx[1]))
+        return (min(xs), min(ys), max(xs), max(ys))
+    except Exception:
+        try:
+            mn, mx = e.GetBoundingBox()
+            return (float(mn[0]), float(mn[1]), float(mx[0]), float(mx[1]))
+        except Exception:
+            return None
+
+
+def _entity_name(e):
+    """兼容 EntityName / EntityType 的实体类型读取（单次尝试，失败返回 None）。"""
+    try:
+        return e.EntityName if hasattr(e, "EntityName") else e.EntityType
     except Exception:
         return None
 
 
-def del_in_region(msp, x0, y0, x1, y1, allowed_types=None, exclude_types=None):
-    """删除 modelspace 中中心完全落在矩形区域内的实体。"""
+def _entity_layer(e):
+    try:
+        return (e.Layer or "").lower()
+    except Exception:
+        return ""
+
+
+def collect_entities(msp):
+    """一次性采集 modelspace 全部实体的 (引用, 类型, 图层, bbox)。
+
+    只跨 COM 边界取一次，后续逐帧过滤全在 Python 内进行，避免“实体数 × 帧数”的往返。
+    任一实体读取失败则跳过（不阻断整轮）。
+    """
+    ents = []
+    try:
+        n = _retry(lambda: msp.Count)
+    except Exception:
+        return ents
+    for i in range(n):
+        try:
+            e = _retry(lambda: msp.Item(i))
+        except Exception:
+            continue
+        et = _entity_name(e)
+        if et is None:
+            continue
+        layer = _entity_layer(e)
+        bb = entity_bbox(e)
+        ents.append({"e": e, "et": et, "layer": layer, "bb": bb})
+    return ents
+
+
+def del_in_region(ents, x0, y0, x1, y1, allowed_types=None, exclude_types=None):
+    """删除实体清单中中心完全落在矩形区域内的实体。"""
     to_del = []
-    for i in range(msp.Count):
-        e = msp.Item(i)
-        et = e.EntityName if hasattr(e, "EntityName") else e.EntityType
+    for d in ents:
+        e, et, _layer, bb = d["e"], d["et"], d["layer"], d["bb"]
+        if et is None or bb is None:
+            continue
         if allowed_types and et not in allowed_types:
             continue
         if exclude_types and et in exclude_types:
-            continue
-        bb = entity_bbox(e)
-        if bb is None:
             continue
         ex0, ey0, ex1, ey1 = bb
         cx, cy = (ex0 + ex1) / 2, (ey0 + ey1) / 2
@@ -98,20 +196,17 @@ def del_in_region(msp, x0, y0, x1, y1, allowed_types=None, exclude_types=None):
     return len(to_del)
 
 
-def del_frame_edges(msp, frame, margin=500):
+def del_frame_edges(ents, frame, margin=500):
     """删除图框层上、与外框面积重合>80% 或贴四边的 LINE/LWPOLYLINE/CIRCLE。"""
     x0, y0, x1, y1 = frame
     frame_layers = {"tukuang", "图框", "0"}
     to_del = []
-    for i in range(msp.Count):
-        e = msp.Item(i)
-        et = e.EntityName if hasattr(e, "EntityName") else e.EntityType
+    for d in ents:
+        e, et, layer, bb = d["e"], d["et"], d["layer"], d["bb"]
         if et not in ("AcDbLine", "AcDbPolyline", "AcDb2dPolyline", "AcDbCircle"):
             continue
-        layer = e.Layer.lower() if hasattr(e, "Layer") else ""
         if layer not in frame_layers and not layer.startswith("tukuang"):
             continue
-        bb = entity_bbox(e)
         if bb is None:
             continue
         ex0, ey0, ex1, ey1 = bb
@@ -171,17 +266,17 @@ def insert_frame(msp, frame, tpl_dwg, fields, size_table=None):
     scale = min(W / tw, H / th) if tw and th else 1.0
 
     # 1) 插入外壳块（导入 HH_FRAME_Ax 块定义）
-    wrapper = msp.InsertBlock(
+    wrapper = _retry(lambda: msp.InsertBlock(
         variant_point(x0, y0, 0.0),
         tpl_dwg,
         scale, scale, scale, 0.0,
-    )
+    ), label="InsertBlock wrapper")
     # 2) 按名插入干净的带属性块
-    insert = msp.InsertBlock(
+    insert = _retry(lambda: msp.InsertBlock(
         variant_point(x0, y0, 0.0),
         "HH_FRAME_" + size_name,
         scale, scale, scale, 0.0,
-    )
+    ), label="InsertBlock frame")
     # 3) 删除外壳块，只保留按名插入的块
     try:
         wrapper.Delete()
@@ -190,7 +285,8 @@ def insert_frame(msp, frame, tpl_dwg, fields, size_table=None):
 
     # 属性回填：只对 tag 命中 fields 的 ATTDEF 写值。
     try:
-        for a in insert.GetAttributes():
+        attrs = _retry(lambda: insert.GetAttributes())
+        for a in attrs:
             tag = a.TagString
             if tag in fields:
                 a.TextString = fields[tag]
@@ -198,19 +294,6 @@ def insert_frame(msp, frame, tpl_dwg, fields, size_table=None):
         print("    set attribs warn:", e)
 
     return insert, scale
-
-
-def _retry(fn, tries=6, wait=1.5, label="op"):
-    """对 AutoCAD COM 调用做重试，容忍瞬时的“被呼叫方拒绝接收呼叫”(RPC_E_CALL_REJECTED)。"""
-    last = None
-    for i in range(tries):
-        try:
-            return fn()
-        except Exception as e:  # noqa: BLE001
-            last = e
-            if i < tries - 1:
-                time.sleep(wait)
-    raise last
 
 
 def _is_dwg(path):
@@ -269,18 +352,7 @@ def prepare_templates(app, tpl_dir, out_dir):
     return result
 
 
-def _entity_name(e):
-    """兼容 EntityName / EntityType 的实体类型读取。"""
-    try:
-        return e.EntityName
-    except Exception:
-        try:
-            return e.EntityType
-        except Exception:
-            return None
-
-
-def del_frame_lines_acad(msp, frames, margin=1.0):
+def del_frame_lines_acad(ents, frames, margin=1.0):
     """按坐标删除图框外框/内框矩形的边线（适用于 SolidWorks 打散图框）。
 
     frames: [(x0,y0,x1,y1), ...]
@@ -294,13 +366,12 @@ def del_frame_lines_acad(msp, frames, margin=1.0):
             edge_coords["h"].add(round(c, 1))
 
     to_del = []
-    for i in range(msp.Count):
-        e = msp.Item(i)
-        et = _entity_name(e)
+    for d in ents:
+        e, et, _layer, bb = d["e"], d["et"], d["layer"], d["bb"]
         if et == "AcDbLine":
             try:
-                s = e.StartPoint
-                en = e.EndPoint
+                s = _retry(lambda: e.StartPoint)
+                en = _retry(lambda: e.EndPoint)
             except Exception:
                 continue
             if abs(s[0] - en[0]) < 1e-3 and round(s[0], 1) in edge_coords["v"]:
@@ -309,9 +380,9 @@ def del_frame_lines_acad(msp, frames, margin=1.0):
                 to_del.append(e)
         elif et == "AcDbPolyline":
             try:
-                coords = list(e.Coordinates)
+                coords = list(_retry(lambda: e.Coordinates))
                 pts = [(coords[j], coords[j + 1]) for j in range(0, len(coords), 2)]
-                closed = bool(e.Closed)
+                closed = bool(_retry(lambda: e.Closed))
             except Exception:
                 continue
             if not (closed or (pts and pts[0] == pts[-1])):
@@ -329,8 +400,8 @@ def del_frame_lines_acad(msp, frames, margin=1.0):
             try:
                 pts = []
                 for v in e:
-                    pts.append((v.Coordinate[0], v.Coordinate[1]))
-                closed = bool(e.Closed)
+                    pts.append((_retry(lambda: v.Coordinate)[0], _retry(lambda: v.Coordinate)[1]))
+                closed = bool(_retry(lambda: e.Closed))
             except Exception:
                 continue
             if not (closed or (pts and pts[0] == pts[-1])):
@@ -354,7 +425,7 @@ def del_frame_lines_acad(msp, frames, margin=1.0):
     return n
 
 
-def del_titleblock_acad(msp, tb, maxdim):
+def del_titleblock_acad(ents, tb, maxdim):
     """删除标题栏区域内实体：文本全删；线/多段线完全落在标题栏内的全删，
     仅对跨越标题栏边界的线保留"短线删、长线（可能是尺寸线）保留"策略。
 
@@ -364,12 +435,10 @@ def del_titleblock_acad(msp, tb, maxdim):
     x0, y0, x1, y1 = tb
     thr = 0.30 * maxdim
     to_del = []
-    for i in range(msp.Count):
-        e = msp.Item(i)
-        et = _entity_name(e)
+    for d in ents:
+        e, et, _layer, bb = d["e"], d["et"], d["layer"], d["bb"]
         if et == "AcDbBlockReference":
             continue
-        bb = entity_bbox(e)
         if bb is None:
             continue
         ex0, ey0, ex1, ey1 = bb
@@ -393,23 +462,21 @@ def del_titleblock_acad(msp, tb, maxdim):
     return n
 
 
-def del_edge_markers_acad(msp, outer, strip=10.0):
+def del_edge_markers_acad(ents, outer, strip=10.0):
     """删除沿外框边缘的区号字母/数字（如 A/B/C 与 4/5/6）。"""
     import re
     x0, y0, x1, y1 = outer
     to_del = []
-    for i in range(msp.Count):
-        e = msp.Item(i)
-        et = _entity_name(e)
+    for d in ents:
+        e, et, _layer, bb = d["e"], d["et"], d["layer"], d["bb"]
         if et not in ("AcDbText", "AcDbMText"):
             continue
         try:
-            raw = e.TextString
+            raw = _retry(lambda: e.TextString)
         except Exception:
             continue
         if not raw or not re.fullmatch(r"[A-Za-z0-9]{1,2}", raw.strip()):
             continue
-        bb = entity_bbox(e)
         if bb is None:
             continue
         cx = (bb[0] + bb[2]) / 2.0

@@ -162,6 +162,13 @@ def _process_one_acad(app, src, doc, args, template, override, tpl_dwgs):
     use_multi, sheet_bbox, targets = _plan_frames(doc, args.mode)
     plan = {"frames": []}
 
+    def _title_strip(fb):
+        """标题栏区 = 右下角（右 55% × 底 28%），与 ezdxf delete_title_strip 对齐；
+        只清旧标题栏，保留框内其余内容（换框不换图）。"""
+        fx0, fy0, fx1, fy1 = fb
+        W, H = fx1 - fx0, fy1 - fy0
+        return [fx0 + 0.45 * W, fy0, fx1, fy0 + 0.28 * H]
+
     if use_multi:
         rec["mode"] = "multi"
         rec["found"] = len(targets)
@@ -172,9 +179,10 @@ def _process_one_acad(app, src, doc, args, template, override, tpl_dwgs):
                 template["fields"], fields, override)
             size_name = _guess_size(fb)
             tpl_dwg = tpl_dwgs.get(size_name) or tpl_dwgs.get("A3") or next(iter(tpl_dwgs.values()))
+            fb_f = [float(v) for v in fb]
             plan["frames"].append({
-                "frame": [float(v) for v in fb],
-                "titleblock": [float(v) for v in fb],
+                "frame": fb_f,
+                "titleblock": _title_strip(fb_f),
                 "tpl_dwg": tpl_dwg,
                 "fields": _values_to_fields(template["fields"], values),
                 "mode": "multiframe",

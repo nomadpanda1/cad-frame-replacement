@@ -52,7 +52,11 @@ def process_file(app, src, dst, plan, wait_open=2.0):
     # 扩展名，Documents.Open 会报“不是有效的图形文件”。SaveAs 写新路径不会改动源文件。
     doc = _retry(lambda: app.Documents.Open(os.path.abspath(src)), label="Open src")
     time.sleep(wait_open)
-    msp = doc.ModelSpace
+    msp = _retry(lambda: doc.ModelSpace, label="ModelSpace")
+
+    # 一次性采集全部实体（含类型/图层/bbox），逐帧只在 Python 内按区域过滤，
+    # 避免“实体数 × 帧数”的 COM 往返（原来单张图 9000 实体 × 15 帧会极慢且易崩）。
+    ents = acad_com.collect_entities(msp)
 
     results = []
     for item in plan.get("frames", []):
@@ -66,13 +70,13 @@ def process_file(app, src, dst, plan, wait_open=2.0):
         maxdim = max(x1 - x0, y1 - y0)
 
         if mode == "raw-frame":
-            n_edge = acad_com.del_frame_lines_acad(msp, [frame], margin=1.0)
-            n_tb = acad_com.del_titleblock_acad(msp, tb, maxdim)
-            n_mark = acad_com.del_edge_markers_acad(msp, frame, strip=10.0)
+            n_edge = acad_com.del_frame_lines_acad(ents, [frame], margin=1.0)
+            n_tb = acad_com.del_titleblock_acad(ents, tb, maxdim)
+            n_mark = acad_com.del_edge_markers_acad(ents, frame, strip=10.0)
         else:
             # 块式/多图框：优先用图层名删外框线（设计院图纸常见“图框”层）
-            n_edge = acad_com.del_frame_edges(msp, frame)
-            n_tb = acad_com.del_in_region(msp, tb[0], tb[1], tb[2], tb[3])
+            n_edge = acad_com.del_frame_edges(ents, frame)
+            n_tb = acad_com.del_in_region(ents, tb[0], tb[1], tb[2], tb[3])
             n_mark = 0
 
         insert, scale = acad_com.insert_frame(msp, frame, tpl_dwg, fields)
