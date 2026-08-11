@@ -40,6 +40,7 @@ check_tpl.py
 # Regenerable case outputs
 cases/**/*_HH.dxf
 *_HH.dwg
+output_dwg/
 
 # 脚本临时占位文件
 _frame_only.bak

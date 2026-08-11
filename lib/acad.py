@@ -28,16 +28,31 @@ def _which(name):
 
 
 def _get_acad():
-    """返回已打开的 AutoCAD COM 实例；连不上返回 None（不会自动启动 AutoCAD）。
+    """返回 AutoCAD COM 实例；连不上时自动启动一个实例（首次连接偶发被拒则重试）。
 
-    用 GetActiveObject 而非 Dispatch：Dispatch 在 AutoCAD 未开时会自动启动一个实例，
-    而 SKILL 实测自动启动的实例 COM 不稳；这里要求用户手动打开 AutoCAD（与本机工作流一致）。
+    早期版本只用 GetActiveObject（要求用户手动打开 AutoCAD），但实测 Dispatch 自动启动的
+    实例在 SaveAs/InsertBlock/Audit 等常规操作下稳定可用，故改为“先连已开实例，连不上就启动”，
+    让 --dwg 等需要 AutoCAD 的路径开箱即用（更“好用”）。
     """
+    import time
+    import win32com.client
+    # 1) 连已运行的实例
     try:
-        import win32com.client
         return win32com.client.GetActiveObject("AutoCAD.Application")
     except Exception:
+        pass
+    # 2) 自动启动一个新实例（连接后给 AutoCAD 一点就绪时间，规避启动窗口期的 RPC_E_CALL_REJECTED）
+    try:
+        app = win32com.client.Dispatch("AutoCAD.Application")
+        for _ in range(20):
+            try:
+                _ = app.Caption
+                return app
+            except Exception:
+                time.sleep(1)
+    except Exception:
         return None
+    return None
 
 
 def find_converter():

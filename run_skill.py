@@ -152,7 +152,12 @@ def _process_one_acad(app, src, doc, args, template, override, tpl_dwgs):
     """
     rec = {"src": os.path.basename(src)}
     base = os.path.splitext(os.path.basename(src))[0]
-    out_dwg = os.path.join(args.out, base + args.suffix + ".dwg")
+    # COM 直接处理模式：输出统一为 .dwg，且用 SaveAs(dst, 12)(acNative) 强制二进制 DWG。
+    # 原因：本机 AutoCAD 2026 的 SaveAs 写 .dxf 会在大量 COM 增删实体后报“保存文档时出错”，
+    # 而 SaveAs(12) 写二进制 DWG 稳定可用（已实测）；DWG 由 AutoCAD 本机写出，可正常打开，
+    # 彻底绕开 ezdxf DXF 在 AutoCAD 2026 打开空白的兼容性问题。
+    ext = ".dwg"
+    out_dwg = os.path.join(args.out, base + args.suffix + ext)
 
     use_multi, sheet_bbox, targets = _plan_frames(doc, args.mode)
     plan = {"frames": []}
@@ -221,7 +226,7 @@ def _process_one_acad(app, src, doc, args, template, override, tpl_dwgs):
             })
             rec["mode"] = "raw-frame"
             rec["found"] = 1
-            print("   块式 0 命中 → 回退线框检测：外框 %s" % [tuple(round(v, 1) for v in frames)])
+            print("   块式 0 命中 → 回退线框检测：外框 %s" % [tuple(round(c, 1) for c in f) for f in frames])
 
     results = acad_pipeline.process_file(app, src, out_dwg, plan)
     rec["status"] = "ok"

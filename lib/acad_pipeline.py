@@ -13,6 +13,7 @@ import shutil
 import time
 
 from . import acad_com
+from .acad_com import _retry
 
 
 def process_file(app, src, dst, plan, wait_open=2.0):
@@ -40,9 +41,16 @@ def process_file(app, src, dst, plan, wait_open=2.0):
     返回处理结果列表（每帧一条 dict）。
     """
     os.makedirs(os.path.dirname(os.path.abspath(dst)) or ".", exist_ok=True)
-    shutil.copy(src, dst)
 
-    doc = app.Documents.Open(os.path.abspath(dst))
+    try:
+        app.Visible = True
+    except Exception:
+        pass
+
+    # 直接打开源文件（扩展名与内容一致，AutoCAD 可正常识别），编辑后 SaveAs 到 dst(.dwg)。
+    # 注意：不能 shutil.copy(src, dst) 再把 dst 当 .dwg 打开——那样 DXF 内容会被套上 .dwg
+    # 扩展名，Documents.Open 会报“不是有效的图形文件”。SaveAs 写新路径不会改动源文件。
+    doc = _retry(lambda: app.Documents.Open(os.path.abspath(src)), label="Open src")
     time.sleep(wait_open)
     msp = doc.ModelSpace
 
@@ -80,8 +88,17 @@ def process_file(app, src, dst, plan, wait_open=2.0):
             "fields": fields,
         })
 
-    doc.Save()
-    doc.Close(False)
+    # 输出：COM 直接处理模式统一输出二进制 DWG（SaveAs(dst, 12) = acNative）。
+    # 本机 AutoCAD 2026 的 SaveAs 写 .dxf 会在大量 COM 增删实体后报“保存文档时出错”，
+    # 而 SaveAs(12) 写二进制 DWG 稳定可用；DWG 由 AutoCAD 本机写出，可正常打开。
+    # 重算一次几何体，规避增删后的显示/数据库不一致（Regen 在 IAcadDocument 上可用）。
+    try:
+        _retry(lambda: doc.Regen(True), label="Regen")
+    except Exception as e:
+        print("   Regen warn:", e)
+    dst_abs = os.path.abspath(dst)
+    _retry(lambda: doc.SaveAs(dst_abs, 12), label="Save dst")
+    _retry(lambda: doc.Close(False), label="Close dst")
     return results
 
 

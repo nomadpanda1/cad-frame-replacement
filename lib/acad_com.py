@@ -140,8 +140,25 @@ def del_frame_edges(msp, frame, margin=500):
     return len(to_del)
 
 
+def _size_name_from_tpl(tpl_dwg):
+    """从模板 dwg 文件名反推幅面名（A0~A4）。
+
+    prepare_templates 用冲突规避名（如 _HH_FRAME_A3.dwg）写出，
+    这里稳定地剥出 "A3"，避免与原块名 HH_FRAME_A3 自参照。
+    """
+    base = os.path.splitext(os.path.basename(tpl_dwg))[0]
+    if "HH_FRAME_" in base:
+        return base.split("HH_FRAME_", 1)[1]
+    return base
+
+
 def insert_frame(msp, frame, tpl_dwg, fields, size_table=None):
-    """在 frame 左下角插入公司图框块（tpl_dwg 为 WBLOCK 生成的 *.dwg），等比缩放并回填属性。
+    """在 frame 左下角插入公司图框块（tpl_dwg 为 prepare_templates 生成的 *.dwg），等比缩放并回填属性。
+
+    由于模板 dwg 内部是“块 HH_FRAME_Ax 内嵌于模型空间”，直接 InsertBlock 该 dwg 会得到一个
+    “外壳块 + 嵌套 HH_FRAME_Ax”的结构，外层 GetAttributes 为空。为拿到可直接回填的 14 个属性，
+    采用双插法：先 InsertBlock(dwg) 把 HH_FRAME_Ax 块定义导入目标图，再按名 InsertBlock("HH_FRAME_Ax")
+    得到干净、带属性的块引用，最后删掉外壳块。
 
     返回 (insert, scale)。缩放 = min(W/tw, H/th)（等比，保持模板自身比例）。
     """
@@ -149,15 +166,27 @@ def insert_frame(msp, frame, tpl_dwg, fields, size_table=None):
         size_table = A_SIZES
     x0, y0, x1, y1 = frame
     W, H = x1 - x0, y1 - y0
-    size_name = os.path.splitext(os.path.basename(tpl_dwg))[0].replace("HH_FRAME_", "")
+    size_name = _size_name_from_tpl(tpl_dwg)
     tw, th = size_table.get(size_name, (W, H))
     scale = min(W / tw, H / th) if tw and th else 1.0
 
-    insert = msp.InsertBlock(
+    # 1) 插入外壳块（导入 HH_FRAME_Ax 块定义）
+    wrapper = msp.InsertBlock(
         variant_point(x0, y0, 0.0),
         tpl_dwg,
         scale, scale, scale, 0.0,
     )
+    # 2) 按名插入干净的带属性块
+    insert = msp.InsertBlock(
+        variant_point(x0, y0, 0.0),
+        "HH_FRAME_" + size_name,
+        scale, scale, scale, 0.0,
+    )
+    # 3) 删除外壳块，只保留按名插入的块
+    try:
+        wrapper.Delete()
+    except Exception as e:
+        print("    delete wrapper warn:", e)
 
     # 属性回填：只对 tag 命中 fields 的 ATTDEF 写值。
     try:
@@ -171,11 +200,40 @@ def insert_frame(msp, frame, tpl_dwg, fields, size_table=None):
     return insert, scale
 
 
-def prepare_templates(app, tpl_dir, out_dir):
-    """把 templates/ 下的 HH_FRAME_*.dxf 用 AutoCAD -WBLOCK 写成 *.dwg。
+def _retry(fn, tries=6, wait=1.5, label="op"):
+    """对 AutoCAD COM 调用做重试，容忍瞬时的“被呼叫方拒绝接收呼叫”(RPC_E_CALL_REJECTED)。"""
+    last = None
+    for i in range(tries):
+        try:
+            return fn()
+        except Exception as e:  # noqa: BLE001
+            last = e
+            if i < tries - 1:
+                time.sleep(wait)
+    raise last
 
-    InsertBlock 不接受 DXF 源，必须用二进制 DWG。本函数幂等：已存在的 DWG 跳过。
-    返回 {size_name: dwg_path} 字典。
+
+def _is_dwg(path):
+    """判断文件是否为真正的二进制 DWG（魔数 AC10xx）。"""
+    if not os.path.exists(path):
+        return False
+    try:
+        with open(path, "rb") as f:
+            return f.read(6).startswith(b"AC10")
+    except Exception:
+        return False
+
+
+def prepare_templates(app, tpl_dir, out_dir):
+    """把 templates/ 下的 HH_FRAME_*.dxf 写成二进制 *.dwg（InsertBlock 必须 DWG 源）。
+
+    关键坑（本机 AutoCAD 2026）：
+      - SendCommand('_.-WBLOCK ...') 会让 AutoCAD 挂起，COM 后续全拒（被呼叫方拒绝接收呼叫）。
+      - doc.SaveAs(.dwg) 不传 format 时本机可能写出 DXF（magic 非 AC10）。
+    因此这里用 doc.SaveAs(dwg, 12)（acNative=12 → 真正的二进制 DWG），文件名加前导下划线
+    （_HH_FRAME_Ax.dwg）以避免与模板内部块名 HH_FRAME_Ax 在 InsertBlock 时“自参照”。
+
+    返回 {size_name: dwg_path}。已存在且为有效 DWG 则跳过（模板很少变，省一次 AutoCAD 往返）。
     """
     import glob
     os.makedirs(out_dir, exist_ok=True)
@@ -183,17 +241,31 @@ def prepare_templates(app, tpl_dir, out_dir):
     for src in sorted(glob.glob(os.path.join(tpl_dir, "HH_FRAME_*.dxf"))):
         name = os.path.splitext(os.path.basename(src))[0]
         size_name = name.replace("HH_FRAME_", "")
-        dst = os.path.join(out_dir, name + ".dwg")
+        dst = os.path.join(out_dir, "_" + name + ".dwg")  # 前导下划线规避自参照
         result[size_name] = dst
-        if os.path.exists(dst):
+        # 已有效则跳过
+        if _is_dwg(dst):
+            print("   模板 %s 已就绪，跳过" % name)
             continue
-        doc = app.Documents.Open(os.path.abspath(src))
+        # 清掉残留（可能上次写成 .dwg.dxf 或无效文件）
+        for cand in (dst, dst + ".dxf"):
+            if os.path.exists(cand):
+                try:
+                    os.remove(cand)
+                except Exception:
+                    pass
+        try:
+            app.Visible = True
+        except Exception:
+            pass
+        doc = _retry(lambda: app.Documents.Open(os.path.abspath(src)), label="Open tpl")
         time.sleep(0.5)
-        # -WBLOCK 命令：文件路径、块名、插入点（回车用空格）
-        cmd = '_.-WBLOCK\n"%s"\n%s\n ' % (dst, name)
-        doc.SendCommand(cmd)
-        time.sleep(1.0)
-        doc.Close(False)
+        try:
+            _retry(lambda: doc.SaveAs(os.path.abspath(dst), 12), label="SaveAs dwg")
+        except Exception as e:
+            print("   模板 %s SaveAs 失败: %r" % (name, e))
+        _retry(lambda: doc.Close(False), label="Close tpl")
+        print("   模板 %s -> %s valid=%s" % (name, dst, _is_dwg(dst)))
     return result
 
 
