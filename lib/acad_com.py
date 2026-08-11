@@ -197,15 +197,20 @@ def del_in_region(ents, x0, y0, x1, y1, allowed_types=None, exclude_types=None):
 
 
 def del_frame_edges(ents, frame, margin=500):
-    """删除图框层上、与外框面积重合>80% 或贴四边的 LINE/LWPOLYLINE/CIRCLE。"""
+    """删除图框层上、与外框面积重合>80% 或贴四边的 LINE/LWPOLYLINE/CIRCLE。
+
+    兼容设计院图纸：图框常落在 PUB_TITLE/图签/TK 等非标准图层；若按图层没删到边框，
+    再做几何兜底——删 bbox 与本框完全重合的外框多段线（只此一条，不会误删内容）。
+    """
     x0, y0, x1, y1 = frame
-    frame_layers = {"tukuang", "图框", "0"}
+    frame_layers = {"tukuang", "图框", "0", "pub_title", "图签", "tk", "title", "frame"}
     to_del = []
     for d in ents:
         e, et, layer, bb = d["e"], d["et"], d["layer"], d["bb"]
         if et not in ("AcDbLine", "AcDbPolyline", "AcDb2dPolyline", "AcDbCircle"):
             continue
-        if layer not in frame_layers and not layer.startswith("tukuang"):
+        ll = (layer or "").lower()
+        if ll not in frame_layers and not ll.startswith("tukuang"):
             continue
         if bb is None:
             continue
@@ -227,6 +232,17 @@ def del_frame_edges(ents, frame, margin=500):
         )
         if near_edge and ex0 >= x0 - margin and ex1 <= x1 + margin and ey0 >= y0 - margin and ey1 <= y1 + margin:
             to_del.append(e)
+    # 几何兜底：图层匹配没删到边框时，删 bbox 与本框重合的外框多段线（设计院图框在非标准图层）
+    if not to_del:
+        for d in ents:
+            e, et, _layer, bb = d["e"], d["et"], d["layer"], d["bb"]
+            if et not in ("AcDbPolyline", "AcDb2dPolyline", "AcDbLWPolyline"):
+                continue
+            if bb is None:
+                continue
+            if (abs(bb[0] - x0) < margin and abs(bb[1] - y0) < margin and
+                    abs(bb[2] - x1) < margin and abs(bb[3] - y1) < margin):
+                to_del.append(e)
     for e in to_del:
         try:
             e.Delete()
