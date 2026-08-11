@@ -53,35 +53,72 @@ def api(method, path, data=None, token=None):
         raise
 
 
+def _tree_sha(rev):
+    return subprocess.check_output(["git", "rev-parse", f"{rev}^{{tree}}"], text=True).strip()
+
+
+def _find_boundary(head, base_tree):
+    """从 HEAD 向父提交回溯，找到 tree 与远端 base_tree 完全相同的本地祖先。
+
+    找不到则返回 None（意味着要全量推送 HEAD 的跟踪文件）。
+    """
+    c = head
+    seen = set()
+    while c and c not in seen:
+        seen.add(c)
+        if _tree_sha(c) == base_tree:
+            return c
+        parents = subprocess.check_output(
+            ["git", "rev-list", "--parents", "-n", "1", c], text=True
+        ).split()
+        if len(parents) < 2:
+            break
+        c = parents[1]  # 取第一个父提交继续回溯
+    return None
+
+
 def main():
     token = get_token()
     head = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
     msg = subprocess.check_output(["git", "log", "-1", "--format=%B"], text=True).strip()
-
     print(f"本地 HEAD : {head}")
 
     # 父提交取「远端 main」实时 SHA（避免本地/远端 SHA 分叉导致孤儿父节点）。
-    # 远端 main 内容与本地 HEAD^ 一致，但其 SHA 才是远端真实对象。
     main_ref = api("GET", "/git/refs/heads/main", token=token)
     parent = main_ref["object"]["sha"]
     print(f"远端 main : {parent}")
 
-    # 1) 父 commit 的 tree
     parent_commit = api("GET", f"/git/commits/{parent}", token=token)
     base_tree = parent_commit["tree"]["sha"]
     print(f"base tree : {base_tree}")
 
-    # 2) 本次 commit 改动的文件
-    files = subprocess.check_output(
-        ["git", "diff-tree", "--no-commit-id", "--name-only", "-r", head],
-        text=True,
-    ).splitlines()
+    # 找本地中 tree 与远端一致的基准祖先；据此计算需要推送的差异文件。
+    boundary = _find_boundary(head, base_tree)
+    if boundary:
+        print(f"本地基准  : {boundary}（tree 已与远端一致）")
+        all_changed = subprocess.check_output(
+            ["git", "-c", "core.quotepath=false", "diff", "--name-only", boundary, head], text=True
+        ).splitlines()
+        deleted = subprocess.check_output(
+            ["git", "-c", "core.quotepath=false", "diff", "--name-only",
+             "--diff-filter=D", boundary, head], text=True,
+        ).splitlines()
+        files = [f for f in all_changed if f not in deleted]
+    else:
+        print("未找到本地基准，改为全量推送 HEAD 的跟踪文件")
+        files = subprocess.check_output(
+            ["git", "-c", "core.quotepath=false", "ls-tree", "-r", "--name-only", head], text=True
+        ).splitlines()
+        deleted = []
     print(f"改动文件  : {files}")
+    if deleted:
+        print(f"删除文件  : {deleted}")
 
-    # 3) 为每个改动文件创建 blob
+    # 为每个（非删除）改动文件创建 blob
     tree_entries = []
     for f in files:
-        content = subprocess.check_output(["git", "show", f"HEAD:{f}"])
+        content = subprocess.check_output(
+            ["git", "-c", "core.quotepath=false", "show", f"HEAD:{f}"])
         blob = api("POST", "/git/blobs",
                    {"content": base64.b64encode(content).decode("ascii"), "encoding": "base64"},
                    token)
@@ -92,6 +129,15 @@ def main():
             "sha": blob["sha"],
         })
         print(f"  blob {f} -> {blob['sha']}")
+    # 删除的文件：sha 设为 None 即从树中移除
+    for f in deleted:
+        tree_entries.append({
+            "path": f.replace("\\", "/"),
+            "mode": "100644",
+            "type": "blob",
+            "sha": None,
+        })
+        print(f"  delete {f}")
 
     # 4) 创建新 tree（基于父 tree，覆盖改动路径）
     tree = api("POST", "/git/trees", {"base_tree": base_tree, "tree": tree_entries}, token)
