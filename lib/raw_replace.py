@@ -29,8 +29,10 @@ def delete_frame_lines(doc, frames):
         dt = e.dxftype()
         if dt == "LINE":
             s, en = e.dxf.start, e.dxf.end
-            if abs(s.x - en.x) < 1e-3 and ("v", round(s.x, 1)) in edge_coords and \
-               (s.y, en.y) == (min(s.y, en.y), max(s.y, en.y)):
+            # 竖直框线：只要 x 对齐边框竖边即删，不要求端点“由底到顶”存储
+            # （SolidWorks 导出的 LINE 常以“高→低”存储，旧写法要求 (s.y,en.y)==(min,max)
+            #  会漏删这些竖线，导致旧框竖线残留在新框上）。与水平分支保持一致。
+            if abs(s.x - en.x) < 1e-3 and ("v", round(s.x, 1)) in edge_coords:
                 msp.delete_entity(e); n += 1
             elif abs(s.y - en.y) < 1e-3 and ("h", round(s.y, 1)) in edge_coords:
                 msp.delete_entity(e); n += 1
@@ -59,7 +61,8 @@ def delete_frame_lines(doc, frames):
 
 
 def delete_titleblock(doc, tb, maxdim):
-    """删标题栏区域内实体：文本全删；线只删短线（网格线），保留长线（可能是真实尺寸线）。"""
+    """删标题栏区域内实体：文本全删；完全落在标题栏内的线/多段线全删，
+    仅对跨越标题栏边界的线保留"短线删、长线（可能是真实尺寸线）保留"策略。"""
     msp = doc.modelspace()
     thr = 0.30 * maxdim
     n = 0
@@ -77,9 +80,12 @@ def delete_titleblock(doc, tb, maxdim):
         if eb[2] < tb[0] or eb[0] > tb[2] or eb[3] < tb[1] or eb[1] > tb[3]:
             continue
         if dt in ("LINE", "LWPOLYLINE", "POLYLINE"):
-            L = max(eb[2] - eb[0], eb[3] - eb[1])
-            if L > thr:
-                continue
+            fully_inside = (eb[0] >= tb[0] and eb[2] <= tb[2] and
+                            eb[1] >= tb[1] and eb[3] <= tb[3])
+            if not fully_inside:
+                L = max(eb[2] - eb[0], eb[3] - eb[1])
+                if L > thr:
+                    continue
         msp.delete_entity(e); n += 1
     return n
 

@@ -355,7 +355,8 @@ def del_frame_lines_acad(msp, frames, margin=1.0):
 
 
 def del_titleblock_acad(msp, tb, maxdim):
-    """删除标题栏区域内实体：文本全删；线只删短线（网格线），保留长线（可能是尺寸线）。
+    """删除标题栏区域内实体：文本全删；线/多段线完全落在标题栏内的全删，
+    仅对跨越标题栏边界的线保留"短线删、长线（可能是尺寸线）保留"策略。
 
     tb: (x0,y0,x1,y1)
     返回删除数量。
@@ -375,9 +376,11 @@ def del_titleblock_acad(msp, tb, maxdim):
         if ex1 < x0 or ex0 > x1 or ey1 < y0 or ey0 > y1:
             continue
         if et in ("AcDbLine", "AcDbPolyline", "AcDb2dPolyline"):
-            L = max(ex1 - ex0, ey1 - ey0)
-            if L > thr:
-                continue
+            fully_inside = (ex0 >= x0 and ex1 <= x1 and ey0 >= y0 and ey1 <= y1)
+            if not fully_inside:
+                L = max(ex1 - ex0, ey1 - ey0)
+                if L > thr:
+                    continue
         to_del.append(e)
 
     n = 0

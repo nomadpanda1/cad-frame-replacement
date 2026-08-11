@@ -79,8 +79,9 @@ def delete_frame_lines(doc, frames):
         dt = e.dxftype()
         if dt == "LINE":
             s, en = e.dxf.start, e.dxf.end
-            if abs(s.x - en.x) < 1e-3 and ("v", round(s.x, 1)) in edge_coords and \
-               (s.y, en.y) == (min(s.y, en.y), max(s.y, en.y)):
+            # 竖直框线：只要求 x 对齐边框竖边，不要求端点“由底到顶”存储
+            # （SolidWorks 导出的 LINE 常以“高→低”存储，旧写法会漏删竖线）。
+            if abs(s.x - en.x) < 1e-3 and ("v", round(s.x, 1)) in edge_coords:
                 msp.delete_entity(e); n += 1
             elif abs(s.y - en.y) < 1e-3 and ("h", round(s.y, 1)) in edge_coords:
                 msp.delete_entity(e); n += 1
@@ -181,7 +182,18 @@ def process_one(dxf_path, out_dir):
     if not sheet:
         return None, "无法计算图幅"
     print("   图幅 bbox:", [round(x, 1) for x in sheet])
-    size_name = guess_size(sheet)
+
+    frames = finder.detect_frames(doc)
+    if not frames:
+        return None, "未检测到外框"
+    # #5：取面积最大的框作为最外框，双线图框（外框+内框）时不会被内框误导
+    outer = max(frames, key=lambda r: (r[2] - r[0]) * (r[3] - r[1]))
+    print("   检测到外框:", [tuple(round(v, 1) for v in f) for f in frames])
+    tb = finder.detect_titleblock(doc, outer)
+    print("   标题栏区域:", [round(v, 1) for v in tb])
+
+    # #4：按检测到的 outer 框选模板幅面，避免 stray 远点误判
+    size_name = guess_size(outer)
     print("   匹配幅面:", size_name)
     tpl_path = pick_template(size_name)
     if not tpl_path:
@@ -189,20 +201,12 @@ def process_one(dxf_path, out_dir):
     print("   模板:", os.path.basename(tpl_path))
     template = template_learn.learn_template(tpl_path)
 
-    frames = finder.detect_frames(doc)
-    if not frames:
-        return None, "未检测到外框"
-    outer = frames[0]  # 最外层
-    print("   检测到外框:", [tuple(round(v, 1) for v in f) for f in frames])
-    tb = finder.detect_titleblock(doc, outer)
-    print("   标题栏区域:", [round(v, 1) for v in tb])
-
     # 渲染 生成前
     before_png = os.path.join(out_dir, base + "_before.png")
-    render_one(dxf_path, before_png, size_inches_for(sheet))
+    render_one(dxf_path, before_png, size_inches_for(outer))
     # 渲染 模板
     tpl_png = os.path.join(out_dir, base + "_template.png")
-    render_one(tpl_path, tpl_png, size_inches_for(sheet))
+    render_one(tpl_path, tpl_png, size_inches_for(outer))
 
     # ★ 先提取旧字段（删除前）
     old_fields = extract.extract_fields(doc, {"bbox": tb, "method": "keyword", "entity": None})
@@ -210,14 +214,14 @@ def process_one(dxf_path, out_dir):
     values, unmatched, unused = mapper.map_fields(template["fields"], old_fields)
     print("   回填字段:", list(dict.fromkeys([f["tag"] for f, v in zip(template["fields"], values) if v])))
 
-    maxdim = max(sheet[2] - sheet[0], sheet[3] - sheet[1])
+    maxdim = max(outer[2] - outer[0], outer[3] - outer[1])
     n_edge = delete_frame_lines(doc, frames)
     n_tb = delete_titleblock(doc, tb, maxdim)
     n_mark = delete_edge_markers(doc, outer, strip=10.0)
     print(f"   删除: 外框线={n_edge} 标题栏实体={n_tb} 边缘区号={n_mark}")
 
-    # 插入新公司图框（整张图幅缩放）
-    region = {"bbox": sheet, "confidence": 1.0, "method": "frame", "source": "sheet", "entity": None}
+    # 插入新公司图框（按检测到的 outer 框缩放，#4：避免 stray 远点把新框撑大）
+    region = {"bbox": outer, "confidence": 1.0, "method": "frame", "source": "sheet", "entity": None}
     ins, written = block_replace.insert_template(doc, template, region, values, fit="max")
     print("   实际回填:", list(dict.fromkeys(written)))
 
@@ -225,7 +229,7 @@ def process_one(dxf_path, out_dir):
     doc.saveas(out_dxf)
 
     after_png = os.path.join(out_dir, base + "_after.png")
-    render_one(out_dxf, after_png, size_inches_for(sheet))
+    render_one(out_dxf, after_png, size_inches_for(outer))
 
     return {"dxf": out_dxf, "before": before_png, "template": tpl_png,
             "after": after_png, "size": size_name, "tpl": os.path.basename(tpl_path),

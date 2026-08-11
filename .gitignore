@@ -42,6 +42,10 @@ cases/**/*_HH.dxf
 *_HH.dwg
 output_dwg/
 
+# 临时验证日志
+_fix_test.log
+_check_*.log
+
 # 脚本临时占位文件
 _frame_only.bak
 _06b_learn.dxf
