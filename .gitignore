@@ -10,8 +10,13 @@ _asm_tmp.dxf
 *.bak
 
 # Excluded real-data & scratch (kept out of distribution)
+# 注：2026-08-12 整理后，根目录的 input_real/ input_real_test/ output_test/ output_dwg/
+#     output_real_v2/ 已全部并入 cases/<NN>_*/；下列条目保留仅为兼容旧副本。
 input_real/
+input_real_test/
 output_real/
+output_test/
+output_dwg/
 input_cng/
 output_cng/
 output_cng_acad/
@@ -37,12 +42,12 @@ convert_to_dwg.py
 dwg2dxf.py
 check_tpl.py
 
-# Regenerable case outputs
+# Regenerable case outputs（可本地重跑重建，体积大不入库）
 cases/**/*_HH.dxf
 *_HH.dwg
-output_dwg/
-output_test/
-input_real_test/
+cases/**/outputs/dwg/          # 各案例成品 DWG（几 MB~几十 MB / 张）
+cases/**/verify/_conv*/         # 核验时 COM 转出的中间 DXF
+cases/12_detect_negative/inputs/S7-1200.dwg   # 6.5MB 负样本源图，本地保留即可
 
 # 临时验证日志
 _fix_test.log

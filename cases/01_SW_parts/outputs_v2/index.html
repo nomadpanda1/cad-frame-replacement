@@ -1,0 +1,67 @@
+<html><head><meta charset='utf-8'><style>body{font-family:sans-serif;background:#1e1e1e;color:#ddd}img{max-width:100%;border:1px solid #444;margin:4px;background:#fff}h2{color:#fff;border-top:1px solid #444;padding-top:10px}table{margin:0 auto}.k{color:#9cd;font-size:13px}.ok{color:#6f6}.n{color:#f99}</style></head><body>
+<h1>CAD 图框批量置换 · 效果对比（修复版 #2 + 打散回退）</h1>
+<p class='k'>管线：run_real 线框检测（detect_frames + detect_titleblock）→ 删旧外框线/标题栏/边缘区号 → 整图幅插 HH_FRAME_A* 模板并回填字段。已修复竖直 LINE 框线端点顺序漏删（#2）。</p>
+<h2>从法兰(2)_HH.dxf &nbsp;<span class='k'>(A4, 模板 HH_FRAME_A4.dxf)</span></h2>
+<p class='k'>提取字段：{'SCALE': '2:1', 'MATERIAL': 'PLA', 'TITLE': '“从动轮法兰”'}<br>回填字段：['TITLE', 'SCALE', 'MATERIAL']</p>
+<table><tr>
+<td><b>生成前</b><br><img src='从法兰(2)_before.png'></td>
+<td><b>公司模板</b><br><img src='从法兰(2)_template.png'></td>
+<td><b>生成后</b><br><img src='从法兰(2)_after.png'></td>
+</tr></table>
+<h2>前叉(1)_HH.dxf &nbsp;<span class='k'>(A4, 模板 HH_FRAME_A4.dxf)</span></h2>
+<p class='k'>提取字段：{'MATERIAL': 'ABS', 'TITLE': '前叉'}<br>回填字段：['TITLE', 'MATERIAL']</p>
+<table><tr>
+<td><b>生成前</b><br><img src='前叉(1)_before.png'></td>
+<td><b>公司模板</b><br><img src='前叉(1)_template.png'></td>
+<td><b>生成后</b><br><img src='前叉(1)_after.png'></td>
+</tr></table>
+<h2>圆柱齿轮13×1(2)_HH.dxf &nbsp;<span class='k'>(A4, 模板 HH_FRAME_A4.dxf)</span></h2>
+<p class='k'>提取字段：{'SCALE': '2:1', 'MATERIAL': '亚克力', 'TITLE': '“圆柱齿轮”'}<br>回填字段：['TITLE', 'SCALE', 'MATERIAL']</p>
+<table><tr>
+<td><b>生成前</b><br><img src='圆柱齿轮13×1(2)_before.png'></td>
+<td><b>公司模板</b><br><img src='圆柱齿轮13×1(2)_template.png'></td>
+<td><b>生成后</b><br><img src='圆柱齿轮13×1(2)_after.png'></td>
+</tr></table>
+<h2>圆柱齿轮65×1(1)_HH.dxf &nbsp;<span class='k'>(A4, 模板 HH_FRAME_A4.dxf)</span></h2>
+<p class='k'>提取字段：{'SCALE': '1:1', 'MATERIAL': '亚克力', 'TITLE': '“圆柱齿轮”'}<br>回填字段：['TITLE', 'SCALE', 'MATERIAL']</p>
+<table><tr>
+<td><b>生成前</b><br><img src='圆柱齿轮65×1(1)_before.png'></td>
+<td><b>公司模板</b><br><img src='圆柱齿轮65×1(1)_template.png'></td>
+<td><b>生成后</b><br><img src='圆柱齿轮65×1(1)_after.png'></td>
+</tr></table>
+<h2>法兰(2)_HH.dxf &nbsp;<span class='k'>(A4, 模板 HH_FRAME_A4.dxf)</span></h2>
+<p class='k'>提取字段：{'VERSION': '0.001', 'SCALE': '2:1', 'MATERIAL': 'PLA', 'TITLE': '法兰'}<br>回填字段：['TITLE', 'SCALE', 'MATERIAL', 'VERSION']</p>
+<table><tr>
+<td><b>生成前</b><br><img src='法兰(2)_before.png'></td>
+<td><b>公司模板</b><br><img src='法兰(2)_template.png'></td>
+<td><b>生成后</b><br><img src='法兰(2)_after.png'></td>
+</tr></table>
+<h2>等轴测图(1)_HH.dxf &nbsp;<span class='k'>(A3, 模板 HH_FRAME_A3.dxf)</span></h2>
+<p class='k'>提取字段：{'SCALE': '1:5', 'WEIGHT': '0.681'}<br>回填字段：['SCALE', 'WEIGHT']</p>
+<table><tr>
+<td><b>生成前</b><br><img src='等轴测图(1)_before.png'></td>
+<td><b>公司模板</b><br><img src='等轴测图(1)_template.png'></td>
+<td><b>生成后</b><br><img src='等轴测图(1)_after.png'></td>
+</tr></table>
+<h2>装配体图纸(1)_HH.dxf &nbsp;<span class='k'>(A3, 模板 HH_FRAME_A3.dxf)</span></h2>
+<p class='k'>提取字段：{'SCALE': '1:5', 'DWG_NO': '1-1'}<br>回填字段：['DWG_NO', 'SCALE']</p>
+<table><tr>
+<td><b>生成前</b><br><img src='装配体图纸(1)_before.png'></td>
+<td><b>公司模板</b><br><img src='装配体图纸(1)_template.png'></td>
+<td><b>生成后</b><br><img src='装配体图纸(1)_after.png'></td>
+</tr></table>
+<h2>装配体爆炸图1(1)_HH.dxf &nbsp;<span class='k'>(A3, 模板 HH_FRAME_A3.dxf)</span></h2>
+<p class='k'>提取字段：{'SCALE': '1:10', 'DWG_NO': '1-2', 'WEIGHT': '0.681', 'TITLE': '爆炸图'}<br>回填字段：['TITLE', 'DWG_NO', 'SCALE', 'WEIGHT']</p>
+<table><tr>
+<td><b>生成前</b><br><img src='装配体爆炸图1(1)_before.png'></td>
+<td><b>公司模板</b><br><img src='装配体爆炸图1(1)_template.png'></td>
+<td><b>生成后</b><br><img src='装配体爆炸图1(1)_after.png'></td>
+</tr></table>
+<h2>龙门架_HH.dxf &nbsp;<span class='k'>(A4, 模板 HH_FRAME_A4.dxf)</span></h2>
+<p class='k'>提取字段：{'MATERIAL': 'ABS', 'TITLE': '龙门架'}<br>回填字段：['TITLE', 'MATERIAL']</p>
+<table><tr>
+<td><b>生成前</b><br><img src='龙门架_before.png'></td>
+<td><b>公司模板</b><br><img src='龙门架_template.png'></td>
+<td><b>生成后</b><br><img src='龙门架_after.png'></td>
+</tr></table>
+</body></html>
