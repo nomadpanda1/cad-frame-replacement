@@ -1,0 +1,144 @@
+[
+  {
+    "name": "天面",
+    "hh_exists": true,
+    "hh_size": 563733,
+    "hh_blocks": {
+      "HH_FRAME_A0": 2
+    },
+    "attrs": 28,
+    "residual": 0,
+    "residual_layers": {},
+    "frame_layers_present": [
+      "FRAME"
+    ]
+  },
+  {
+    "name": "弱电1",
+    "hh_exists": true,
+    "hh_size": 305417,
+    "hh_blocks": {
+      "HH_FRAME_A0": 1
+    },
+    "attrs": 14,
+    "residual": 0,
+    "residual_layers": {},
+    "frame_layers_present": []
+  },
+  {
+    "name": "强电平面",
+    "hh_exists": true,
+    "hh_size": 550304,
+    "hh_blocks": {
+      "HH_FRAME_A0": 1
+    },
+    "attrs": 14,
+    "residual": 0,
+    "residual_layers": {},
+    "frame_layers_present": [
+      "FRAME"
+    ]
+  },
+  {
+    "name": "消防系统图",
+    "hh_exists": true,
+    "hh_size": 172988,
+    "hh_blocks": {
+      "HH_FRAME_A0": 1
+    },
+    "attrs": 14,
+    "residual": 0,
+    "residual_layers": {},
+    "frame_layers_present": []
+  },
+  {
+    "name": "消防，弱电2",
+    "hh_exists": true,
+    "hh_size": 412898,
+    "hh_blocks": {
+      "HH_FRAME_A0": 1
+    },
+    "attrs": 14,
+    "residual": 0,
+    "residual_layers": {},
+    "frame_layers_present": []
+  },
+  {
+    "name": "系统",
+    "hh_exists": true,
+    "hh_size": 190689,
+    "hh_blocks": {
+      "HH_FRAME_A0": 2
+    },
+    "attrs": 28,
+    "residual": 0,
+    "residual_layers": {},
+    "frame_layers_present": []
+  },
+  {
+    "name": "裙楼消防平面",
+    "hh_exists": true,
+    "hh_size": 647436,
+    "hh_blocks": {
+      "HH_FRAME_A0": 2
+    },
+    "attrs": 28,
+    "residual": 0,
+    "residual_layers": {},
+    "frame_layers_present": []
+  },
+  {
+    "name": "首二层商场平面",
+    "hh_exists": true,
+    "hh_size": 1691005,
+    "hh_blocks": {
+      "HH_FRAME_A0": 1
+    },
+    "attrs": 14,
+    "residual": 0,
+    "residual_layers": {},
+    "frame_layers_present": [
+      "FRAME"
+    ]
+  },
+  {
+    "name": "首二层系统图",
+    "hh_exists": true,
+    "hh_size": 205090,
+    "hh_blocks": {
+      "HH_FRAME_A0": 1
+    },
+    "attrs": 14,
+    "residual": 0,
+    "residual_layers": {},
+    "frame_layers_present": []
+  },
+  {
+    "name": "首层配电干线平面图",
+    "hh_exists": true,
+    "hh_size": 1851369,
+    "hh_blocks": {
+      "HH_FRAME_A0": 1
+    },
+    "attrs": 14,
+    "residual": 0,
+    "residual_layers": {},
+    "frame_layers_present": [
+      "FRAME"
+    ]
+  },
+  {
+    "name": "高低压系统",
+    "hh_exists": true,
+    "hh_size": 157610,
+    "hh_blocks": {
+      "HH_FRAME_A0": 1
+    },
+    "attrs": 14,
+    "residual": 0,
+    "residual_layers": {},
+    "frame_layers_present": [
+      "TKTEXT"
+    ]
+  }
+]

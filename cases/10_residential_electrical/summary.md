@@ -25,29 +25,71 @@
 | 首层配电干线平面图 | single | 118800×124702 | ~近正方 | HH_FRAME_A0 | 14 | 0 |
 | 高低压系统 | single | 89100×63000 | ~A1(√2) | HH_FRAME_A0 | 14 | 0 |
 
-**结论：11/11 张全部成功——HH_FRAME 块已插入、字段回填、旧图框残留 = 0。**
-验证口径（去噪）：只在「专用图框层、排除 layer 0、中心落在 HH_FRAME 框内」的直线/多段线
-才算残留，排除图内内容噪声。详见 `output_test/case10_verify.json`。
+> ⚠ 上表「旧框残留」一列来自**早期浅核验**，已被 2026-08-12 深度核验推翻，见下节。
+
+## 核验结论（2026-08-12 深度核验，权威口径）
+
+**换框动作 11/11 成功**（每张都插入了 `HH_FRAME_A0` 块），但**不能算"完工"**——深度核验查出三类真实缺陷：
+
+| # | 问题 | 影响 | 严重度 |
+|---|------|------|-------|
+| 1 | 标题栏属性大面积空白 / 错填 | **11/11** | 高 |
+| 2 | 旧图框 / 旧标题栏残线未删净 | 2 张（首层配电干线 **18 条**、首二层商场 **1 条**） | 中 |
+| 3 | 非 √2 旧框导致比例失真 | 3 张（裙楼 1.77、首层配电 0.95、首二层商场 1.19） | 中 |
+
+**方法论更正（重要教训）**：早期 `verify_case10_fast.py` 用 `entity.bbox()` 算包围盒，
+但 **ezdxf 1.4.x 的实体没有 `.bbox()` 方法**，调用抛 `AttributeError` 被 `try/except`
+静默吞掉 → 包围盒恒为 `None` → 残留判定**从未真正执行**，"残留=0"是**假零**。
+现已改用 `ezdxf.bbox.extents`（浅/深两个脚本都已修）。
+
+完整逐张核查表、根因分析、优先级清单见 **[`verify/verify_report.md`](verify/verify_report.md)**，
+原始数据见 `verify/verify_deep.json`。
 
 ## 已知现象 / 局限
 1. **模板尺寸名被错标为 A0（无害）**：`_guess_size(bbox)` 把绘图单位（≈100 单位/mm，
    如 59300）直接拿来和 A_SIZES（mm，如 1189）比较，相对误差公式在大数值下恒取最大参考
    （A0）。所以多数图插入的是 `HH_FRAME_A0`。但因**所有 A 幅面同 √2 长宽比**，
    `insert_frame` 等比缩放后新框实际尺寸由检出框决定，错标只影响块名、不影响成品几何。
-2. **非 √2 图框（裙楼 1.77、首二层商场 1.19、首层配电 0.95）**：公司模板是 √2 横版，
-   用 `fit=max` 等比缩放后新框会比原框略大/略小一圈，属可接受的「边框微调」，
-   不是错位。若日后要求严格贴合，需补 `HH_FRAME_Ax_WIDE` / 竖版模板。
+2. **非 √2 图框（裙楼 1.77、首二层商场 1.19、首层配电 0.95）—— 已确认是真缺陷，不是"微调"**：
+   公司模板是 √2 横版，`fit=max` 等比缩放后新框**盖不住**非 √2 的旧框：裙楼（1.77 加宽幅）
+   新框偏窄→图面向两侧溢出；首层配电（0.95 近正方）新框偏矮→图面上半冒出框外。
+   连带后果就是问题 #2 的旧框残线（新框没盖到的旧框顶边/旧标题栏区没被删除逻辑覆盖）。
+   **根治需补 `HH_FRAME_Ax_WIDE` / 竖版 `HH_FRAME_A4V` 模板，按旧框比自动选模板。**
 3. **符号块误检过滤**：`消防系统图.dwg` 中含带属性（如“编号”）的消防元件符号块
    `M_I14YDH`，初次被 `find_titleblocks` 误判为 6 个标题栏。已新增 `_titleblock_plausible()`：
    若块式检出对象的 maxdim 不足图纸全图 maxdim 的 5%，则视为符号块并回退到线框检测。
    重跑后 消防系统图 正确识别为单张 ~A2 外框，HH_FRAME_A0 ×1，残留 0。
-4. **与微信图纸同一类「打散图框」**：本套书验证了「块式 0 命中 → 线框回退」管线在
-   大批量真实住宅电气图上的稳定性（11/11 通过），可作为「微信图纸批处理」的预演。
+4. **与微信图纸同一类「打散图框」**：本套验证了「块式 0 命中 → 线框回退」管线在
+   大批量真实住宅电气图上跑得通（11/11 都能插框），可作为「微信图纸批处理」的预演；
+   但标题栏字段质量与非 √2 图幅是量产前必须先解决的两道坎。
+
+## 待办（按优先级，源自深度核验）
+1. **【高】标题栏属性回填质量** — TITLE 不要抓「注：…」注记 / 电缆型号 / 房间号；
+   SCALE / DATE / DESIGN 明确来源，无来源就留空而不是错填。
+2. **【中】旧框 / 旧标题栏彻底删除** — 删除范围要覆盖旧框 bbox 全域 + 旧标题栏区，
+   修掉首层配电（18 条）、首二层商场（1 条）残线。
+3. **【中】非 √2 模板** — 建 `HH_FRAME_A4V`（竖版）/ 加宽模板，按旧框比自动选。
+
+## 目录结构
+```
+cases/10_residential_electrical/
+├── inputs/                     11 张源 DWG（入 git）
+├── outputs/
+│   ├── <图名>_before.png       换框前渲染（入 git）
+│   ├── <图名>_HH.png           换框后渲染（入 git）
+│   ├── dwg/<图名>_HH.dwg       成品 DWG 11 张（体积大，不入 git）
+│   ├── detection/*.json        换框前旧框检测数据 10 份（入 git）
+│   └── *_last_rerun.*          最后一次单张重跑的执行日志
+└── verify/
+    ├── verify_report.md        ★ 深度核验报告（权威结论）
+    ├── verify_deep.json        深度核验原始数据
+    └── verify_shallow.json     早期浅核验（假零，留作对比）
+```
 
 ## 复现
 ```bash
-python run_residential.py        # 逐张跑 COM 替换（写 output_test/<名>_HH.dwg）
-python verify_case10_fast.py     # COM 转 DXF + ezdxf 统计块/属性/残留 → case10_verify.json
-python render_case10.py          # 渲染 before/after PNG → cases/10_residential_electrical/outputs/
+python run_residential.py        # 逐张跑 COM 替换 → outputs/dwg/<名>_HH.dwg
+python verify_case10_deep.py     # ★ 深度核验（几何+属性+残留）→ verify/verify_deep.json
+python verify_case10_fast.py     # 浅核验（仅块/专用图框层残留）→ verify/verify_shallow.json
+python render_case10.py          # 渲染 before/after PNG → outputs/
 ```
-成品 DWG 在 `output_test/*_HH.dwg`；PNG 对比在 `cases/10_residential_electrical/outputs/`。

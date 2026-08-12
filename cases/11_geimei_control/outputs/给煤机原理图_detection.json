@@ -1,0 +1,186 @@
+{
+  "mode": "multi",
+  "sheet": null,
+  "frames": [
+    {
+      "bbox": [
+        1455.0,
+        825.0,
+        2005.0,
+        1215.0
+      ],
+      "confidence": 1.0,
+      "method": "frame",
+      "source": "multiframe",
+      "confirmed": false
+    },
+    {
+      "bbox": [
+        410.0,
+        820.0,
+        590.0,
+        1107.0
+      ],
+      "confidence": 1.0,
+      "method": "frame",
+      "source": "multiframe",
+      "confirmed": false
+    },
+    {
+      "bbox": [
+        875.0,
+        415.0,
+        1425.0,
+        805.0
+      ],
+      "confidence": 1.0,
+      "method": "frame",
+      "source": "multiframe",
+      "confirmed": false
+    },
+    {
+      "bbox": [
+        2619.999999999409,
+        4.999999999763531,
+        3004.999999990305,
+        279.9999999932607
+      ],
+      "confidence": 1.0,
+      "method": "frame",
+      "source": "multiframe",
+      "confirmed": false
+    },
+    {
+      "bbox": [
+        2629.999999999172,
+        64.9999999983447,
+        2997.499999990482,
+        257.4999999937927
+      ],
+      "confidence": 1.0,
+      "method": "frame",
+      "source": "multiframe",
+      "confirmed": false
+    },
+    {
+      "bbox": [
+        875.0,
+        5.0,
+        1425.0,
+        395.0
+      ],
+      "confidence": 1.0,
+      "method": "frame",
+      "source": "multiframe",
+      "confirmed": false
+    },
+    {
+      "bbox": [
+        2605.0,
+        299.9999999930242,
+        2995.0,
+        849.9999999930242
+      ],
+      "confidence": 1.0,
+      "method": "frame",
+      "source": "multiframe",
+      "confirmed": false
+    },
+    {
+      "bbox": [
+        2615.0,
+        879.9999999930241,
+        3165.0,
+        1269.999999993024
+      ],
+      "confidence": 1.0,
+      "method": "frame",
+      "source": "multiframe",
+      "confirmed": false
+    },
+    {
+      "bbox": [
+        2035.0,
+        1235.0,
+        2585.0,
+        1625.0
+      ],
+      "confidence": 1.0,
+      "method": "frame",
+      "source": "multiframe",
+      "confirmed": false
+    },
+    {
+      "bbox": [
+        2035.0,
+        5.0,
+        2585.0,
+        395.0
+      ],
+      "confidence": 1.0,
+      "method": "frame",
+      "source": "multiframe",
+      "confirmed": false
+    },
+    {
+      "bbox": [
+        1455.0,
+        5.0,
+        2005.0,
+        395.0
+      ],
+      "confidence": 1.0,
+      "method": "frame",
+      "source": "multiframe",
+      "confirmed": false
+    },
+    {
+      "bbox": [
+        2035.0,
+        415.0,
+        2585.0,
+        805.0
+      ],
+      "confidence": 1.0,
+      "method": "frame",
+      "source": "multiframe",
+      "confirmed": false
+    },
+    {
+      "bbox": [
+        1455.0,
+        415.0,
+        2005.0,
+        805.0
+      ],
+      "confidence": 1.0,
+      "method": "frame",
+      "source": "multiframe",
+      "confirmed": false
+    },
+    {
+      "bbox": [
+        2035.0,
+        825.0,
+        2585.0,
+        1215.0
+      ],
+      "confidence": 1.0,
+      "method": "frame",
+      "source": "multiframe",
+      "confirmed": false
+    },
+    {
+      "bbox": [
+        445.7681324621808,
+        4.326086908411525,
+        846.342656371482,
+        565.3260871850252
+      ],
+      "confidence": 1.0,
+      "method": "frame",
+      "source": "multiframe",
+      "confirmed": false
+    }
+  ]
+}

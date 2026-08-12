@@ -1,0 +1,54 @@
+{
+  "mode": "multi",
+  "sheet": null,
+  "frames": [
+    {
+      "bbox": [
+        0.0,
+        0.0,
+        59400.0,
+        42000.0
+      ],
+      "confidence": 1.0,
+      "method": "frame",
+      "source": "multiframe",
+      "confirmed": false
+    },
+    {
+      "bbox": [
+        184.6309143477702,
+        -43835.66498019718,
+        59584.63091434777,
+        -1835.664980197187
+      ],
+      "confidence": 1.0,
+      "method": "frame",
+      "source": "multiframe",
+      "confirmed": false
+    },
+    {
+      "bbox": [
+        61183.06680638706,
+        -43835.66498019718,
+        120583.0668063871,
+        -1835.664980197187
+      ],
+      "confidence": 1.0,
+      "method": "frame",
+      "source": "multiframe",
+      "confirmed": false
+    },
+    {
+      "bbox": [
+        61369.03763344007,
+        41.50426734880602,
+        120769.0376334401,
+        42041.5042673488
+      ],
+      "confidence": 1.0,
+      "method": "frame",
+      "source": "multiframe",
+      "confirmed": false
+    }
+  ]
+}

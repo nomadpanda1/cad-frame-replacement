@@ -403,7 +403,7 @@ def main():
 {kuidian_section()}
 
 <h2>案例十：住宅楼电气设计方案（11 张真实 DWG，策略二）</h2>
-<p><span class="tag">11 张 DWG</span><span class="tag">天面/强弱电/消防/系统/裙楼/首二层/高低压</span><span class="tag">打散图框</span><span class="tag">中文 SHX</span> 来源：爱给网住宅楼电气设计方案（AutoCAD/ZWCAD，提供 dwg）。全部为真实设计院图纸、打散图框（0 个 INSERT 块式标题栏）、含中文 SHX 字体——与微信发来的图纸同属「打散」一类。逐张走「块式 0 命中 → 线框检测回退」：删旧外框+标题栏+边缘区号 → 整图幅插公司图框 → 回填。本套 11/11 全部成功（HH_FRAME 块已插入、字段回填、旧图框残留 = 0）。成品 DWG 在 <code>output_test/*_HH.dwg</code>。</p>
+<p><span class="tag">11 张 DWG</span><span class="tag">天面/强弱电/消防/系统/裙楼/首二层/高低压</span><span class="tag">打散图框</span><span class="tag">中文 SHX</span> 来源：爱给网住宅楼电气设计方案（AutoCAD/ZWCAD，提供 dwg）。全部为真实设计院图纸、打散图框（0 个 INSERT 块式标题栏）、含中文 SHX 字体——与微信发来的图纸同属「打散」一类。逐张走「块式 0 命中 → 线框检测回退」：删旧外框+标题栏+边缘区号 → 整图幅插公司图框 → 回填。<b>11/11 均成功插入 HH_FRAME_A0 块</b>；2026-08-12 深度核验（<code>ezdxf.bbox.extents</code>）另查出三类未完工项：① 标题栏属性大面积空/错填（11/11，TITLE 常抓成"注：…"注记/电缆型号/房间号）；② 旧框残线未删净 2 张（首层配电干线 18 条、首二层商场 1 条）；③ 非 √2 旧框比例失真 3 张（裙楼 1.77、首层配电 0.95、首二层商场 1.19）。详见 <code>10_residential_electrical/verify/verify_report.md</code>。成品 DWG 在 <code>10_residential_electrical/outputs/dwg/*_HH.dwg</code>。</p>
 {residential_section()}
 
 <h2>案例六：合成异常样本（多图框 / 嵌套块 / 缺字体 / 会签栏差异）</h2>
@@ -424,7 +424,10 @@ def main():
   <li>案例六输出（合成样本 + 结论）：<a href="06_synth/outputs/index.html">06_synth/outputs/index.html</a> / <a href="06_synth/outputs/results.json">results.json</a></li>
   <li>案例七输出（多图框逐框替换）：<a href="07_multiframe/outputs/index.html">07_multiframe/outputs/index.html</a> / <a href="07_multiframe/outputs/results.json">results.json</a></li>
   <li>案例九输出（成品 DWG）：<a href="09_kuidian_electrical/outputs/kuidian_HH.dwg">kuidian_HH.dwg</a></li>
-  <li>案例十输出（成品 DWG，11 张）：<a href="../../output_test/">output_test/（*_HH.dwg）</a> / 案例十说明：<a href="10_residential_electrical/summary.md">summary.md</a></li>
+  <li>案例十输出（成品 DWG，11 张）：<a href="10_residential_electrical/outputs/dwg/">10_residential_electrical/outputs/dwg/（*_HH.dwg）</a> / 说明：<a href="10_residential_electrical/summary.md">summary.md</a> / 深度核验：<a href="10_residential_electrical/verify/verify_report.md">verify/verify_report.md</a></li>
+  <li>案例十一输出（给煤机控制原理图）：<a href="11_geimei_control/outputs/">11_geimei_control/outputs/</a> / 说明：<a href="11_geimei_control/summary.md">summary.md</a></li>
+  <li>案例十二（检测负样本）：<a href="12_detect_negative/">12_detect_negative/</a></li>
+  <li>测试与验证总表：<a href="TESTS.md">TESTS.md</a> / 案例集导航：<a href="README.md">README.md</a></li>
   <li>使用手册：<a href="../MANUAL.md">MANUAL.md</a></li>
 </ul>
 

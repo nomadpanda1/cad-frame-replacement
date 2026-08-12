@@ -1,17 +1,24 @@
 # -*- coding: utf-8 -*-
-"""案例十快速验证：COM 把 *_HH.dwg 转 DXF(一次 SaveAs)，再用 ezdxf 快速统计。
+"""案例十【快速/浅层】验证：COM 把 *_HH.dwg 转 DXF(一次 SaveAs)，再用 ezdxf 快速统计。
 避免逐个实体 COM 遍历(120k 调用/张 太慢)。统计 HH_FRAME 块引用(名称+属性)
 与旧框残留(专用图框层、排除 0、中心落在任一 HH_FRAME 框内)。
+
+输出: cases/10_residential_electrical/verify/verify_shallow.json
+
+⚠ 这是浅层核验，只看"有没有块 / 专用图框层残留"，不看图框覆盖度、宽高比匹配、
+  标题栏字段是否填对。完整结论请跑 verify_case10_deep.py（输出 verify_deep.json
+  + verify_report.md）。
 """
 import os, sys, time, json, collections
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
-RES = os.path.join(HERE, "output_test")
-OUT = os.path.join(HERE, "cases", "10_residential_electrical", "outputs")
+CASE = os.path.join(HERE, "cases", "10_residential_electrical")
+RES = os.path.join(CASE, "outputs", "dwg")
+OUT = os.path.join(CASE, "verify")
 CONV = os.path.join(OUT, "_conv")
 os.makedirs(CONV, exist_ok=True)
-NAMES = sorted(f for f in os.listdir(os.path.join(HERE, "cases", "10_residential_electrical", "inputs")) if f.lower().endswith(".dwg"))
+NAMES = sorted(f for f in os.listdir(os.path.join(CASE, "inputs")) if f.lower().endswith(".dwg"))
 
 FRAME_LAYERS = {"图框", "tukuang", "pub_title", "图签", "tk", "title", "frame",
                 "border", "borders", "边框", "titleblock", "图框线", "图框层"}
@@ -53,10 +60,34 @@ def to_dxf(src, dst):
     return os.path.exists(dst)
 
 
+def ent_bbox(e, cache):
+    """取单个实体的包围盒 -> (xmin,ymin,xmax,ymax) 或 None。
+
+    注意(踩过的坑)：ezdxf 1.4.x 的实体【没有】 .bbox() 方法，调用会抛
+    AttributeError；若被 except 吞掉就会得到"永远为空/永远 0"的假结果
+    （本脚本早期版本的"残留=0"就是这么来的）。必须走 ezdxf.bbox.extents。
+    同时要剔除无穷大（RAY/XLINE 等无界实体会把包围盒污染成 inf）。
+    """
+    import math
+    from ezdxf import bbox as _bbox
+    try:
+        bb = _bbox.extents([e], cache=cache)
+    except Exception:
+        return None
+    if bb is None or not bb.has_data:
+        return None
+    vals = (bb.extmin.x, bb.extmin.y, bb.extmax.x, bb.extmax.y)
+    if not all(math.isfinite(v) for v in vals):
+        return None
+    return vals
+
+
 def analyze(dxf):
     import ezdxf
+    from ezdxf import bbox as _bbox
     doc = ezdxf.readfile(dxf)
     msp = doc.modelspace()
+    cache = _bbox.Cache()          # 每个文件独立 cache，跨文件复用会导致块退化成宽 0
     hh_bboxes = []
     hh_blocks = collections.Counter()
     attrs = 0
@@ -83,12 +114,9 @@ def analyze(dxf):
                     attrs += len(list(e.attribs))
                 except Exception:
                     pass
-                try:
-                    bb = e.bbox()
-                    if bb:
-                        hh_bboxes.append((bb.extmin.x, bb.extmin.y, bb.extmax.x, bb.extmax.y))
-                except Exception:
-                    pass
+                bb = ent_bbox(e, cache)
+                if bb:
+                    hh_bboxes.append(bb)
     # 第二遍：残留在专用图框层、落在 HH_FRAME 框内
     resid = 0
     resid_layers = collections.Counter()
@@ -106,13 +134,10 @@ def analyze(dxf):
             layer = ""
         if (layer or "").lower() not in FRAME_LAYERS:
             continue
-        try:
-            bb = e.bbox()
-        except Exception:
-            continue
+        bb = ent_bbox(e, cache)
         if not bb:
             continue
-        cx, cy = (bb.extmin.x + bb.extmax.x) / 2, (bb.extmin.y + bb.extmax.y) / 2
+        cx, cy = (bb[0] + bb[2]) / 2.0, (bb[1] + bb[3]) / 2.0
         for hb in hh_bboxes:
             if hb[0] - 500 <= cx <= hb[2] + 500 and hb[1] - 500 <= cy <= hb[3] + 500:
                 resid += 1
@@ -153,7 +178,7 @@ for fn in NAMES:
         ("层=%s" % resid_layers) if resid else ""), flush=True)
     ALL.append(rec)
 
-with open(os.path.join(RES, "case10_verify.json"), "w", encoding="utf-8") as f:
+with open(os.path.join(OUT, "verify_shallow.json"), "w", encoding="utf-8") as f:
     json.dump(ALL, f, ensure_ascii=False, indent=2)
 
 ok = sum(1 for r in ALL if r["hh_exists"] and r["hh_blocks"] and r["residual"] == 0)

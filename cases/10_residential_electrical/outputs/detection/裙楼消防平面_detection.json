@@ -1,0 +1,30 @@
+{
+  "mode": "multi",
+  "sheet": null,
+  "frames": [
+    {
+      "bbox": [
+        16022.74254344619,
+        -139549.3887487903,
+        121122.7425434462,
+        -80149.38874879025
+      ],
+      "confidence": 1.0,
+      "method": "frame",
+      "source": "multiframe",
+      "confirmed": false
+    },
+    {
+      "bbox": [
+        16022.74254344619,
+        -70154.74024152957,
+        121122.7425434462,
+        -10754.74024152956
+      ],
+      "confidence": 1.0,
+      "method": "frame",
+      "source": "multiframe",
+      "confirmed": false
+    }
+  ]
+}

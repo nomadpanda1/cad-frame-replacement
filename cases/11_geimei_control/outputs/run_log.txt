@@ -1,0 +1,30 @@
+[safe-delete][SAFE_DELETE_FAIL_CLOSED] {"target": "C:\\Users\\86308\\WorkBuddy\\2026-08-06-10-55-23\\cad-frame-replacement-dist\\cad-frame-replacement\\output_test\\._incr_tx32_42l.tmp", "reason": "windows-sandbox-recycle-bin-unavailable"}
+== AutoCAD COM 直接处理模式: Autodesk AutoCAD 2026 - [开始]
+   模板 HH_FRAME_A0 已就绪，跳过
+   模板 HH_FRAME_A1 已就绪，跳过
+   模板 HH_FRAME_A2 已就绪，跳过
+   模板 HH_FRAME_A3 已就绪，跳过
+   模板 HH_FRAME_A4 已就绪，跳过
+   模板 DWG: ['A0', 'A1', 'A2', 'A3', 'A4']
+== 学习模板: templates/HH_FRAME_A3.dxf
+   类型:block 块名:HH_FRAME_A3 字段数:14 bbox:(0.0, 0.0, 421.0, 299.0)
+
+== 处理: input_real_test/给煤机原理图.dwg
+   帧1 bbox=[1455.0, 825.0, 2005.0, 1215.0] 字段={'DWG_NO': '版次', 'TITLE': '由2#皮带机控制回路引来'} 回填=['TITLE', 'DWG_NO']
+   帧2 bbox=[410.0, 820.0, 590.0, 1107.0] 字段={'TITLE': 'X963-209 -10'} 回填=['TITLE']
+   帧3 bbox=[875.0, 415.0, 1425.0, 805.0] 字段={'DWG_NO': '版次', 'TITLE': '注: (1).电磁分离器与1#皮带机同时开车,由1#皮带机控制'} 回填=['TITLE', 'DWG_NO']
+   帧4 bbox=[2620.0, 5.0, 3005.0, 280.0] 字段={'DWG_NO': '版次', 'TITLE': 'KVV-(10x1.5)'} 回填=['TITLE', 'DWG_NO']
+   帧5 bbox=[2630.0, 65.0, 2997.5, 257.5] 字段={'TITLE': 'KVV-(10x1.5)'} 回填=['TITLE']
+   帧6 bbox=[875.0, 5.0, 1425.0, 395.0] 字段={'TITLE': '型   号', 'DWG_NO': '版次'} 回填=['TITLE', 'DWG_NO']
+   帧7 bbox=[2605.0, 300.0, 2995.0, 850.0] 字段={'DWG_NO': '版次', 'TITLE': 'KVV-(10x1.5)'} 回填=['TITLE', 'DWG_NO']
+   帧8 bbox=[2615.0, 880.0, 3165.0, 1270.0] 字段={'TITLE': '型 号 规 格', 'DWG_NO': '版次'} 回填=['TITLE', 'DWG_NO']
+   帧9 bbox=[2035.0, 1235.0, 2585.0, 1625.0] 字段={'TITLE': '型 号 规 格', 'DWG_NO': '版次'} 回填=['TITLE', 'DWG_NO']
+   帧10 bbox=[2035.0, 5.0, 2585.0, 395.0] 字段={'TITLE': '型 号 规 格', 'DWG_NO': '版次'} 回填=['TITLE', 'DWG_NO']
+   帧11 bbox=[1455.0, 5.0, 2005.0, 395.0] 字段={'DWG_NO': '版次', 'TITLE': '接至2#皮带机控制回路'} 回填=['TITLE', 'DWG_NO']
+   帧12 bbox=[2035.0, 415.0, 2585.0, 805.0] 字段={'TITLE': '型 号 规 格', 'DWG_NO': '版次'} 回填=['TITLE', 'DWG_NO']
+   帧13 bbox=[1455.0, 415.0, 2005.0, 805.0] 字段={'DWG_NO': '版次', 'TITLE': '由3#皮带机控制回路引来'} 回填=['TITLE', 'DWG_NO']
+   帧14 bbox=[2035.0, 825.0, 2585.0, 1215.0] 字段={'TITLE': '型 号 规 格', 'DWG_NO': '版次'} 回填=['TITLE', 'DWG_NO']
+   帧15 bbox=[445.8, 4.3, 846.3, 565.3] 字段={'DWG_NO': '版次', 'TITLE': '注: 所有6C系列接触器均配用6CA11组合式配件.'} 回填=['TITLE', 'DWG_NO']
+   输出 DWG (AutoCAD COM 直接处理): output_test\给煤机原理图_HH.dwg
+
+== 完成。报告: output_test\Execution_Log.csv

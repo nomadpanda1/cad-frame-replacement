@@ -64,13 +64,13 @@ def run_script(script, label):
 def main():
     summary = []
 
-    # 1) output_real：9 张用户 SW 图纸（案例一同一批）
-    print("===== output_real_v2（9 张 SW 图纸，raw-frame 路径）=====")
+    # 1) 案例一 outputs_v2：9 张用户 SW 图纸（raw-frame 路径，DXF 产出 + index.html）
+    print("===== cases/01_SW_parts/outputs_v2（9 张 SW 图纸，raw-frame 路径）=====")
     ok, tot = regen_raw_frame(
-        "output_real_v2",
-        os.path.join(HERE, "input_real"),
-        os.path.join(HERE, "output_real_v2"))
-    summary.append(("output_real_v2 (9 SW 图纸)", ok, tot))
+        "01_SW_parts/outputs_v2",
+        os.path.join(HERE, "cases", "01_SW_parts", "inputs"),
+        os.path.join(HERE, "cases", "01_SW_parts", "outputs_v2"))
+    summary.append(("01_SW_parts/outputs_v2 (9 SW 图纸)", ok, tot))
 
     # 2) 案例一 01_SW_parts（与 output_real 同一批图纸，raw-frame）
     print("===== cases/01_SW_parts（raw-frame）=====")

@@ -1,0 +1,860 @@
+[
+  {
+    "name": "天面",
+    "hh_exists": true,
+    "hh_size": 563733,
+    "frames": [
+      {
+        "name": "HH_FRAME_A0",
+        "xscale": 46.93,
+        "yscale": 46.93,
+        "rotation": 0.0,
+        "bbox": [
+          33784.7,
+          -54492.3,
+          89631.7,
+          -14930.2
+        ],
+        "attribs": {
+          "TITLE": "注:B2栋天面消防平面同B1栋天面消防平面",
+          "DWG_NO": "",
+          "SCALE": "",
+          "STAGE": "",
+          "MATERIAL": "",
+          "WEIGHT": "",
+          "VERSION": "",
+          "DATE": "",
+          "SHEET": "",
+          "DESIGN": "",
+          "CHECKED": "",
+          "REVIEWED": "",
+          "APPROVED": "",
+          "COUNTERSIGN": ""
+        },
+        "flags": [
+          "CONTENT_OVERFLOW",
+          "EMPTY_ATTR:SCALE,DATE,DESIGN"
+        ],
+        "frame_aspect": 1.4116,
+        "content_aspect": 1.5225
+      },
+      {
+        "name": "HH_FRAME_A0",
+        "xscale": 46.93,
+        "yscale": 46.93,
+        "rotation": 0.0,
+        "bbox": [
+          -37706.3,
+          -54799.8,
+          18140.6,
+          -15237.7
+        ],
+        "attribs": {
+          "TITLE": "注:B2栋天面配电平面同B1栋天面配电平面",
+          "DWG_NO": "",
+          "SCALE": "",
+          "STAGE": "",
+          "MATERIAL": "",
+          "WEIGHT": "",
+          "VERSION": "",
+          "DATE": "",
+          "SHEET": "",
+          "DESIGN": "",
+          "CHECKED": "",
+          "REVIEWED": "",
+          "APPROVED": "",
+          "COUNTERSIGN": ""
+        },
+        "flags": [
+          "CONTENT_OVERFLOW",
+          "EMPTY_ATTR:SCALE,DATE,DESIGN"
+        ],
+        "frame_aspect": 1.4116,
+        "content_aspect": 1.5225
+      }
+    ],
+    "flags": [
+      "CONTENT_OVERFLOW",
+      "EMPTY_ATTR:SCALE,DATE,DESIGN"
+    ],
+    "content_aspect": 1.5225,
+    "frame_aspects": [
+      1.4116,
+      1.4116
+    ],
+    "residual_broad": 4,
+    "residual_broad_layers": {
+      "0": 4
+    },
+    "residual_frameset": 0,
+    "residual_frameset_layers": {},
+    "content_bbox": [
+      -134221.4,
+      -155207.8,
+      143869.2,
+      27442.6
+    ],
+    "native_bbox": [
+      0.0,
+      0.0,
+      1190.0,
+      843.0
+    ],
+    "total_lines": 2669
+  },
+  {
+    "name": "弱电1",
+    "hh_exists": true,
+    "hh_size": 305417,
+    "frames": [
+      {
+        "name": "HH_FRAME_A0",
+        "xscale": 49.87,
+        "yscale": 49.87,
+        "rotation": 0.0,
+        "bbox": [
+          193704.0,
+          -154987.0,
+          254973.3,
+          -112943.3
+        ],
+        "attribs": {
+          "TITLE": "注：B1栋标准层弱电平面(1)同B2栋标准层弱电平面(1).",
+          "DWG_NO": "",
+          "SCALE": "",
+          "STAGE": "",
+          "MATERIAL": "",
+          "WEIGHT": "",
+          "VERSION": "",
+          "DATE": "",
+          "SHEET": "",
+          "DESIGN": "",
+          "CHECKED": "",
+          "REVIEWED": "",
+          "APPROVED": "",
+          "COUNTERSIGN": ""
+        },
+        "flags": [
+          "CONTENT_OVERFLOW",
+          "EMPTY_ATTR:SCALE,DATE,DESIGN"
+        ],
+        "frame_aspect": 1.4573,
+        "content_aspect": 1.5101
+      }
+    ],
+    "flags": [
+      "CONTENT_OVERFLOW",
+      "EMPTY_ATTR:SCALE,DATE,DESIGN"
+    ],
+    "content_aspect": 1.5101,
+    "frame_aspects": [
+      1.4573
+    ],
+    "residual_broad": 0,
+    "residual_broad_layers": {},
+    "residual_frameset": 0,
+    "residual_frameset_layers": {},
+    "content_bbox": [
+      198462.9,
+      -152160.8,
+      259558.1,
+      -111703.0
+    ],
+    "native_bbox": [
+      0.0,
+      0.0,
+      1190.0,
+      843.0
+    ],
+    "total_lines": 1619
+  },
+  {
+    "name": "强电平面",
+    "hh_exists": true,
+    "hh_size": 550304,
+    "frames": [
+      {
+        "name": "HH_FRAME_A0",
+        "xscale": 70.63,
+        "yscale": 70.63,
+        "rotation": 0.0,
+        "bbox": [
+          45735.0,
+          -75167.0,
+          133025.7,
+          -15625.7
+        ],
+        "attribs": {
+          "TITLE": "注:B1栋标准层照明配电平面同B2栋标准层照明配电平面。",
+          "DWG_NO": "",
+          "SCALE": "1:100",
+          "STAGE": "",
+          "MATERIAL": "",
+          "WEIGHT": "",
+          "VERSION": "",
+          "DATE": "",
+          "SHEET": "",
+          "DESIGN": "",
+          "CHECKED": "",
+          "REVIEWED": "",
+          "APPROVED": "",
+          "COUNTERSIGN": ""
+        },
+        "flags": [
+          "CONTENT_OVERFLOW",
+          "ASPECT_MISMATCH(21%)",
+          "EMPTY_ATTR:DATE,DESIGN"
+        ],
+        "frame_aspect": 1.4661,
+        "content_aspect": 1.8491
+      }
+    ],
+    "flags": [
+      "CONTENT_OVERFLOW",
+      "ASPECT_MISMATCH(21%)",
+      "EMPTY_ATTR:DATE,DESIGN"
+    ],
+    "content_aspect": 1.8491,
+    "frame_aspects": [
+      1.4661
+    ],
+    "residual_broad": 0,
+    "residual_broad_layers": {},
+    "residual_frameset": 0,
+    "residual_frameset_layers": {},
+    "content_bbox": [
+      48298.3,
+      -74167.5,
+      146968.1,
+      -20805.9
+    ],
+    "native_bbox": [
+      0.0,
+      0.0,
+      1190.0,
+      843.0
+    ],
+    "total_lines": 3481
+  },
+  {
+    "name": "消防，弱电2",
+    "hh_exists": true,
+    "hh_size": 412898,
+    "frames": [
+      {
+        "name": "HH_FRAME_A0",
+        "xscale": 70.63,
+        "yscale": 70.63,
+        "rotation": 0.0,
+        "bbox": [
+          51239.0,
+          -206498.0,
+          137484.6,
+          -146956.7
+        ],
+        "attribs": {
+          "TITLE": "2、B1栋标准层弱电平面(2)同B2栋标准层弱电平面(2)",
+          "DWG_NO": "",
+          "SCALE": "1:100",
+          "STAGE": "",
+          "MATERIAL": "",
+          "WEIGHT": "",
+          "VERSION": "",
+          "DATE": "",
+          "SHEET": "",
+          "DESIGN": "",
+          "CHECKED": "",
+          "REVIEWED": "",
+          "APPROVED": "",
+          "COUNTERSIGN": ""
+        },
+        "flags": [
+          "ASPECT_MISMATCH(14%)",
+          "EMPTY_ATTR:DATE,DESIGN"
+        ],
+        "frame_aspect": 1.4485,
+        "content_aspect": 1.681
+      }
+    ],
+    "flags": [
+      "ASPECT_MISMATCH(14%)",
+      "EMPTY_ATTR:DATE,DESIGN"
+    ],
+    "content_aspect": 1.681,
+    "frame_aspects": [
+      1.4485
+    ],
+    "residual_broad": 0,
+    "residual_broad_layers": {},
+    "residual_frameset": 0,
+    "residual_frameset_layers": {},
+    "content_bbox": [
+      54050.5,
+      -201984.0,
+      133813.8,
+      -154533.1
+    ],
+    "native_bbox": [
+      0.0,
+      0.0,
+      1190.0,
+      843.0
+    ],
+    "total_lines": 2992
+  },
+  {
+    "name": "消防系统图",
+    "hh_exists": true,
+    "hh_size": 172988,
+    "frames": [
+      {
+        "name": "HH_FRAME_A0",
+        "xscale": 49.87,
+        "yscale": 49.87,
+        "rotation": 0.0,
+        "bbox": [
+          2678.0,
+          1750.0,
+          62027.9,
+          43793.7
+        ],
+        "attribs": {
+          "TITLE": "B1B2栋住宅消防系统图",
+          "DWG_NO": "",
+          "SCALE": "",
+          "STAGE": "",
+          "MATERIAL": "",
+          "WEIGHT": "",
+          "VERSION": "",
+          "DATE": "",
+          "SHEET": "",
+          "DESIGN": "",
+          "CHECKED": "",
+          "REVIEWED": "",
+          "APPROVED": "",
+          "COUNTERSIGN": ""
+        },
+        "flags": [
+          "CONTENT_OVERFLOW",
+          "EMPTY_ATTR:SCALE,DATE,DESIGN"
+        ],
+        "frame_aspect": 1.4116,
+        "content_aspect": 1.4804
+      }
+    ],
+    "flags": [
+      "CONTENT_OVERFLOW",
+      "EMPTY_ATTR:SCALE,DATE,DESIGN"
+    ],
+    "content_aspect": 1.4804,
+    "frame_aspects": [
+      1.4116
+    ],
+    "residual_broad": 0,
+    "residual_broad_layers": {},
+    "residual_frameset": 0,
+    "residual_frameset_layers": {},
+    "content_bbox": [
+      6881.1,
+      3855.5,
+      62819.3,
+      41642.4
+    ],
+    "native_bbox": [
+      0.0,
+      0.0,
+      1190.0,
+      843.0
+    ],
+    "total_lines": 229
+  },
+  {
+    "name": "系统",
+    "hh_exists": true,
+    "hh_size": 190689,
+    "frames": [
+      {
+        "name": "HH_FRAME_A0",
+        "xscale": 49.87,
+        "yscale": 49.87,
+        "rotation": 0.0,
+        "bbox": [
+          68406.3,
+          -44986.1,
+          134103.7,
+          -2942.4
+        ],
+        "attribs": {
+          "TITLE": "配电箱19Q1(B2)同19Q1(B1)箱,配电箱19Q3(B2)同19Q3(B1)其进线回路编号如下表 :",
+          "DWG_NO": "",
+          "SCALE": "",
+          "STAGE": "",
+          "MATERIAL": "",
+          "WEIGHT": "",
+          "VERSION": "",
+          "DATE": "",
+          "SHEET": "",
+          "DESIGN": "",
+          "CHECKED": "",
+          "REVIEWED": "",
+          "APPROVED": "",
+          "COUNTERSIGN": ""
+        },
+        "flags": [
+          "CONTENT_OVERFLOW",
+          "ASPECT_MISMATCH(48%)",
+          "EMPTY_ATTR:SCALE,DATE,DESIGN"
+        ],
+        "frame_aspect": 1.5626,
+        "content_aspect": 3.0066
+      },
+      {
+        "name": "HH_FRAME_A0",
+        "xscale": 49.87,
+        "yscale": 49.87,
+        "rotation": 0.0,
+        "bbox": [
+          129659.1,
+          -45190.2,
+          190547.8,
+          -3146.6
+        ],
+        "attribs": {
+          "TITLE": "注 : 1, 1Q1(B2)箱同1Q(B1)箱,其进线编号如下:",
+          "DWG_NO": "1, 1Q1(B2)箱同1Q(B1)箱,其进线编号如下:",
+          "SCALE": "",
+          "STAGE": "",
+          "MATERIAL": "",
+          "WEIGHT": "",
+          "VERSION": "",
+          "DATE": "",
+          "SHEET": "",
+          "DESIGN": "",
+          "CHECKED": "",
+          "REVIEWED": "",
+          "APPROVED": "",
+          "COUNTERSIGN": ""
+        },
+        "flags": [
+          "CONTENT_OVERFLOW",
+          "ASPECT_MISMATCH(52%)",
+          "EMPTY_ATTR:SCALE,DATE,DESIGN"
+        ],
+        "frame_aspect": 1.4482,
+        "content_aspect": 3.0066
+      }
+    ],
+    "flags": [
+      "CONTENT_OVERFLOW",
+      "ASPECT_MISMATCH(48%)",
+      "EMPTY_ATTR:SCALE,DATE,DESIGN",
+      "ASPECT_MISMATCH(52%)"
+    ],
+    "content_aspect": 3.0066,
+    "frame_aspects": [
+      1.5626,
+      1.4482
+    ],
+    "residual_broad": 0,
+    "residual_broad_layers": {},
+    "residual_frameset": 0,
+    "residual_frameset_layers": {},
+    "content_bbox": [
+      73483.5,
+      -43000.9,
+      188255.2,
+      -4827.6
+    ],
+    "native_bbox": [
+      0.0,
+      0.0,
+      1190.0,
+      843.0
+    ],
+    "total_lines": 435
+  },
+  {
+    "name": "裙楼消防平面",
+    "hh_exists": true,
+    "hh_size": 647436,
+    "frames": [
+      {
+        "name": "HH_FRAME_A0",
+        "xscale": 70.63,
+        "yscale": 70.63,
+        "rotation": 0.0,
+        "bbox": [
+          16022.7,
+          -139549.4,
+          100072.7,
+          -80008.1
+        ],
+        "attribs": {
+          "TITLE": "LT2",
+          "DWG_NO": "",
+          "SCALE": "",
+          "STAGE": "",
+          "MATERIAL": "",
+          "WEIGHT": "",
+          "VERSION": "",
+          "DATE": "",
+          "SHEET": "",
+          "DESIGN": "",
+          "CHECKED": "",
+          "REVIEWED": "",
+          "APPROVED": "",
+          "COUNTERSIGN": ""
+        },
+        "flags": [
+          "CONTENT_OVERFLOW",
+          "ASPECT_MISMATCH(77%)",
+          "EMPTY_ATTR:SCALE,DATE,DESIGN"
+        ],
+        "frame_aspect": 1.4116,
+        "content_aspect": 0.7958
+      },
+      {
+        "name": "HH_FRAME_A0",
+        "xscale": 70.63,
+        "yscale": 70.63,
+        "rotation": 0.0,
+        "bbox": [
+          16022.7,
+          -70154.7,
+          100072.7,
+          -10613.5
+        ],
+        "attribs": {
+          "TITLE": "集水井大样详见",
+          "DWG_NO": "",
+          "SCALE": "",
+          "STAGE": "",
+          "MATERIAL": "",
+          "WEIGHT": "",
+          "VERSION": "",
+          "DATE": "",
+          "SHEET": "",
+          "DESIGN": "",
+          "CHECKED": "",
+          "REVIEWED": "",
+          "APPROVED": "",
+          "COUNTERSIGN": ""
+        },
+        "flags": [
+          "CONTENT_OVERFLOW",
+          "ASPECT_MISMATCH(77%)",
+          "EMPTY_ATTR:SCALE,DATE,DESIGN"
+        ],
+        "frame_aspect": 1.4116,
+        "content_aspect": 0.7958
+      }
+    ],
+    "flags": [
+      "CONTENT_OVERFLOW",
+      "ASPECT_MISMATCH(77%)",
+      "EMPTY_ATTR:SCALE,DATE,DESIGN"
+    ],
+    "content_aspect": 0.7958,
+    "frame_aspects": [
+      1.4116,
+      1.4116
+    ],
+    "residual_broad": 0,
+    "residual_broad_layers": {},
+    "residual_frameset": 0,
+    "residual_frameset_layers": {},
+    "content_bbox": [
+      19590.9,
+      -134829.2,
+      114376.0,
+      -15728.3
+    ],
+    "native_bbox": [
+      0.0,
+      0.0,
+      1190.0,
+      843.0
+    ],
+    "total_lines": 3380
+  },
+  {
+    "name": "首二层商场平面",
+    "hh_exists": true,
+    "hh_size": 1691005,
+    "frames": [
+      {
+        "name": "HH_FRAME_A0",
+        "xscale": 99.92,
+        "yscale": 99.92,
+        "rotation": 0.0,
+        "bbox": [
+          3476.0,
+          -110089.0,
+          122375.9,
+          -25859.9
+        ],
+        "attribs": {
+          "TITLE": "首,二层配电平面",
+          "DWG_NO": "",
+          "SCALE": "",
+          "STAGE": "",
+          "MATERIAL": "",
+          "WEIGHT": "",
+          "VERSION": "",
+          "DATE": "",
+          "SHEET": "",
+          "DESIGN": "",
+          "CHECKED": "",
+          "REVIEWED": "",
+          "APPROVED": "",
+          "COUNTERSIGN": ""
+        },
+        "flags": [
+          "CONTENT_OVERFLOW",
+          "ASPECT_MISMATCH(25%)",
+          "EMPTY_ATTR:SCALE,DATE,DESIGN"
+        ],
+        "frame_aspect": 1.4116,
+        "content_aspect": 1.1289
+      }
+    ],
+    "flags": [
+      "CONTENT_OVERFLOW",
+      "ASPECT_MISMATCH(25%)",
+      "EMPTY_ATTR:SCALE,DATE,DESIGN"
+    ],
+    "content_aspect": 1.1289,
+    "frame_aspects": [
+      1.4116
+    ],
+    "residual_broad": 1,
+    "residual_broad_layers": {
+      "FRAME": 1
+    },
+    "residual_frameset": 1,
+    "residual_frameset_layers": {
+      "FRAME": 1
+    },
+    "content_bbox": [
+      5925.8,
+      -113484.4,
+      121325.7,
+      -11257.4
+    ],
+    "native_bbox": [
+      0.0,
+      0.0,
+      1190.0,
+      843.0
+    ],
+    "total_lines": 4048
+  },
+  {
+    "name": "首二层系统图",
+    "hh_exists": true,
+    "hh_size": 205090,
+    "frames": [
+      {
+        "name": "HH_FRAME_A0",
+        "xscale": 49.87,
+        "yscale": 49.87,
+        "rotation": 0.0,
+        "bbox": [
+          70699.0,
+          -39550.0,
+          130048.9,
+          2493.7
+        ],
+        "attribs": {
+          "TITLE": "YJV-5X10  MR",
+          "DWG_NO": "",
+          "SCALE": "",
+          "STAGE": "",
+          "MATERIAL": "",
+          "WEIGHT": "",
+          "VERSION": "",
+          "DATE": "",
+          "SHEET": "",
+          "DESIGN": "",
+          "CHECKED": "",
+          "REVIEWED": "",
+          "APPROVED": "",
+          "COUNTERSIGN": ""
+        },
+        "flags": [
+          "CONTENT_OVERFLOW",
+          "ASPECT_MISMATCH(24%)",
+          "EMPTY_ATTR:SCALE,DATE,DESIGN"
+        ],
+        "frame_aspect": 1.4116,
+        "content_aspect": 1.1419
+      }
+    ],
+    "flags": [
+      "CONTENT_OVERFLOW",
+      "ASPECT_MISMATCH(24%)",
+      "EMPTY_ATTR:SCALE,DATE,DESIGN"
+    ],
+    "content_aspect": 1.1419,
+    "frame_aspects": [
+      1.4116
+    ],
+    "residual_broad": 0,
+    "residual_broad_layers": {},
+    "residual_frameset": 0,
+    "residual_frameset_layers": {},
+    "content_bbox": [
+      74087.7,
+      -36105.6,
+      127280.4,
+      10478.8
+    ],
+    "native_bbox": [
+      0.0,
+      0.0,
+      1190.0,
+      843.0
+    ],
+    "total_lines": 138
+  },
+  {
+    "name": "首层配电干线平面图",
+    "hh_exists": true,
+    "hh_size": 1851369,
+    "frames": [
+      {
+        "name": "HH_FRAME_A0",
+        "xscale": 99.92,
+        "yscale": 99.92,
+        "rotation": 0.0,
+        "bbox": [
+          2942.0,
+          -110089.0,
+          121841.9,
+          -25859.9
+        ],
+        "attribs": {
+          "TITLE": "",
+          "DWG_NO": "",
+          "SCALE": "",
+          "STAGE": "",
+          "MATERIAL": "",
+          "WEIGHT": "",
+          "VERSION": "",
+          "DATE": "",
+          "SHEET": "",
+          "DESIGN": "",
+          "CHECKED": "",
+          "REVIEWED": "",
+          "APPROVED": "",
+          "COUNTERSIGN": ""
+        },
+        "flags": [
+          "CONTENT_OVERFLOW",
+          "ASPECT_MISMATCH(52%)",
+          "EMPTY_ATTR:TITLE,SCALE,DATE,DESIGN"
+        ],
+        "frame_aspect": 1.4116,
+        "content_aspect": 0.9274
+      }
+    ],
+    "flags": [
+      "CONTENT_OVERFLOW",
+      "ASPECT_MISMATCH(52%)",
+      "EMPTY_ATTR:TITLE,SCALE,DATE,DESIGN"
+    ],
+    "content_aspect": 0.9274,
+    "frame_aspects": [
+      1.4116
+    ],
+    "residual_broad": 2,
+    "residual_broad_layers": {
+      "FRAME": 2
+    },
+    "residual_frameset": 18,
+    "residual_frameset_layers": {
+      "FRAME": 18
+    },
+    "content_bbox": [
+      2942.1,
+      -113484.4,
+      121742.1,
+      14613.0
+    ],
+    "native_bbox": [
+      0.0,
+      0.0,
+      1190.0,
+      843.0
+    ],
+    "total_lines": 4407
+  },
+  {
+    "name": "高低压系统",
+    "hh_exists": true,
+    "hh_size": 157610,
+    "frames": [
+      {
+        "name": "HH_FRAME_A0",
+        "xscale": 74.91,
+        "yscale": 74.91,
+        "rotation": 0.0,
+        "bbox": [
+          -2859.0,
+          2318.0,
+          86284.9,
+          65467.8
+        ],
+        "attribs": {
+          "TITLE": "低压配电系统图",
+          "DWG_NO": "",
+          "SCALE": "",
+          "STAGE": "",
+          "MATERIAL": "",
+          "WEIGHT": "",
+          "VERSION": "",
+          "DATE": "",
+          "SHEET": "",
+          "DESIGN": "",
+          "CHECKED": "",
+          "REVIEWED": "",
+          "APPROVED": "",
+          "COUNTERSIGN": ""
+        },
+        "flags": [
+          "CONTENT_OVERFLOW",
+          "ASPECT_MISMATCH(24%)",
+          "EMPTY_ATTR:SCALE,DATE,DESIGN"
+        ],
+        "frame_aspect": 1.4116,
+        "content_aspect": 1.1366
+      }
+    ],
+    "flags": [
+      "CONTENT_OVERFLOW",
+      "ASPECT_MISMATCH(24%)",
+      "EMPTY_ATTR:SCALE,DATE,DESIGN"
+    ],
+    "content_aspect": 1.1366,
+    "frame_aspects": [
+      1.4116
+    ],
+    "residual_broad": 0,
+    "residual_broad_layers": {},
+    "residual_frameset": 0,
+    "residual_frameset_layers": {},
+    "content_bbox": [
+      3453.7,
+      4886.1,
+      82283.0,
+      74238.7
+    ],
+    "native_bbox": [
+      0.0,
+      0.0,
+      1190.0,
+      843.0
+    ],
+    "total_lines": 491
+  }
+]

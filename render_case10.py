@@ -12,7 +12,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 IN_DIR = os.path.join(HERE, "cases", "10_residential_electrical", "inputs")
 OUTDIR = os.path.join(HERE, "cases", "10_residential_electrical", "outputs")
-RES_DIR = os.path.join(HERE, "output_test")
+RES_DIR = os.path.join(HERE, "cases", "10_residential_electrical", "outputs", "dwg")
 os.makedirs(OUTDIR, exist_ok=True)
 
 

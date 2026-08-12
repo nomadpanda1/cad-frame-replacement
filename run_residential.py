@@ -2,15 +2,18 @@
 """住宅楼电气方案 11 张图：逐张跑 AutoCAD COM 替换管线（含重试/落盘校验）。
 
 每张独立调用 run_skill.main()，调用前关闭 AutoCAD 残留文档清锁；
-每次确认 output_test/<名>_HH.dwg 真正写盘（存在且 size>2KB）才算成功，否则重试。
+每次确认 cases/10_residential_electrical/outputs/dwg/<名>_HH.dwg 真正写盘
+（存在且 size>2KB）才算成功，否则重试。
 """
 import os, sys, time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 
-IN_DIR = os.path.join(HERE, "cases", "10_residential_electrical", "inputs")
-OUT = os.path.join(HERE, "output_test")
+CASE = os.path.join(HERE, "cases", "10_residential_electrical")
+IN_DIR = os.path.join(CASE, "inputs")
+OUT = os.path.join(CASE, "outputs", "dwg")
+os.makedirs(OUT, exist_ok=True)
 TPL = os.path.join(HERE, "templates", "HH_FRAME_A4.dxf")
 FILES = sorted(
     f for f in os.listdir(IN_DIR)

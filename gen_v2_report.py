@@ -22,8 +22,10 @@ import run_real as R
 # 指向当前仓库自带的模板（与 exe 打包一致），而非旧硬编码路径
 R.TPL_DIR = os.path.join(HERE, "templates")
 
-INPUT_DIR = os.path.join(HERE, "input_real")  # 已随仓库自带（从旧草稿副本迁入，避免依赖已冻结的草稿副本）
-OUT_DIR = os.path.join(HERE, "output_real_v2")
+# 输入/输出统一收归案例一目录（原根目录 input_real/ 与 cases/01 inputs 字节一致，已去重删除；
+# 原 output_real_v2/ 已 git mv 到 cases/01_SW_parts/outputs_v2/）
+INPUT_DIR = os.path.join(HERE, "cases", "01_SW_parts", "inputs")
+OUT_DIR = os.path.join(HERE, "cases", "01_SW_parts", "outputs_v2")
 
 
 def main():

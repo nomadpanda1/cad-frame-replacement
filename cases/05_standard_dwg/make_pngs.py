@@ -25,8 +25,8 @@ from ezdxf.addons.drawing.matplotlib import qsave
 
 import win32com.client as wc
 
-SRC_DWG = os.path.join(ROOT, "input_real_test", "92DZ1_xiaohuobeng.dwg")
-OUT_DWG = os.path.join(ROOT, "output_test", "92DZ1_xiaohuobeng_HH.dwg")
+SRC_DWG = os.path.join(HERE, "inputs", "92DZ1_xiaohuobeng.dwg")
+OUT_DWG = os.path.join(HERE, "outputs", "dwg", "92DZ1_xiaohuobeng_HH.dwg")
 TPL_DXF = os.path.join(ROOT, "templates", "HH_FRAME_A3.dxf")
 OUT_DIR = os.path.join(HERE, "outputs")
 os.makedirs(OUT_DIR, exist_ok=True)
