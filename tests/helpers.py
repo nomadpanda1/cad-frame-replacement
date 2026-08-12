@@ -52,3 +52,25 @@ def add_dimension(msp, p1, p2, dimstyle="Standard"):
         if e.dxftype() == "DIMENSION":
             return e
     return None
+
+
+def add_rect_segments(msp, x0, y0, x1, y1, segs_per_side=3):
+    """用分段短直线（LINE）画一个轴对齐矩形，模拟「边框被拆成多段短直线」的画法。
+
+    每条边（上/下/左/右）拆成 segs_per_side 段，单段长度 < 边长，故单段不足以
+    跨越图幅 —— 旧 detect_frames 的「单段 > 0.5×图幅」阈值会漏检，新覆盖度实现可重建。
+    """
+    def seg(a, b, n):
+        out = []
+        for i in range(n):
+            t0 = i / n
+            t1 = (i + 1) / n
+            out.append((a[0] + (b[0] - a[0]) * t0, a[1] + (b[1] - a[1]) * t0,
+                        a[0] + (b[0] - a[0]) * t1, a[1] + (b[1] - a[1]) * t1))
+        return out
+    pts = [(x0, y0), (x1, y0), (x1, y1), (x0, y1), (x0, y0)]
+    lines = []
+    for k in range(4):
+        lines += seg(pts[k], pts[k + 1], segs_per_side)
+    for (sx, sy, ex, ey) in lines:
+        msp.add_line((sx, sy), (ex, ey))

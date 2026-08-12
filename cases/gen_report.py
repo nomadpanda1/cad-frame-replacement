@@ -42,6 +42,13 @@ STANDARD = [
      "处理：块式检测回退到线框检测 → 逐框删除旧外框+标题栏 → 插入 HH_FRAME_A3(fit=max) → 回填图名/图号/阶段/比例等字段 ✅"),
 ]
 
+# 案例九：真实电气原理图（BORDER 层双线图框，AutoCAD COM 直接处理，策略二）
+KUIDIAN = [
+    ("馈电-电气原理图", "A4 竖版", "HH_FRAME_A4",
+     "检测：块式标题栏 0 命中 → 线框回退，检出外框 [0,0,210,297]+内框 [25,5,205,292]（BORDER 层双线图框，无 INSERT 块）",
+     "处理：把 border 图层补进 del_frame_edges 词表 → 内外框一并删净(残留 0) → 插入 HH_FRAME_A4(fit=max) → 回填图名'壳式断路器'等字段 ✅。注意：本图为 A4 竖版，当前模板库仅横版 HH_FRAME_A4，故横版模板等比缩放后只填满下半部分；后续需补 HH_FRAME_A4V 竖版模板。"),
+]
+
 # 案例四：装配体图纸（无图框/无标题栏，AutoCAD COM 转 DXF + 清标题栏占位，策略二）
 ASM = [
     ("装配体图纸(1)", "A3", "HH_FRAME_A3",
@@ -221,6 +228,29 @@ def standard_section():
     return "\n".join(rows)
 
 
+def kuidian_section():
+    rows = []
+    for name, size, tpl, ext, fill in KUIDIAN:
+        b = "09_kuidian_electrical/outputs/kuidian_before.png"
+        t = "09_kuidian_electrical/outputs/kuidian_template.png"
+        a = "09_kuidian_electrical/outputs/kuidian_HH.png"
+        if not (os.path.exists(os.path.join(HERE, b)) and
+                os.path.exists(os.path.join(HERE, t)) and
+                os.path.exists(os.path.join(HERE, a))):
+            return ""
+        rows.append(f"""
+<div class="card">
+  <h3>{name} <span class="tag">{size}</span><span class="tag">{tpl}</span></h3>
+  <table><tr>
+    <td width="33%"><b>生成前</b><br><img src="{b}"></td>
+    <td width="33%"><b>公司模板</b><br><img src="{t}"></td>
+    <td width="34%"><b>生成后</b><br><img src="{a}"></td>
+  </tr></table>
+  <p class="cap ok">{ext}<br>{fill}</p>
+</div>""")
+    return "\n".join(rows)
+
+
 def synth_section():
     rows = []
     for name, size, tpl, ext, fill in SYNTH:
@@ -300,7 +330,7 @@ def main():
 </head>
 <body>
 <h1>CAD 图框批量置换 — 效果对比报告</h1>
-<p>本页聚合八套案例的 <b>生成前 / 公司模板 / 生成后</b> 对比图。案例一为普通图纸（纯 ezdxf 离线，策略一）；案例二为设计院加密 DWG（AutoCAD COM 直接处理，策略二）；案例三为储能 ESS 成果包（纯 ezdxf，策略一）；案例四为无图框/无标题栏的装配体图纸（COM 转 DXF + 清标题栏占位，策略二）；<b>案例五</b>为标准设计院图纸（92DZ1 消火栓泵，2×2 多图框，图框位于 PUB_TITLE 层，策略二）；<b>案例六</b>为程序化生成的<b>异常场景合成样本</b>（多图框混排 / 嵌套块标题栏 / 缺字体 / 会签栏差异）；<b>案例七</b>为<b>多图框逐框替换</b>开发项成果（平铺多框含整图纸框 / 并排多框无整图纸框），验证"检测多图框 → 逐框插公司图框 → 逐框回填"；<b>案例八</b>为<b>真实多图框端到端验证</b>：用 4 张真实 ESS 图纸拼成 2×2 多图框。</p>
+<p>本页聚合九套案例的 <b>生成前 / 公司模板 / 生成后</b> 对比图。案例一为普通图纸（纯 ezdxf 离线，策略一）；案例二为设计院加密 DWG（AutoCAD COM 直接处理，策略二）；案例三为储能 ESS 成果包（纯 ezdxf，策略一）；案例四为无图框/无标题栏的装配体图纸（COM 转 DXF + 清标题栏占位，策略二）；<b>案例五</b>为标准设计院图纸（92DZ1 消火栓泵，2×2 多图框，图框位于 PUB_TITLE 层，策略二）；<b>案例六</b>为程序化生成的<b>异常场景合成样本</b>（多图框混排 / 嵌套块标题栏 / 缺字体 / 会签栏差异）；<b>案例七</b>为<b>多图框逐框替换</b>开发项成果（平铺多框含整图纸框 / 并排多框无整图纸框），验证"检测多图框 → 逐框插公司图框 → 逐框回填"；<b>案例八</b>为<b>真实多图框端到端验证</b>：用 4 张真实 ESS 图纸拼成 2×2 多图框。</p>
 
 <h2>案例一：SolidWorks 导出零件图 / 装配图（9 张，策略一）</h2>
 <p><span class="tag">9 张图纸</span><span class="tag">A3/A4</span><span class="tag">标准标题栏</span> 来源：SolidWorks 工程图导出的 DXF，图框为打散 LINE/LWPOLYLINE，标题栏为右下角 TEXT/MTEXT 网格。</p>
@@ -321,6 +351,10 @@ def main():
 <h2>案例五：标准设计院图纸 — 92DZ1 单电源单台消火栓泵（PUB_TITLE 层，策略二）</h2>
 <p><span class="tag">1 张 DWG</span><span class="tag">4 个图框</span><span class="tag">A3</span><span class="tag">PUB_TITLE 层</span><span class="tag">打散图框</span> 来源：标准设计院电气原理图，2×2 平铺排列，图框为 PUB_TITLE 层闭合 LWPOLYLINE，无 INSERT 块式标题栏。处理时先走块式检测（返回 0）再回退到线框检测，逐框替换为公司 A3 图框。</p>
 {standard_section()}
+
+<h2>案例九：真实电气原理图 — 馈电-电气原理图（BORDER 层双线图框，策略二）</h2>
+<p><span class="tag">1 张 DWG</span><span class="tag">A4 竖版</span><span class="tag">BORDER 层</span><span class="tag">双线图框</span> 来源：真实电气原理图（爱给网），单张 A4 竖版，图框为 BORDER 层双线矩形（外框 [0,0,210,297]+内框 [25,5,205,292]），无 INSERT 块式标题栏。验证了「BORDER 标准边框层」的兼容修复（del_frame_edges 词表补 border，内外框一并删净）。</p>
+{kuidian_section()}
 
 <h2>案例六：合成异常样本（多图框 / 嵌套块 / 缺字体 / 会签栏差异）</h2>
 <p><span class="tag">4 个合成 DXF</span><span class="tag">程序化生成</span><span class="tag">可控可复现</span> 用 ezdxf 直接生成，无需外部图纸。每个异常图都经过"检测图框/抽取字段/插入公司图框/渲染"全流程，下面给出工具<b>实际行为</b>与结论。</p>

@@ -60,36 +60,89 @@ def _seg_edges(e):
     return out
 
 
+def _union_span(intervals):
+    """合并重叠区间，返回总覆盖长度（用于按坐标聚合线段覆盖度）。"""
+    ivs = sorted(intervals)
+    total = 0.0
+    cur = None
+    for a, b in ivs:
+        if cur is None:
+            cur = [a, b]
+        elif a <= cur[1]:
+            cur[1] = max(cur[1], b)
+        else:
+            total += cur[1] - cur[0]
+            cur = [a, b]
+    if cur:
+        total += cur[1] - cur[0]
+    return total
+
+
 def detect_frames(doc):
-    """检测图纸外框矩形列表 [(x0,y0,x1,y1), ...]（含外框和内框）。"""
+    """检测图纸外框矩形列表 [(x0,y0,x1,y1), ...]（含外框和内框）。
+
+    两种画法都支持：
+      (a) 连续长直线 / 闭合多段线构成的外框（单段即接近整边）；
+      (b) 被分段绘制的图框线（国标图框常把边框拆成多段短直线），
+          单段不超阈值，改用「按 x/y 坐标聚合线段覆盖度」重建矩形——
+          只要边框各边的线段在竖直/水平方向累计覆盖达到图幅的主要部分，
+          就能拼出外框，避免原实现因「单段长度 > 0.5×图幅」而被分段短
+          线滤掉的漏检。
+
+    返回最外矩形（双线边框额外返回内层矩形）。下游线框回退取面积最大者
+    作为插入区域。
+    """
     msp = doc.modelspace()
     segs = []
     for e in msp:
         segs.extend(_seg_edges(e))
     if not segs:
         return []
-    ext = bbox_mod.extents(msp)
+    try:
+        ext = bbox_mod.extents(msp)
+    except Exception:
+        return []
     sw = max(1e-6, ext.extmax.x - ext.extmin.x)
     sh = max(1e-6, ext.extmax.y - ext.extmin.y)
-    thr = 0.5 * max(sw, sh)
-    vseg = [(c, c0, c1) for (o, c, c0, c1) in segs if o == "v" and (c1 - c0) > thr]
-    hseg = [(c, c0, c1) for (o, c, c0, c1) in segs if o == "h" and (c1 - c0) > thr]
-    if not vseg or not hseg:
+
+    # 按坐标聚合全部轴对齐线段的覆盖区间
+    TOL = 1.0
+    vcov = {}
+    hcov = {}
+    for (o, c, c0, c1) in segs:
+        if o == "v":
+            key = round(c / TOL) * TOL
+            vcov.setdefault(key, []).append((c0, c1))
+        else:
+            key = round(c / TOL) * TOL
+            hcov.setdefault(key, []).append((c0, c1))
+    vcov = {k: _union_span(v) for k, v in vcov.items()}
+    hcov = {k: _union_span(v) for k, v in hcov.items()}
+
+    # 边需覆盖图幅主要部分（分段边框也能凑满整边）；阈值 0.6 兼顾容错
+    vmin = 0.6 * sh
+    hmin = 0.6 * sw
+    x_cand = sorted([x for x, cov in vcov.items() if cov >= vmin])
+    y_cand = sorted([y for y, cov in hcov.items() if cov >= hmin])
+    if len(x_cand) < 2 or len(y_cand) < 2:
         return []
-    xs = sorted(set(round(c, 1) for c, _, _ in vseg))
-    ys = sorted(set(round(c, 1) for c, _, _ in hseg))
-    vset = set(round(c, 1) for c, _, _ in vseg)
-    hset = set(round(c, 1) for c, _, _ in hseg)
-    rects = []
-    m = min(len(xs) // 2, len(ys) // 2)
-    for k in range(m):
-        xL, xR = xs[k], xs[-(k + 1)]
-        yB, yT = ys[k], ys[-(k + 1)]
-        if xR - xL < 1 or yT - yB < 1:
-            continue
-        if (round(xL, 1) in vset and round(xR, 1) in vset and
-                round(yB, 1) in hset and round(yT, 1) in hset):
-            rects.append((xL, yB, xR, yT))
+    xs = sorted(set(x_cand))
+    ys = sorted(set(y_cand))
+
+    xL, xR = xs[0], xs[-1]
+    yB, yT = ys[0], ys[-1]
+    if xR - xL < 1 or yT - yB < 1:
+        return []
+    rects = [(xL, yB, xR, yT)]
+    # 双线边框：取次外/次内作为内层矩形（剔除与外框几乎重合的）
+    if len(xs) >= 4 and len(ys) >= 4:
+        ixL, ixR = xs[1], xs[-2]
+        iyB, iyT = ys[1], ys[-2]
+        if ixR - ixL >= 1 and iyT - iyB >= 1:
+            outer_area = (xR - xL) * (yT - yB)
+            inner_area = (ixR - ixL) * (iyT - iyB)
+            if inner_area < 0.99 * outer_area:
+                rects.append((ixL, iyB, ixR, iyT))
     return rects
 
 

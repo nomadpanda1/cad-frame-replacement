@@ -37,6 +37,12 @@ A_SIZES = {
     "A3": (420, 297),
     "A3_WIDE": (604, 299),
     "A4": (297, 210),
+    # 竖版（Portrait）占位：后续添加 HH_FRAME_*V.dxf 模板后自动生效
+    "A0V": (841, 1189),
+    "A1V": (594, 841),
+    "A2V": (420, 594),
+    "A3V": (297, 420),
+    "A4V": (210, 297),
 }
 
 
@@ -203,7 +209,8 @@ def del_frame_edges(ents, frame, margin=500):
     再做几何兜底——删 bbox 与本框完全重合的外框多段线（只此一条，不会误删内容）。
     """
     x0, y0, x1, y1 = frame
-    frame_layers = {"tukuang", "图框", "0", "pub_title", "图签", "tk", "title", "frame"}
+    frame_layers = {"tukuang", "图框", "0", "pub_title", "图签", "tk", "title", "frame",
+                    "border", "borders", "边框"}
     to_del = []
     for d in ents:
         e, et, layer, bb = d["e"], d["et"], d["layer"], d["bb"]

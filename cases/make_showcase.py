@@ -14,7 +14,7 @@ spec = importlib.util.spec_from_file_location("gen_report", os.path.join(HERE, "
 gr = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(gr)
 
-INTRO = """<p>本页聚合八套案例的 <b>生成前 / 公司模板 / 生成后</b> 对比图。案例一为普通图纸（纯 ezdxf 离线，策略一）；案例二为设计院加密 DWG（AutoCAD COM 直接处理，策略二）；案例三为储能 ESS 成果包（纯 ezdxf，策略一）；案例四为无图框/无标题栏的装配体图纸（COM 转 DXF + 清标题栏占位，策略二）；<b>案例五</b>为标准设计院图纸（92DZ1 消火栓泵，2×2 多图框，图框位于 PUB_TITLE 层，策略二）；<b>案例六</b>为程序化生成的<b>异常场景合成样本</b>（多图框混排 / 嵌套块标题栏 / 缺字体 / 会签栏差异）；<b>案例七</b>为<b>多图框逐框替换</b>开发项成果（平铺多框含整图纸框 / 并排多框无整图纸框），验证"检测多图框 → 逐框插公司图框 → 逐框回填"；<b>案例八</b>为<b>真实多图框端到端验证</b>：用 4 张真实 ESS 图纸拼成 2×2 多图框（内容 100% 真实，仅排布合成），在真实标题栏结构上跑逐框替换管线，过程中发现并修复了标题区越界泄漏 bug。</p>"""
+INTRO = """<p>本页聚合九套案例的 <b>生成前 / 公司模板 / 生成后</b> 对比图。案例一为普通图纸（纯 ezdxf 离线，策略一）；案例二为设计院加密 DWG（AutoCAD COM 直接处理，策略二）；案例三为储能 ESS 成果包（纯 ezdxf，策略一）；案例四为无图框/无标题栏的装配体图纸（COM 转 DXF + 清标题栏占位，策略二）；<b>案例五</b>为标准设计院图纸（92DZ1 消火栓泵，2×2 多图框，图框位于 PUB_TITLE 层，策略二）；<b>案例六</b>为程序化生成的<b>异常场景合成样本</b>（多图框混排 / 嵌套块标题栏 / 缺字体 / 会签栏差异）；<b>案例七</b>为<b>多图框逐框替换</b>开发项成果（平铺多框含整图纸框 / 并排多框无整图纸框），验证"检测多图框 → 逐框插公司图框 → 逐框回填"；<b>案例八</b>为<b>真实多图框端到端验证</b>：用 4 张真实 ESS 图纸拼成 2×2 多图框（内容 100% 真实，仅排布合成），在真实标题栏结构上跑逐框替换管线，过程中发现并修复了标题区越界泄漏 bug；<b>案例九</b>为<b>真实电气原理图（馈电）</b>：单张 A4 竖版、BORDER 层双线图框，验证了「BORDER 标准边框层」的兼容修复（del_frame_edges 词表补 border，内外框一并删净）。</p>"""
 
 USAGE = """
 <h2>使用说明</h2>
@@ -58,6 +58,7 @@ python run_skill.py --template templates/公司图框.dxf --dry-run  samples/*.d
     <tr><td>案例六 合成异常样本</td><td><code>python gen_synth.py</code> 生成 → <code>python run_synth.py</code></td></tr>
     <tr><td>案例七 多图框逐框替换</td><td><code>python gen_mf_samples.py</code> 生成 → <code>python run_multiframe.py</code></td></tr>
     <tr><td>案例八 真实多图框端到端</td><td><code>python gen_real_mf.py</code> 拼图 → <code>python run_real_mf.py</code></td></tr>
+    <tr><td>案例九 真实电气原理图（馈电，BORDER 层）</td><td><code>python run_skill.py --template templates/HH_FRAME_A4.dxf --dwg cases/09_kuidian_electrical/inputs/kuidian.dwg</code></td></tr>
   </table>
 
   <h3>4. 已知约束</h3>
@@ -77,6 +78,7 @@ FOOTER = """
   <li>案例三输出：<a href="03_ESS_cad/outputs/">03_ESS_cad/outputs/</a></li>
   <li>案例四输出（成品 DXF）：<a href="04_assembly/outputs/装配体图纸(1)_HH.dxf">装配体图纸(1)_HH.dxf</a></li>
   <li>案例五输出（成品 DWG，本地运行生成，体积大不入库）：<a href="05_standard_dwg/inputs/92DZ1_xiaohuobeng.dwg">92DZ1_xiaohuobeng.dwg（源）</a> / <a href="05_standard_dwg/outputs/92DZ1_xiaohuobeng_HH.png">92DZ1_xiaohuobeng_HH.png（效果图）</a></li>
+  <li>案例九输出（成品 DWG，本地运行生成，体积大不入库）：<a href="09_kuidian_electrical/inputs/kuidian.dwg">kuidian.dwg（源）</a> / <a href="09_kuidian_electrical/outputs/kuidian_HH.png">kuidian_HH.png（效果图）</a></li>
   <li>案例六输出（合成样本 + 结论）：<a href="06_synth/outputs/index.html">06_synth/outputs/index.html</a> / <a href="06_synth/outputs/results.json">results.json</a></li>
   <li>案例七输出（多图框逐框替换）：<a href="07_multiframe/outputs/index.html">07_multiframe/outputs/index.html</a> / <a href="07_multiframe/outputs/results.json">results.json</a></li>
   <li>使用手册：<a href="../MANUAL.md">MANUAL.md</a></li>
@@ -116,6 +118,10 @@ def assemble(embed):
 <h2>案例五：标准设计院图纸 — 92DZ1 单电源单台消火栓泵（PUB_TITLE 层，策略二）</h2>
 <p><span class="tag">1 张 DWG</span><span class="tag">4 个图框</span><span class="tag">A3</span><span class="tag">PUB_TITLE 层</span><span class="tag">打散图框</span> 来源：标准设计院电气原理图，2×2 平铺排列，图框为 PUB_TITLE 层闭合 LWPOLYLINE，无 INSERT 块式标题栏。处理时先走块式检测（返回 0）再回退到线框检测，逐框替换为公司 A3 图框，并修复了 `del_frame_edges` 对 PUB_TITLE 等设计院图框图层的兼容性问题。</p>
 {gr.standard_section()}
+
+<h2>案例九：真实电气原理图 — 馈电-电气原理图（BORDER 层双线图框，策略二）</h2>
+<p><span class="tag">1 张 DWG</span><span class="tag">A4 竖版</span><span class="tag">BORDER 层</span><span class="tag">双线图框</span> 来源：真实电气原理图（爱给网），单张 A4 竖版，图框为 BORDER 层双线矩形（外框 [0,0,210,297]+内框 [25,5,205,292]），无 INSERT 块式标题栏。验证了「BORDER 标准边框层」的兼容修复（del_frame_edges 词表补 border，内外框一并删净），并暴露了当前模板库缺少 A4 竖版模板的问题。</p>
+{gr.kuidian_section()}
 
 <h2>案例六：合成异常样本（多图框 / 嵌套块 / 缺字体 / 会签栏差异）</h2>
 <p><span class="tag">4 个合成 DXF</span><span class="tag">程序化生成</span><span class="tag">可控可复现</span> 用 ezdxf 直接生成，无需外部图纸。每个异常图都经过"检测图框/抽取字段/插入公司图框/渲染"全流程，下面给出工具<b>实际行为</b>与结论。</p>

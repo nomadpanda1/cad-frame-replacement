@@ -71,6 +71,9 @@ def process_file(app, src, dst, plan, wait_open=2.0):
 
         if mode == "raw-frame":
             n_edge = acad_com.del_frame_lines_acad(ents, [frame], margin=1.0)
+            # 双线图框：外框坐标删净后，内框（与外框重叠>80%、落在图框层）一并删掉。
+            # margin=1.0 使 near_edge 几乎不触发，仅按图层+面积重叠兜底，不会误删贴边内容。
+            n_edge += acad_com.del_frame_edges(ents, frame, margin=1.0)
             n_tb = acad_com.del_titleblock_acad(ents, tb, maxdim)
             n_mark = acad_com.del_edge_markers_acad(ents, frame, strip=10.0)
         else:
@@ -119,7 +122,6 @@ def build_plan_from_mapping(doc, mappings, template, tpl_dwgs, fit="min"):
     from . import finder
 
     size_name = _guess_size_from_template(template)
-    tpl_dwg = tpl_dwgs.get(size_name) or tpl_dwgs.get("A3") or next(iter(tpl_dwgs.values()))
 
     frames = []
     for m in mappings:
@@ -129,6 +131,7 @@ def build_plan_from_mapping(doc, mappings, template, tpl_dwgs, fit="min"):
         fields = m.get("extracted", {})
         # 如果 mapping 里已有回填后的字段值，优先用；否则从 extracted 按模板字段构造
         written = m.get("written", [])
+        tpl_dwg = _pick_template_dwg(tpl_dwgs, size_name, [float(v) for v in region])
         frames.append({
             "frame": [float(v) for v in region],
             "titleblock": [float(v) for v in region],
@@ -142,7 +145,7 @@ def build_plan_from_mapping(doc, mappings, template, tpl_dwgs, fit="min"):
 def build_plan_for_raw_frame(doc, outer, tb, template, tpl_dwgs, fields):
     """为 SolidWorks 打散图框（raw-frame 回退路径）构造 plan。"""
     size_name = _guess_size_from_template(template)
-    tpl_dwg = tpl_dwgs.get(size_name) or tpl_dwgs.get("A3") or next(iter(tpl_dwgs.values()))
+    tpl_dwg = _pick_template_dwg(tpl_dwgs, size_name, [float(v) for v in outer])
     return {
         "frames": [{
             "frame": [float(v) for v in outer],
@@ -162,3 +165,20 @@ def _guess_size_from_template(template):
         if name.startswith(prefix):
             return prefix.replace("HH_FRAME_", "")
     return "A3"
+
+
+def _pick_template_dwg(tpl_dwgs, size_name, frame):
+    """按图纸方向选择模板 DWG：竖版图纸优先用 *V 竖版模板，无则回退并警告。"""
+    fallback = tpl_dwgs.get(size_name) or tpl_dwgs.get("A3") or next(iter(tpl_dwgs.values()))
+    W = frame[2] - frame[0]
+    H = frame[3] - frame[1]
+    # 仅在真实幅面尺寸附近才做方向检查（毫米单位）
+    if min(W, H) < 100 or max(W, H) > 1300:
+        return fallback
+    if H > W * 1.1:  # 竖版
+        alt = size_name + "V"
+        if alt in tpl_dwgs:
+            return tpl_dwgs[alt]
+        print("   警告: 当前图纸为竖版(%s)，未找到竖版模板 %s.dxf，使用横版 %s 回退（框架将填不满）。" %
+              ("%dx%d" % (W, H), alt, size_name))
+    return fallback
