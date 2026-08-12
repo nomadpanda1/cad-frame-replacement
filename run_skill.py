@@ -80,6 +80,33 @@ def ezdxf_read(p):
     return ezdxf.readfile(p)
 
 
+def _titleblock_plausible(doc, regions, min_ratio=0.05):
+    """块式标题栏大小合理性校验：过滤掉符号块等过小的误检。
+
+    如果所有检出块的 maxdim 都小于图纸全图 maxdim 的 min_ratio（默认 5%），
+    则视为符号/元件块误检，应回退到线框检测。该比例对 mm 单位图纸与
+    100 单位/mm 的图纸均适用（真实标题栏通常占图纸 20%-100%）。
+    """
+    if not regions:
+        return False
+    try:
+        import ezdxf.bbox as bbox_mod
+        ext = bbox_mod.extents(doc.modelspace())
+        if not ext or not ext.has_data:
+            return True
+        draw_max = max(ext.size.x, ext.size.y)
+        if draw_max <= 0:
+            return True
+        for r in regions:
+            bb = r["bbox"]
+            rd = max(bb[2] - bb[0], bb[3] - bb[1])
+            if rd >= min_ratio * draw_max:
+                return True
+        return False
+    except Exception:
+        return True
+
+
 def _plan_frames(doc, mode):
     """决定这张图走单框还是多图框逐框替换。
 
@@ -124,16 +151,22 @@ A_SIZES = [("A0", 1189, 841), ("A1", 841, 594), ("A2", 594, 420),
 
 
 def _guess_size(bbox):
-    """按外框尺寸推断幅面（返回 A0/A1/A2/A3/A4）。"""
+    """按外框尺寸推断幅面（返回 A0/A1/A2/A3/A4）。
+
+    注：insert_frame 会把模板等比缩放到检出框的实际尺寸，故这里只需选到
+    最近的 A 幅面即可；不再设严格阈值回退 A3，否则大图/非标图幅会被错判成 A3。
+    """
     w = bbox[2] - bbox[0]
     h = bbox[3] - bbox[1]
+    if w <= 0 or h <= 0:
+        return "A3"
     best, best_err = None, 1e9
     for name, sw, sh in A_SIZES:
         for cand in [(sw, sh), (sh, sw)]:
             err = abs(w - cand[0]) / cand[0] + abs(h - cand[1]) / cand[1]
             if err < best_err:
                 best_err, best = err, name
-    return best if best_err < 0.15 else "A3"
+    return best
 
 
 def _values_to_fields(template_fields, values):
@@ -193,6 +226,9 @@ def _process_one_acad(app, src, doc, args, template, override, tpl_dwgs):
 
     else:
         regions = finder.find_titleblocks(doc)
+        if regions and not _titleblock_plausible(doc, regions):
+            print("   块式检测命中 %d 个过小对象（疑似符号块），回退到线框检测" % len(regions))
+            regions = []
         rec["found"] = len(regions)
         print("   检测到标题栏(块式): %d 个" % len(regions))
         if regions:
@@ -347,6 +383,9 @@ def main():
                     print("     [%d] bbox=%s" % (i, [float(round(x, 1)) for x in fb]))
             else:
                 regions = finder.find_titleblocks(doc)
+                if regions and not _titleblock_plausible(doc, regions):
+                    print("   块式检测命中 %d 个过小对象（疑似符号块），回退到线框检测" % len(regions))
+                    regions = []
                 rec["found"] = len(regions)
                 print("   检测到标题栏(块式): %d 个" % len(regions))
                 for i, r in enumerate(regions):
