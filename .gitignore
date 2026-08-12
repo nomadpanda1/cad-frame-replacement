@@ -70,3 +70,5 @@ build_*_log*.txt
 
 # sandbox safe-delete temp files
 ._incr_*.tmp
+
+cases/12_detect_negative/inputs/std_A3.dwg
