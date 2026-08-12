@@ -62,3 +62,6 @@ build/
 *.exe
 *.spec
 build_*_log*.txt
+
+# sandbox safe-delete temp files
+._incr_*.tmp

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """finder 核心：多图框层级检测（案例七）+ 标题区字段抽取。"""
-from helpers import new_doc, add_rect, add_text
+from helpers import new_doc, add_rect, add_text, add_line
 from lib.finder import (
     detect_frames_hierarchical,
     extract_frame_fields,
@@ -144,3 +144,32 @@ def test_detect_no_false_positive_like_cng():
         add_rect(msp, x, y, x + 1000, y + 1000, closed=True)
     sheet, targets = detect_frames_hierarchical(doc)
     assert len(targets) == 4
+
+
+def test_no_false_positive_borderless_dense():
+    """回归：边框less 密集小方框（控制原理图元件符号）不应被判为图框。
+
+    给煤机控制原理图即此情形：全图无 A 幅面边框（长条图，折合1#），图内大量
+    继电器/接触器轮廓是闭合小矩形（约 550x390，单个仅占整图 ~1%）。修复前
+    detect_frames_hierarchical 会把这些小方框全部当成「图框」返回，导致误插 15 个
+    公司框破坏原图。修复后新增全局占比护栏：候选框面积不足整图 2% 时视为元件
+    方框剔除，判定为「无有效图框」。
+    """
+    doc = new_doc()
+    msp = doc.modelspace()
+    # 长条图轮廓：两条长线把整图范围撑到 ~9200 x 1800（模拟滚动长条图 extents）
+    add_line(msp, -6000, 0, 3200, 0)
+    add_line(msp, -6000, 1800, 3200, 1800)
+    # 15 个元件方框（与给煤机实测一致），散布在图内一小片区域
+    boxes = [
+        (1455, 825, 2005, 1215), (410, 820, 590, 1107), (875, 415, 1425, 805),
+        (2620, 5, 3005, 280), (2630, 65, 2997, 257), (875, 5, 1425, 395),
+        (2605, 300, 2995, 850), (2615, 880, 3165, 1270), (2035, 1235, 2585, 1625),
+        (2035, 5, 2585, 395), (1455, 5, 2005, 395), (2035, 415, 2585, 805),
+        (1455, 415, 2005, 805), (2035, 825, 2585, 1215), (445.8, 4.3, 846.3, 565.3),
+    ]
+    for x0, y0, x1, y1 in boxes:
+        add_rect(msp, x0, y0, x1, y1, closed=True)
+    sheet, targets = detect_frames_hierarchical(doc)
+    assert sheet is None
+    assert targets == []

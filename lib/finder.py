@@ -266,7 +266,8 @@ def dedup_double_border(frames, dedup_ratio=0.8):
 
 
 def detect_frames_hierarchical(doc, min_side=80, min_area=5000,
-                               min_area_share=0.15, dedup_ratio=0.8):
+                               min_area_share=0.15, dedup_ratio=0.8,
+                               min_drawing_share=0.02):
     """检测所有闭合矩形图框，返回 (sheet_bbox_or_None, list_of_target_frame_bboxes)。
 
     规则：
@@ -317,7 +318,28 @@ def detect_frames_hierarchical(doc, min_side=80, min_area=5000,
                        if _bbox_area(r) >= max_area * min_area_share]
         targets = dedup_double_border(targets, dedup_ratio=dedup_ratio)
 
-    if not targets:
+    # 全局占比护栏：真实图框应占整图 min_drawing_share 以上；占比过小的闭合矩形
+    # 极可能是元件/符号方框（如控制原理图里大量继电器、接触器轮廓），应剔除。
+    # 给煤机控制原理图即此情形：全图无 A 幅面边框、检出 15 个方框（单个仅占整图
+    # ~1%），经此过滤全部剔除后判定为「无有效图框」，交回上层走线框检测或
+    # 「未检测到图框」，避免误插公司框破坏原图。该护栏仅对「多个候选框」生效，
+    # 单框（len==1）保持旧行为。
+    global_filtered = False
+    if len(targets) > 1:
+        try:
+            ext = bbox_mod.extents(msp)
+            drawing_area = max(1e-9, (ext.extmax.x - ext.extmin.x) *
+                               (ext.extmax.y - ext.extmin.y))
+        except Exception:
+            drawing_area = 1e-9
+        kept = [r for r in targets if _bbox_area(r) >= min_drawing_share * drawing_area]
+        if kept:
+            targets = kept
+        else:
+            targets = []
+            global_filtered = True
+
+    if not targets and not global_filtered:
         targets = raw
     return sheet, targets
 
