@@ -426,6 +426,30 @@ python run_skill.py --template templates/公司图框.dxf --dry-run  samples/*.d
   <p class="cap ok">检测：4 个真实图框（由 4 张真实 ESS 图纸——一次设备表/二次系统信号表/二次系统柜体表/简化主接线图——平移拼成 2×2 网格，内容 100% 真实，仅排布合成）；逐框抽取真实字段 图名/图号/比例/阶段 全部正确 ✅<br>结论：真实标题栏结构的多图框逐框替换端到端验证通过；过程中发现并修复 extract_frame_fields 标题区越界泄漏 bug（已加回归测试）</p>
 </div>
 
+<h2>案例十一：给煤机控制原理图（边框 less 长条图，检测器加固验证）</h2>
+<p><span class="tag">1 张 DWG</span><span class="tag">折合1# 长条图</span><span class="tag">无 A 幅面图框</span> 来源：爱给网给煤机控制原理图，10096×1840 绘图单位（长宽比 ≈ 5.49），图本身不画在 A 幅面图框内；无包围矩形。验证「无框可换 → 不改图」与检测器误检护栏。</p>
+
+<div class="card">
+  <h3>边框 less 长条图 · 检测器正确判定「无有效图框」<span class="tag">长条图 10096×1840</span><span class="tag">0 图框</span></h3>
+  <table><tr>
+    <td width="50%"><b>原图：长条图（无 A 幅面图框）</b><br><img src="11_geimei_control/outputs/geimei_before.png"></td>
+    <td width="50%"><b>检测结果：15 元件方框被护栏过滤 → 0 框</b><br><img src="11_geimei_control/outputs/geimei_after.png"></td>
+  </tr></table>
+  <p class="cap ok">检测器加固：detect_frames_hierarchical 新增<b>全局占比护栏</b>，候选框面积 &lt; 整图 2% 视为元件/符号方框剔除。本图正确判定「无需换框、不改图」；回归测试 test_no_false_positive_borderless_dense 复刻 15 元件方框 → targets==[]。对其余 10 个案例无回归。详见 <code>11_geimei_control/summary.md</code>。</p>
+</div>
+
+<h2>案例十二：检测负样本（已知局限归档）</h2>
+<p><span class="tag">std_A3</span><span class="tag">S7-1200</span> 两张真实图纸，记录当前检测器<b>漏检</b>的两类场景，作为回归负样本。</p>
+
+<div class="card">
+  <h3>检测负样本（已知局限归档）<span class="tag">std_A3</span><span class="tag">S7-1200</span></h3>
+  <table><tr>
+    <td width="50%"><b>① std_A3：分段短直线边框 → 漏检</b><br><img src="12_detect_negative/outputs/std_A3.png"></td>
+    <td width="50%"><b>② S7-1200：全块化（0 条原始直线）→ 漏检</b><br><img src="12_detect_negative/outputs/S7-1200.png"></td>
+  </tr></table>
+  <p class="cap warn">两图 detectors 均输出 frames:[]，经核查是<b>检测器启发式不足</b>而非图纸无框：① 外框上/下边框被拆成多段短直线，横向覆盖不足 0.6×图幅宽；② 内容全部封装在 INSERT 块内，无线框/块式路径可见。已作为回归负样本归档，避免未来「假完成」误判；增强方向见 <code>12_detect_negative/summary.md</code>。</p>
+</div>
+
 
 <h2>文件位置</h2>
 <ul>

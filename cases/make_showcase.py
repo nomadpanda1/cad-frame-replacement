@@ -144,6 +144,14 @@ def assemble(embed):
 <p><span class="tag">4×A1</span><span class="tag">真实标题栏</span><span class="tag">逐框回填</span><span class="tag">发现并修复 bug</span> 用 4 张<b>真实</b> ESS 图纸（一次设备表 / 二次系统信号表 / 二次系统柜体表 / 简化主接线图）平移拼成 2×2 网格多图框，内容 100% 真实、仅排布合成。在真实标题栏结构上跑"检测多图框 → 逐框插公司图框 → 逐框回填"，4 个真实图名/图号均正确归位；过程中暴露并修复了 <code>extract_frame_fields</code> 标题区越界泄漏 bug（已加 pytest 回归测试）。</p>
 {gr.real_mf_section()}
 
+<h2>案例十一：给煤机控制原理图（边框 less 长条图，检测器加固验证）</h2>
+<p><span class="tag">1 张 DWG</span><span class="tag">折合1# 长条图</span><span class="tag">无 A 幅面图框</span> 来源：爱给网给煤机控制原理图，10096×1840 绘图单位（长宽比 ≈ 5.49），图本身不画在 A 幅面图框内；无包围矩形。验证「无框可换 → 不改图」与检测器误检护栏。</p>
+{gr.geimei_section()}
+
+<h2>案例十二：检测负样本（已知局限归档）</h2>
+<p><span class="tag">std_A3</span><span class="tag">S7-1200</span> 两张真实图纸，记录当前检测器<b>漏检</b>的两类场景，作为回归负样本。</p>
+{gr.negative_section()}
+
 {FOOTER}
 </body>
 </html>"""
