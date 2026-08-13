@@ -81,10 +81,10 @@
 
 - **案例十一 · 给煤机控制原理图**（`cases/11_geimei_control/`）：边框 less 长条图（长宽比 ≈ 5.49，无 A 幅面图框），
   检测器正确判定「无有效图框、不改图」，并据此加固了 `detect_frames_hierarchical` 的全局占比护栏，杜绝把图内元件方框当图框误插。
-  属逻辑验证案例，**无渲染对比图**，详见 `cases/11_geimei_control/summary.md`。
+  属逻辑验证案例，**配「原图/检测过滤」对比示意图**，详见 `cases/11_geimei_control/summary.md` 与 `cases/report.html`。
 - **案例十二 · 检测负样本**（`cases/12_detect_negative/`）：记录当前检测器**漏检**的两类真实图纸
   （`std_A3` 分段短直线边框、`S7-1200` 全块化无原始直线）作为回归负样本，明确「已知局限」，避免未来「假完成」误判。
-  属负样本归档，**无渲染对比图**，详见 `cases/12_detect_negative/summary.md`。
+  属负样本归档，**配「漏检根因」示意对比图**，详见 `cases/12_detect_negative/summary.md` 与 `cases/report.html`。
 
 ### 📌 案例修复记录（v0.3，反映当前逻辑）
 
@@ -100,9 +100,9 @@
   `extract_frame_fields` 的标题区判定原本是个无限延伸象限（只卡 x / y 两个方向），在多图框里会把**邻框标题文字吸进来**（第 1 框读成右边第 2 框的「二次系统信号表」）。
   **修复**：标题区改为四边有界；并补 `test_extract_no_leak_from_neighbor_frame` 回归单测。修复后 4 个框的图名 / 图号全部正确回填，几何零丢失。
 
-- **案例九 · A4 竖版方向缺口（已知局限，待补模板）**
-  本图为 A4 竖版 `210×297`，当前模板库仅横版 `HH_FRAME_A4`（298×212），等比缩放后新框只填满竖版图幅下半部分。
-  代码已加方向感知回退：检测到竖版图幅且存在 `HH_FRAME_A4V` 模板时自动切换；**竖版模板尚未制作**，故暂用横版回退。后续补 `HH_FRAME_A4V.dxf` 即可完全适配。
+- **案例九 · A4 竖版方向缺口（已闭环 ✅）**
+  本图为 A4 竖版 `210×297`。旧横版模板 `HH_FRAME_A4` 等比缩放后只填满竖版图幅下半部分。
+  **闭环**：已补 `templates/HH_FRAME_A4V.dxf` 竖版模板（由 `HH_FRAME_A4` 经 `lib/frame_gen.py` 重定向生成），`lib/sheet.py` 幅面推断判为竖版 `A4V`，`run_skill --dwg` 自动切换为 `HH_FRAME_A4V`，新框严丝合缝填满整张 A4 竖版。
 
 - **案例十 · 字段错填 + 旧框残线（2026-08-13 修复 ✅，核心回归点）**
   - **① 字段错填（TITLE 抓成「注：…」注记 / 电缆型号 / 房间号）**——根因为 COM 打散路径误用旧版 `extract.extract_fields`（抓「最长文本」）。已统一改用 `finder.extract_frame_fields`（按图名字号最大 + 标题栏标签定位真实图名，排除注记 / 电缆 / 房间号干扰）。重跑 11/11，TITLE 全部回填为真实图名。

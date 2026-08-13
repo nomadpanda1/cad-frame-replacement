@@ -15,19 +15,25 @@
 1. 块式标题栏检测命中 0 → 自动回退到线框检测。
 2. 删除旧外框线（4 条）与内框线（1 条 BORDER 层闭合多段线）。
 3. 删除旧标题栏区域实体 48 个。
-4. 插入公司图框 `HH_FRAME_A4`，回填 14 个属性字段，标题 `壳式断路器`。
-5. AutoCAD COM 直接写出 `_HH.dwg`。
+4. 幅面推断：`lib/sheet.py` 由外框 210×297 判为 **A4V 竖版**，触发方向感知模板选择。
+5. 插入公司图框 `HH_FRAME_A4V`（竖版 210×297），回填 14 个属性字段，标题 `壳式断路器`。
+6. AutoCAD COM 直接写出 `_HH.dwg`。
 
 ## 验证结果
-- HH_FRAME_A4 块引用数：1
+- HH_FRAME_A4V 块引用数：1
 - 属性标签数：14
 - 残留旧外框（边框层直线/多段线）：**0**
 - 旧标题栏区域内残留：**0**
+- 竖版模板是否严丝合缝：**是**，新图框填满整张 A4 竖版。
 
-## 已知问题与后续工作
-当前模板库中的 `HH_FRAME_A4.dxf` 为 **横版（298×212）**，而本图为 **竖版（210×297）**。`insert_frame` 使用等比缩放，导致横版模板只能填满竖版图幅的下半部分，上半部分无公司外框。代码已增加方向感知回退逻辑：当检测到竖版图幅且存在 `HH_FRAME_A4V` 模板时会自动切换；当前因竖版模板尚未制作，故仍使用横版回退。后续需制作 `HH_FRAME_A4V.dxf` 竖版模板以完全适配此类图纸。
+## 修复闭环（2026-08-13）
+已新增 `templates/HH_FRAME_A4V.dxf` 竖版模板（由 `HH_FRAME_A4.dxf` 经 `lib/frame_gen.py` 模板重定向生成）。
+本图重新跑 `run_skill --dwg` 后：
+- `幅面判定：旧框 210x297 -> A4V 210x297`；
+- `模板 HH_FRAME_A4V` 被 `prepare_templates` 转成 DWG 并用于插框；
+- 旧横版模板只填下半部分的问题彻底解决。
 
 ## 输出文件
 - 原图：`inputs/kuidian.dwg`
-- 结果：`output_test/kuidian_HH.dwg`
+- 结果：`outputs/kuidian_HH.dwg`
 - 示意图：`outputs/kuidian_before.png`、`outputs/kuidian_template.png`、`outputs/kuidian_HH.png`

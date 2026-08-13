@@ -44,9 +44,9 @@ STANDARD = [
 
 # 案例九：真实电气原理图（BORDER 层双线图框，AutoCAD COM 直接处理，策略二）
 KUIDIAN = [
-    ("馈电-电气原理图", "A4 竖版", "HH_FRAME_A4",
-     "检测：块式标题栏 0 命中 → 线框回退，检出外框 [0,0,210,297]+内框 [25,5,205,292]（BORDER 层双线图框，无 INSERT 块）",
-     "处理：把 border 图层补进 del_frame_edges 词表 → 内外框一并删净(残留 0) → 插入 HH_FRAME_A4(fit=max) → 回填图名'壳式断路器'等字段 ✅。注意：本图为 A4 竖版，当前模板库仅横版 HH_FRAME_A4，故横版模板等比缩放后只填满下半部分；后续需补 HH_FRAME_A4V 竖版模板。"),
+    ("馈电-电气原理图", "A4 竖版", "HH_FRAME_A4V",
+     "检测：块式标题栏 0 命中 → 线框回退，检出外框 [0,0,210,297]+内框 [25,5,205,292]（BORDER 层双线图框，无 INSERT 块）；lib/sheet.py 幅面推断判为竖版 A4V",
+     "处理：把 border 图层补进 del_frame_edges 词表 → 内外框一并删净(残留 0) → 插入 HH_FRAME_A4V 竖版模板(fit=max) → 回填图名'壳式断路器'等 14 字段 ✅。缺口已闭环：现已补 HH_FRAME_A4V.dxf 竖版模板（由 HH_FRAME_A4 经 lib/frame_gen.py 重定向生成），竖版图框严丝合缝填满整张 A4 竖版。"),
 ]
 
 # 案例十：住宅楼电气设计方案（11 张真实 DWG，AutoCAD COM 直接处理，策略二）
@@ -366,6 +366,40 @@ def real_mf_section():
     return "\n".join(rows)
 
 
+def geimei_section():
+    b = "11_geimei_control/outputs/geimei_before.png"
+    a = "11_geimei_control/outputs/geimei_after.png"
+    if not (os.path.exists(os.path.join(HERE, b)) and
+            os.path.exists(os.path.join(HERE, a))):
+        return ""
+    return f"""
+<div class="card">
+  <h3>边框 less 长条图 · 检测器正确判定「无有效图框」<span class="tag">长条图 10096×1840</span><span class="tag">0 图框</span></h3>
+  <table><tr>
+    <td width="50%"><b>原图：长条图（无 A 幅面图框）</b><br><img src="{b}"></td>
+    <td width="50%"><b>检测结果：15 元件方框被护栏过滤 → 0 框</b><br><img src="{a}"></td>
+  </tr></table>
+  <p class="cap ok">检测器加固：detect_frames_hierarchical 新增<b>全局占比护栏</b>，候选框面积 &lt; 整图 2% 视为元件/符号方框剔除。本图正确判定「无需换框、不改图」；回归测试 test_no_false_positive_borderless_dense 复刻 15 元件方框 → targets==[]。对其余 10 个案例无回归。详见 <code>11_geimei_control/summary.md</code>。</p>
+</div>"""
+
+
+def negative_section():
+    s1 = "12_detect_negative/outputs/std_A3.png"
+    s2 = "12_detect_negative/outputs/S7-1200.png"
+    if not (os.path.exists(os.path.join(HERE, s1)) and
+            os.path.exists(os.path.join(HERE, s2))):
+        return ""
+    return f"""
+<div class="card">
+  <h3>检测负样本（已知局限归档）<span class="tag">std_A3</span><span class="tag">S7-1200</span></h3>
+  <table><tr>
+    <td width="50%"><b>① std_A3：分段短直线边框 → 漏检</b><br><img src="{s1}"></td>
+    <td width="50%"><b>② S7-1200：全块化（0 条原始直线）→ 漏检</b><br><img src="{s2}"></td>
+  </tr></table>
+  <p class="cap warn">两图 detectors 均输出 frames:[]，经核查是<b>检测器启发式不足</b>而非图纸无框：① 外框上/下边框被拆成多段短直线，横向覆盖不足 0.6×图幅宽；② 内容全部封装在 INSERT 块内，无线框/块式路径可见。已作为回归负样本归档，避免未来「假完成」误判；增强方向见 <code>12_detect_negative/summary.md</code>。</p>
+</div>"""
+
+
 def main():
     html = f"""<!DOCTYPE html>
 <html lang="zh-CN">
@@ -376,7 +410,7 @@ def main():
 </head>
 <body>
 <h1>CAD 图框批量置换 — 效果对比报告</h1>
-<p>本页聚合十套案例的 <b>生成前 / 公司模板 / 生成后</b> 对比图。案例一为普通图纸（纯 ezdxf 离线，策略一）；案例二为设计院加密 DWG（AutoCAD COM 直接处理，策略二）；案例三为储能 ESS 成果包（纯 ezdxf，策略一）；案例四为无图框/无标题栏的装配体图纸（COM 转 DXF + 清标题栏占位，策略二）；<b>案例五</b>为标准设计院图纸（92DZ1 消火栓泵，2×2 多图框，图框位于 PUB_TITLE 层，策略二）；<b>案例六</b>为程序化生成的<b>异常场景合成样本</b>（多图框混排 / 嵌套块标题栏 / 缺字体 / 会签栏差异）；<b>案例七</b>为<b>多图框逐框替换</b>开发项成果（平铺多框含整图纸框 / 并排多框无整图纸框），验证"检测多图框 → 逐框插公司图框 → 逐框回填"；<b>案例八</b>为<b>真实多图框端到端验证</b>：用 4 张真实 ESS 图纸拼成 2×2 多图框；<b>案例九</b>为真实电气原理图（馈电，BORDER 层双线图框，策略二）；<b>案例十</b>为<b>住宅楼电气设计方案整套 11 张真实 DWG</b>（爱给网，打散图框 + 中文 SHX，策略二），11/11 全部成功。</p>
+<p>本页聚合 <b>12 套案例</b>的对比图与示意。案例一~十为带前后对比渲染的实战案例（案例一/三为纯 ezdxf 离线策略一，案例二/四/五/九/十为 AutoCAD COM 直接处理策略二）；<b>案例十一</b>（给煤机控制原理图，边框 less 长条图）与 <b>案例十二</b>（检测负样本）属逻辑验证 / 已知局限归档，以「对比示意」说明检测器行为，无渲染对比图。案例二为设计院加密 DWG（策略二）；案例三为储能 ESS 成果包（策略一）；案例四为无图框/无标题栏的装配体图纸（COM 转 DXF + 清标题栏占位，策略二）；<b>案例五</b>为标准设计院图纸（92DZ1 消火栓泵，2×2 多图框，图框位于 PUB_TITLE 层，策略二）；<b>案例六</b>为程序化生成的<b>异常场景合成样本</b>（多图框混排 / 嵌套块标题栏 / 缺字体 / 会签栏差异）；<b>案例七</b>为<b>多图框逐框替换</b>开发项成果（平铺多框含整图纸框 / 并排多框无整图纸框），验证"检测多图框 → 逐框插公司图框 → 逐框回填"；<b>案例八</b>为<b>真实多图框端到端验证</b>：用 4 张真实 ESS 图纸拼成 2×2 多图框；<b>案例九</b>为真实电气原理图（馈电，BORDER 层双线图框，策略二，A4 竖版已补 HH_FRAME_A4V 模板闭环）；<b>案例十</b>为<b>住宅楼电气设计方案整套 11 张真实 DWG</b>（爱给网，打散图框 + 中文 SHX，策略二），11/11 全部成功。</p>
 
 <h2>案例一：SolidWorks 导出零件图 / 装配图（9 张，策略一）</h2>
 <p><span class="tag">9 张图纸</span><span class="tag">A3/A4</span><span class="tag">标准标题栏</span> 来源：SolidWorks 工程图导出的 DXF，图框为打散 LINE/LWPOLYLINE，标题栏为右下角 TEXT/MTEXT 网格。</p>
@@ -399,7 +433,7 @@ def main():
 {standard_section()}
 
 <h2>案例九：真实电气原理图 — 馈电-电气原理图（BORDER 层双线图框，策略二）</h2>
-<p><span class="tag">1 张 DWG</span><span class="tag">A4 竖版</span><span class="tag">BORDER 层</span><span class="tag">双线图框</span> 来源：真实电气原理图（爱给网），单张 A4 竖版，图框为 BORDER 层双线矩形（外框 [0,0,210,297]+内框 [25,5,205,292]），无 INSERT 块式标题栏。验证了「BORDER 标准边框层」的兼容修复（del_frame_edges 词表补 border，内外框一并删净）。</p>
+<p><span class="tag">1 张 DWG</span><span class="tag">A4 竖版</span><span class="tag">BORDER 层</span><span class="tag">双线图框</span><span class="tag">缺口已闭环</span> 来源：真实电气原理图（爱给网），单张 A4 竖版，图框为 BORDER 层双线矩形（外框 [0,0,210,297]+内框 [25,5,205,292]），无 INSERT 块式标题栏。验证了「BORDER 标准边框层」的兼容修复（del_frame_edges 词表补 border，内外框一并删净）。<b>缺口已闭环</b>：现已补 <code>HH_FRAME_A4V.dxf</code> 竖版模板（由 HH_FRAME_A4 经 lib/frame_gen.py 重定向生成，lib/sheet.py 幅面推断判为竖版 A4V），竖版图框严丝合缝填满整张 A4 竖版，不再只填下半部分。</p>
 {kuidian_section()}
 
 <h2>案例十：住宅楼电气设计方案（11 张真实 DWG，策略二）</h2>
@@ -419,6 +453,14 @@ def main():
 <h2>案例七：多图框逐框替换（检测多图框 → 逐框插公司图框）</h2>
 <p><span class="tag">2 个合成 DXF</span><span class="tag">平铺多框</span><span class="tag">并排多框</span><span class="tag">逐框回填</span> 新开发项：在 <code>lib/finder.py</code> 新增 <code>detect_frames_hierarchical</code>（识别整图纸框为纸边、其余为替换目标），在 <code>lib/block_replace.py</code> 新增 <code>delete_frame_border</code>/<code>delete_title_strip</code>（外科手术式删除，保留图内几何）。逐框选模板尺寸 → 抽字段 → 删旧框线+标题栏 → 插公司图框(fit=max) → 回填。</p>
 {multi_section()}
+
+<h2>案例十一：给煤机控制原理图（边框 less 长条图，检测器加固验证）</h2>
+<p><span class="tag">1 张 DWG</span><span class="tag">折合1# 长条图</span><span class="tag">无 A 幅面图框</span> 来源：爱给网给煤机控制原理图，10096×1840 绘图单位（长宽比 ≈ 5.49），图本身不画在 A 幅面图框内；无包围矩形。验证「无框可换 → 不改图」与检测器误检护栏。</p>
+{geimei_section()}
+
+<h2>案例十二：检测负样本（已知局限归档）</h2>
+<p><span class="tag">std_A3</span><span class="tag">S7-1200</span> 两张真实图纸，记录当前检测器<b>漏检</b>的两类场景，作为回归负样本。</p>
+{negative_section()}
 
 <h2>文件位置</h2>
 <ul>

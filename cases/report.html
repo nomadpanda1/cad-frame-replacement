@@ -259,13 +259,13 @@ python run_skill.py --template templates/公司图框.dxf --dry-run  samples/*.d
 <p><span class="tag">1 张 DWG</span><span class="tag">A4 竖版</span><span class="tag">BORDER 层</span><span class="tag">双线图框</span> 来源：真实电气原理图（爱给网），单张 A4 竖版，图框为 BORDER 层双线矩形（外框 [0,0,210,297]+内框 [25,5,205,292]），无 INSERT 块式标题栏。验证了「BORDER 标准边框层」的兼容修复（del_frame_edges 词表补 border，内外框一并删净），并暴露了当前模板库缺少 A4 竖版模板的问题。</p>
 
 <div class="card">
-  <h3>馈电-电气原理图 <span class="tag">A4 竖版</span><span class="tag">HH_FRAME_A4</span></h3>
+  <h3>馈电-电气原理图 <span class="tag">A4 竖版</span><span class="tag">HH_FRAME_A4V</span></h3>
   <table><tr>
     <td width="33%"><b>生成前</b><br><img src="09_kuidian_electrical/outputs/kuidian_before.png"></td>
     <td width="33%"><b>公司模板</b><br><img src="09_kuidian_electrical/outputs/kuidian_template.png"></td>
     <td width="34%"><b>生成后</b><br><img src="09_kuidian_electrical/outputs/kuidian_HH.png"></td>
   </tr></table>
-  <p class="cap ok">检测：块式标题栏 0 命中 → 线框回退，检出外框 [0,0,210,297]+内框 [25,5,205,292]（BORDER 层双线图框，无 INSERT 块）<br>处理：把 border 图层补进 del_frame_edges 词表 → 内外框一并删净(残留 0) → 插入 HH_FRAME_A4(fit=max) → 回填图名'壳式断路器'等字段 ✅。注意：本图为 A4 竖版，当前模板库仅横版 HH_FRAME_A4，故横版模板等比缩放后只填满下半部分；后续需补 HH_FRAME_A4V 竖版模板。</p>
+  <p class="cap ok">检测：块式标题栏 0 命中 → 线框回退，检出外框 [0,0,210,297]+内框 [25,5,205,292]（BORDER 层双线图框，无 INSERT 块）；lib/sheet.py 幅面推断判为竖版 A4V<br>处理：把 border 图层补进 del_frame_edges 词表 → 内外框一并删净(残留 0) → 插入 HH_FRAME_A4V 竖版模板(fit=max) → 回填图名'壳式断路器'等 14 字段 ✅。缺口已闭环：现已补 HH_FRAME_A4V.dxf 竖版模板（由 HH_FRAME_A4 经 lib/frame_gen.py 重定向生成），竖版图框严丝合缝填满整张 A4 竖版。</p>
 </div>
 
 <h2>案例十：住宅楼电气设计方案（11 张真实 DWG，策略二）</h2>
