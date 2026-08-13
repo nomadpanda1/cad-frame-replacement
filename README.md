@@ -26,58 +26,165 @@
 - 🧪 **[exe_test_out/exe_test.html](exe_test_out/exe_test.html)** —— 打包 **exe 真实运行** 9 张 SolidWorks 图纸前后对比（实测命令 + 逐图指标 + 提取到的真实字段）
 - 🧪 **[test_other/test_other.html](test_other/test_other.html)** —— 其他场景 20 张前后对比（自动按幅面选模板 + 标题栏残线修复，case 01/03/06/07/08）
 
-### 前后对比缩略图
+### 前后对比缩略图（最新 exe 真实测试 + 其他场景测试）
+
+> 以下缩略图均来自最新一轮真实运行渲染（深色底为 ezdxf 默认 CAD 背景），无旧图框残留。
+> 点进 [exe_test.html](exe_test_out/exe_test.html) / [test_other.html](test_other/test_other.html) 可看到 SVG 高清前后对比。
+
+#### 一、exe 真实测试（9 张 SolidWorks 图纸）
 
 <table>
+<tr><th align='center'>图纸</th><th>替换前</th><th>替换后</th></tr>
 <tr>
-<td align="center"><b>案例一：法兰零件图</b></td>
-<td><img src="cases/01_SW_parts/outputs/从法兰(2)_before.png" width="380" alt="before"></td>
-<td><img src="cases/01_SW_parts/outputs/从法兰(2)_after.png" width="380" alt="after"></td>
+<td align='center'><b>从法兰(2)</b></td>
+<td><img src='assets/thumbnails/exe_从法兰(2)_before.png' width='280' alt='before'></td>
+<td><img src='assets/thumbnails/exe_从法兰(2)_after.png' width='280' alt='after'></td>
 </tr>
 <tr>
-<td align="center"><b>案例二：CNG 电气系统图</b></td>
-<td><img src="cases/02_CNG_electrical/outputs/CNG_电气系统图_before.png" width="380" alt="before"></td>
-<td><img src="cases/02_CNG_electrical/outputs/CNG_电气系统图_after.png" width="380" alt="after"></td>
+<td align='center'><b>前叉(1)</b></td>
+<td><img src='assets/thumbnails/exe_前叉(1)_before.png' width='280' alt='before'></td>
+<td><img src='assets/thumbnails/exe_前叉(1)_after.png' width='280' alt='after'></td>
 </tr>
 <tr>
-<td align="center"><b>案例三：储能 ESS 设备表</b></td>
-<td><img src="cases/03_ESS_cad/outputs/16MW_32MWh_一次设备表_before.png" width="380" alt="before"></td>
-<td><img src="cases/03_ESS_cad/outputs/16MW_32MWh_一次设备表_after.png" width="380" alt="after"></td>
+<td align='center'><b>圆柱齿轮13×1(2)</b></td>
+<td><img src='assets/thumbnails/exe_圆柱齿轮13×1(2)_before.png' width='280' alt='before'></td>
+<td><img src='assets/thumbnails/exe_圆柱齿轮13×1(2)_after.png' width='280' alt='after'></td>
 </tr>
 <tr>
-<td align="center"><b>案例四：无图框装配体</b></td>
-<td><img src="cases/04_assembly/outputs/装配体图纸(1)_before.png" width="380" alt="before"></td>
-<td><img src="cases/04_assembly/outputs/装配体图纸(1)_after.png" width="380" alt="after"></td>
+<td align='center'><b>圆柱齿轮65×1(1)</b></td>
+<td><img src='assets/thumbnails/exe_圆柱齿轮65×1(1)_before.png' width='280' alt='before'></td>
+<td><img src='assets/thumbnails/exe_圆柱齿轮65×1(1)_after.png' width='280' alt='after'></td>
 </tr>
 <tr>
-<td align="center"><b>案例五：标准设计院图纸（92DZ1 消火栓泵）</b></td>
-<td><img src="cases/05_standard_dwg/outputs/92DZ1_xiaohuobeng_before.png" width="380" alt="before"></td>
-<td><img src="cases/05_standard_dwg/outputs/92DZ1_xiaohuobeng_HH.png" width="380" alt="after"></td>
+<td align='center'><b>法兰(2)</b></td>
+<td><img src='assets/thumbnails/exe_法兰(2)_before.png' width='280' alt='before'></td>
+<td><img src='assets/thumbnails/exe_法兰(2)_after.png' width='280' alt='after'></td>
 </tr>
 <tr>
-<td align="center"><b>案例六：合成异常样本</b></td>
-<td><img src="cases/06_synth/outputs/06a_before.png" width="380" alt="before"></td>
-<td><img src="cases/06_synth/outputs/06a_after.png" width="380" alt="after"></td>
+<td align='center'><b>等轴测图(1)</b></td>
+<td><img src='assets/thumbnails/exe_等轴测图(1)_before.png' width='280' alt='before'></td>
+<td><img src='assets/thumbnails/exe_等轴测图(1)_after.png' width='280' alt='after'></td>
 </tr>
 <tr>
-<td align="center"><b>案例七：多图框逐框替换</b></td>
-<td><img src="cases/07_multiframe/outputs/07b_side_by_side_before.png" width="380" alt="before"></td>
-<td><img src="cases/07_multiframe/outputs/07b_side_by_side_HH.png" width="380" alt="after"></td>
+<td align='center'><b>装配体图纸(1)</b></td>
+<td><img src='assets/thumbnails/exe_装配体图纸(1)_before.png' width='280' alt='before'></td>
+<td><img src='assets/thumbnails/exe_装配体图纸(1)_after.png' width='280' alt='after'></td>
 </tr>
 <tr>
-<td align="center"><b>案例八：真实多图框（4×A1 拼接）</b></td>
-<td><img src="cases/08_real_mf/outputs/08_real_multiframe_before.png" width="380" alt="before"></td>
-<td><img src="cases/08_real_mf/outputs/08_real_multiframe_HH.png" width="380" alt="after"></td>
+<td align='center'><b>装配体爆炸图1(1)</b></td>
+<td><img src='assets/thumbnails/exe_装配体爆炸图1(1)_before.png' width='280' alt='before'></td>
+<td><img src='assets/thumbnails/exe_装配体爆炸图1(1)_after.png' width='280' alt='after'></td>
 </tr>
 <tr>
-<td align="center"><b>案例九：馈电-电气原理图（A4 竖版）</b></td>
-<td><img src="cases/09_kuidian_electrical/outputs/kuidian_before.png" width="380" alt="before"></td>
-<td><img src="cases/09_kuidian_electrical/outputs/kuidian_HH.png" width="380" alt="after"></td>
+<td align='center'><b>龙门架</b></td>
+<td><img src='assets/thumbnails/exe_龙门架_before.png' width='280' alt='before'></td>
+<td><img src='assets/thumbnails/exe_龙门架_after.png' width='280' alt='after'></td>
+</tr>
+</table>
+
+#### 二、其他场景测试（20 张，case 01/03/06/07/08）
+
+<table>
+<tr><th align='center'>图纸</th><th>替换前</th><th>替换后</th></tr>
+<tr>
+<td align='center'><b>案例 01 · 从法兰(2)</b></td>
+<td><img src='assets/thumbnails/other_01__从法兰(2)_before.png' width='280' alt='before'></td>
+<td><img src='assets/thumbnails/other_01__从法兰(2)_after.png' width='280' alt='after'></td>
 </tr>
 <tr>
-<td align="center"><b>案例十：住宅楼电气设计方案（11 张 DWG）</b></td>
-<td><img src="cases/10_residential_electrical/outputs/天面_before.png" width="380" alt="before"></td>
-<td><img src="cases/10_residential_electrical/outputs/天面_HH.png" width="380" alt="after"></td>
+<td align='center'><b>案例 01 · 前叉(1)</b></td>
+<td><img src='assets/thumbnails/other_01__前叉(1)_before.png' width='280' alt='before'></td>
+<td><img src='assets/thumbnails/other_01__前叉(1)_after.png' width='280' alt='after'></td>
+</tr>
+<tr>
+<td align='center'><b>案例 01 · 圆柱齿轮13×1(2)</b></td>
+<td><img src='assets/thumbnails/other_01__圆柱齿轮13×1(2)_before.png' width='280' alt='before'></td>
+<td><img src='assets/thumbnails/other_01__圆柱齿轮13×1(2)_after.png' width='280' alt='after'></td>
+</tr>
+<tr>
+<td align='center'><b>案例 01 · 圆柱齿轮65×1(1)</b></td>
+<td><img src='assets/thumbnails/other_01__圆柱齿轮65×1(1)_before.png' width='280' alt='before'></td>
+<td><img src='assets/thumbnails/other_01__圆柱齿轮65×1(1)_after.png' width='280' alt='after'></td>
+</tr>
+<tr>
+<td align='center'><b>案例 01 · 法兰(2)</b></td>
+<td><img src='assets/thumbnails/other_01__法兰(2)_before.png' width='280' alt='before'></td>
+<td><img src='assets/thumbnails/other_01__法兰(2)_after.png' width='280' alt='after'></td>
+</tr>
+<tr>
+<td align='center'><b>案例 01 · 等轴测图(1)</b></td>
+<td><img src='assets/thumbnails/other_01__等轴测图(1)_before.png' width='280' alt='before'></td>
+<td><img src='assets/thumbnails/other_01__等轴测图(1)_after.png' width='280' alt='after'></td>
+</tr>
+<tr>
+<td align='center'><b>案例 01 · 装配体图纸(1)</b></td>
+<td><img src='assets/thumbnails/other_01__装配体图纸(1)_before.png' width='280' alt='before'></td>
+<td><img src='assets/thumbnails/other_01__装配体图纸(1)_after.png' width='280' alt='after'></td>
+</tr>
+<tr>
+<td align='center'><b>案例 01 · 装配体爆炸图1(1)</b></td>
+<td><img src='assets/thumbnails/other_01__装配体爆炸图1(1)_before.png' width='280' alt='before'></td>
+<td><img src='assets/thumbnails/other_01__装配体爆炸图1(1)_after.png' width='280' alt='after'></td>
+</tr>
+<tr>
+<td align='center'><b>案例 01 · 龙门架</b></td>
+<td><img src='assets/thumbnails/other_01__龙门架_before.png' width='280' alt='before'></td>
+<td><img src='assets/thumbnails/other_01__龙门架_after.png' width='280' alt='after'></td>
+</tr>
+<tr>
+<td align='center'><b>案例 03 · 16MW_32MWh_一次设备表</b></td>
+<td><img src='assets/thumbnails/other_03__16MW_32MWh_一次设备表_before.png' width='280' alt='before'></td>
+<td><img src='assets/thumbnails/other_03__16MW_32MWh_一次设备表_after.png' width='280' alt='after'></td>
+</tr>
+<tr>
+<td align='center'><b>案例 03 · 16MW_32MWh_二次系统信号表</b></td>
+<td><img src='assets/thumbnails/other_03__16MW_32MWh_二次系统信号表_before.png' width='280' alt='before'></td>
+<td><img src='assets/thumbnails/other_03__16MW_32MWh_二次系统信号表_after.png' width='280' alt='after'></td>
+</tr>
+<tr>
+<td align='center'><b>案例 03 · 16MW_32MWh_二次系统柜体表</b></td>
+<td><img src='assets/thumbnails/other_03__16MW_32MWh_二次系统柜体表_before.png' width='280' alt='before'></td>
+<td><img src='assets/thumbnails/other_03__16MW_32MWh_二次系统柜体表_after.png' width='280' alt='after'></td>
+</tr>
+<tr>
+<td align='center'><b>案例 03 · 16MW_32MWh_储能系统简化主接线图</b></td>
+<td><img src='assets/thumbnails/other_03__16MW_32MWh_储能系统简化主接线图_before.png' width='280' alt='before'></td>
+<td><img src='assets/thumbnails/other_03__16MW_32MWh_储能系统简化主接线图_after.png' width='280' alt='after'></td>
+</tr>
+<tr>
+<td align='center'><b>案例 06 · 06a_multiframe</b></td>
+<td><img src='assets/thumbnails/other_06__06a_multiframe_before.png' width='280' alt='before'></td>
+<td><img src='assets/thumbnails/other_06__06a_multiframe_after.png' width='280' alt='after'></td>
+</tr>
+<tr>
+<td align='center'><b>案例 06 · 06b_nested_title</b></td>
+<td><img src='assets/thumbnails/other_06__06b_nested_title_before.png' width='280' alt='before'></td>
+<td><img src='assets/thumbnails/other_06__06b_nested_title_after.png' width='280' alt='after'></td>
+</tr>
+<tr>
+<td align='center'><b>案例 06 · 06c_missing_font</b></td>
+<td><img src='assets/thumbnails/other_06__06c_missing_font_before.png' width='280' alt='before'></td>
+<td><img src='assets/thumbnails/other_06__06c_missing_font_after.png' width='280' alt='after'></td>
+</tr>
+<tr>
+<td align='center'><b>案例 06 · 06d_countersign</b></td>
+<td><img src='assets/thumbnails/other_06__06d_countersign_before.png' width='280' alt='before'></td>
+<td><img src='assets/thumbnails/other_06__06d_countersign_after.png' width='280' alt='after'></td>
+</tr>
+<tr>
+<td align='center'><b>案例 07 · 07a_tiled</b></td>
+<td><img src='assets/thumbnails/other_07__07a_tiled_before.png' width='280' alt='before'></td>
+<td><img src='assets/thumbnails/other_07__07a_tiled_after.png' width='280' alt='after'></td>
+</tr>
+<tr>
+<td align='center'><b>案例 07 · 07b_side_by_side</b></td>
+<td><img src='assets/thumbnails/other_07__07b_side_by_side_before.png' width='280' alt='before'></td>
+<td><img src='assets/thumbnails/other_07__07b_side_by_side_after.png' width='280' alt='after'></td>
+</tr>
+<tr>
+<td align='center'><b>案例 08 · 08_real_multiframe</b></td>
+<td><img src='assets/thumbnails/other_08__08_real_multiframe_before.png' width='280' alt='before'></td>
+<td><img src='assets/thumbnails/other_08__08_real_multiframe_after.png' width='280' alt='after'></td>
 </tr>
 </table>
 
