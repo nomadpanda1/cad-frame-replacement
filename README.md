@@ -145,6 +145,74 @@
 </tr>
 </table>
 
+#### 三、真实下载图纸测试（住宅楼电气 11 张 + CNG 电气 1 张）
+
+> 以下图纸为从爱给网下载的**真实 CAD 图纸（.dwg）**，经 exe 核心 `run_skill.py --dwg`（AutoCAD COM 直接处理，策略二）实际置换：住宅楼 11 张全部成功（含首层配电干线平面图等 A0 大图幅），CNG 1 张含 4 个图框（A1 大图框 + 3×A3 宽幅）。
+
+<table>
+<tr><th align='center'>图纸</th><th>替换前</th><th>替换后</th></tr>
+<tr>
+<td align='center'><b>住宅楼·天面</b></td>
+<td><img src='assets/thumbnails/case10_01_天面_before.png' width='280' alt='before'></td>
+<td><img src='assets/thumbnails/case10_01_天面_after.png' width='280' alt='after'></td>
+</tr>
+<tr>
+<td align='center'><b>住宅楼·弱电1</b></td>
+<td><img src='assets/thumbnails/case10_02_弱电1_before.png' width='280' alt='before'></td>
+<td><img src='assets/thumbnails/case10_02_弱电1_after.png' width='280' alt='after'></td>
+</tr>
+<tr>
+<td align='center'><b>住宅楼·强电平面</b></td>
+<td><img src='assets/thumbnails/case10_03_强电平面_before.png' width='280' alt='before'></td>
+<td><img src='assets/thumbnails/case10_03_强电平面_after.png' width='280' alt='after'></td>
+</tr>
+<tr>
+<td align='center'><b>住宅楼·消防弱电2</b></td>
+<td><img src='assets/thumbnails/case10_04_消防弱电2_before.png' width='280' alt='before'></td>
+<td><img src='assets/thumbnails/case10_04_消防弱电2_after.png' width='280' alt='after'></td>
+</tr>
+<tr>
+<td align='center'><b>住宅楼·消防系统图</b></td>
+<td><img src='assets/thumbnails/case10_05_消防系统图_before.png' width='280' alt='before'></td>
+<td><img src='assets/thumbnails/case10_05_消防系统图_after.png' width='280' alt='after'></td>
+</tr>
+<tr>
+<td align='center'><b>住宅楼·系统</b></td>
+<td><img src='assets/thumbnails/case10_06_系统_before.png' width='280' alt='before'></td>
+<td><img src='assets/thumbnails/case10_06_系统_after.png' width='280' alt='after'></td>
+</tr>
+<tr>
+<td align='center'><b>住宅楼·裙楼消防平面</b></td>
+<td><img src='assets/thumbnails/case10_07_裙楼消防平面_before.png' width='280' alt='before'></td>
+<td><img src='assets/thumbnails/case10_07_裙楼消防平面_after.png' width='280' alt='after'></td>
+</tr>
+<tr>
+<td align='center'><b>住宅楼·首二层商场平面</b></td>
+<td><img src='assets/thumbnails/case10_08_首二层商场平面_before.png' width='280' alt='before'></td>
+<td><img src='assets/thumbnails/case10_08_首二层商场平面_after.png' width='280' alt='after'></td>
+</tr>
+<tr>
+<td align='center'><b>住宅楼·首二层系统图</b></td>
+<td><img src='assets/thumbnails/case10_09_首二层系统图_before.png' width='280' alt='before'></td>
+<td><img src='assets/thumbnails/case10_09_首二层系统图_after.png' width='280' alt='after'></td>
+</tr>
+<tr>
+<td align='center'><b>住宅楼·首层配电干线平面图</b></td>
+<td><img src='assets/thumbnails/case10_10_首层配电干线平面图_before.png' width='280' alt='before'></td>
+<td><img src='assets/thumbnails/case10_10_首层配电干线平面图_after.png' width='280' alt='after'></td>
+</tr>
+<tr>
+<td align='center'><b>住宅楼·高低压系统</b></td>
+<td><img src='assets/thumbnails/case10_11_高低压系统_before.png' width='280' alt='before'></td>
+<td><img src='assets/thumbnails/case10_11_高低压系统_after.png' width='280' alt='after'></td>
+</tr>
+<tr>
+<td align='center'><b>CNG·电气系统图（4 图框）</b></td>
+<td><img src='assets/thumbnails/case02_cng_before.png' width='280' alt='before'></td>
+<td><img src='assets/thumbnails/case02_cng_after.png' width='280' alt='after'></td>
+</tr>
+</table>
+
 - **案例十一 · 给煤机控制原理图**（`cases/11_geimei_control/`）：边框 less 长条图（长宽比 ≈ 5.49，无 A 幅面图框），
   检测器正确判定「无有效图框、不改图」，并据此加固了 `detect_frames_hierarchical` 的全局占比护栏，杜绝把图内元件方框当图框误插。
   属逻辑验证案例，**配「原图/检测过滤」对比示意图**，详见 `cases/11_geimei_control/summary.md` 与 `cases/report.html`。
