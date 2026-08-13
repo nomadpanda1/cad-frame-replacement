@@ -317,6 +317,12 @@ a { color:#4a9eff; text-decoration:none; } a:hover { text-decoration:underline; 
   <p class="cap ok">检测：线框回退，外框 89100×63000（≈√2）<br>插 HH_FRAME_A0，残留 0 ✅</p>
 </div>
 
+<h2>案例十·修复记录（2026-08-13）：字段错填 + 旧框残线</h2>
+<p><span class="tag">已修复</span> 2026-08-12 深度核验曾查出三类问题，本次迭代已解决前两类：</p>
+<p class="ok"><b>① 字段错填（TITLE 抓成"注：…"注记 / 电缆型号 / 房间号）</b>——根因为 COM 打散路径误用旧版 <code>extract.extract_fields</code>（抓"最长文本"）。已统一改用 <code>finder.extract_frame_fields</code>（按图名字号最大 + 标题栏标签定位真实图名，排除注记/电缆/房间号干扰）。重新跑 11/11，TITLE 全部回填为真实图名（如「标准层照明配电平面」「栋扶梯配电系统图」「首层配电干线平面」）。</p>
+<p class="ok"><b>② 旧框残线（首层配电干线 18 条、首二层商场 1 条 FRAME 层线）</b>——根因为旧删除逻辑只删"精确贴外边"或"面积&gt;80%"的线，框内旧框线（内框/标题栏网格/竖向分隔线）漏删。已新增 <code>del_frame_layer_inside</code>（删"图框层 + 完全落在旧框内"全部线类实体），接入 COM 管线。浅层核验（<code>ezdxf.bbox.extents</code>，11/11）确认 <b>残留 = 0</b>。</p>
+<p class="warn"><b>③ 非 √2 旧框比例失真（裙楼 1.77 / 首层配电 0.95 / 首二层商场 1.19）</b>——已知局限，未专门处理：新框按 √2 幅面整图幅插入（fit=max），对偏方旧框会略大/略小一圈（可接受），后续需补非标幅面模板（如 HH_FRAME_A4V 竖版 / 加长版）才能 1:1 贴合。</p>
+
 <h2>案例六：合成异常样本（多图框 / 嵌套块 / 缺字体 / 会签栏差异）</h2>
 <p><span class="tag">4 个合成 DXF</span><span class="tag">程序化生成</span><span class="tag">可控可复现</span> 用 ezdxf 直接生成，无需外部图纸。每个异常图都经过"检测图框/抽取字段/插入公司图框/渲染"全流程，下面给出工具<b>实际行为</b>与结论。</p>
 

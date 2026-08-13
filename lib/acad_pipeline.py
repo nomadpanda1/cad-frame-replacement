@@ -74,20 +74,36 @@ def process_file(app, src, dst, plan, wait_open=2.0):
             # 双线图框：外框坐标删净后，内框（与外框重叠>80%、落在图框层）一并删掉。
             # margin=1.0 使 near_edge 几乎不触发，仅按图层+面积重叠兜底，不会误删贴边内容。
             n_edge += acad_com.del_frame_edges(ents, frame, margin=1.0)
+            # 整框清除：图框层上完全落在旧框内的全部线（内框/标题栏网格/竖向分隔线等
+            # 不在外边坐标上、面积也<80% 的旧框残线），彻底杜绝残线压在新框上。
+            n_edge += acad_com.del_frame_layer_inside(ents, frame, margin=20.0)
             n_tb = acad_com.del_titleblock_acad(ents, tb, maxdim)
             n_mark = acad_com.del_edge_markers_acad(ents, frame, strip=10.0)
         else:
             # 块式/多图框：优先用图层名删外框线（设计院图纸常见“图框”层）
             n_edge = acad_com.del_frame_edges(ents, frame)
+            # 同样整框清除旧框层残留线（块式图框背后可能仍有 FRAME 层旧边框线）
+            n_edge += acad_com.del_frame_layer_inside(ents, frame, margin=20.0)
             n_tb = acad_com.del_in_region(ents, tb[0], tb[1], tb[2], tb[3])
             n_mark = 0
 
-        insert, scale = acad_com.insert_frame(msp, frame, tpl_dwg, fields)
+        # tpl_size 由上游（run_skill._tpl_for_frame）按检出框比例即时生成模板时给出，
+        # 是该模板真实的幅面尺寸（mm）。必须显式传下来：非标幅面模板（如 C1051X594）
+        # 不在 acad_com.A_SIZES 静态表里，缺了它 insert_frame 会退化成 scale=1.0，
+        # 模板按毫米原尺寸插进图形单位的图里，等于插了个看不见的小框。
+        size_table = None
+        tpl_size = item.get("tpl_size")
+        if tpl_size:
+            size_table = {acad_com._size_name_from_tpl(tpl_dwg):
+                          (float(tpl_size[0]), float(tpl_size[1]))}
+        insert, scale = acad_com.insert_frame(
+            msp, frame, tpl_dwg, fields, size_table=size_table)
 
         results.append({
             "frame": frame,
             "mode": mode,
             "tpl_dwg": tpl_dwg,
+            "tpl_size": tpl_size,
             "scale": scale,
             "deleted_edges": n_edge,
             "deleted_titleblock": n_tb,

@@ -406,6 +406,12 @@ def main():
 <p><span class="tag">11 张 DWG</span><span class="tag">天面/强弱电/消防/系统/裙楼/首二层/高低压</span><span class="tag">打散图框</span><span class="tag">中文 SHX</span> 来源：爱给网住宅楼电气设计方案（AutoCAD/ZWCAD，提供 dwg）。全部为真实设计院图纸、打散图框（0 个 INSERT 块式标题栏）、含中文 SHX 字体——与微信发来的图纸同属「打散」一类。逐张走「块式 0 命中 → 线框检测回退」：删旧外框+标题栏+边缘区号 → 整图幅插公司图框 → 回填。<b>11/11 均成功插入 HH_FRAME_A0 块</b>；2026-08-12 深度核验（<code>ezdxf.bbox.extents</code>）另查出三类未完工项：① 标题栏属性大面积空/错填（11/11，TITLE 常抓成"注：…"注记/电缆型号/房间号）；② 旧框残线未删净 2 张（首层配电干线 18 条、首二层商场 1 条）；③ 非 √2 旧框比例失真 3 张（裙楼 1.77、首层配电 0.95、首二层商场 1.19）。详见 <code>10_residential_electrical/verify/verify_report.md</code>。成品 DWG 在 <code>10_residential_electrical/outputs/dwg/*_HH.dwg</code>。</p>
 {residential_section()}
 
+<h2>案例十·修复记录（2026-08-13）：字段错填 + 旧框残线</h2>
+<p><span class="tag">已修复</span> 2026-08-12 深度核验曾查出三类问题，本次迭代已解决前两类：</p>
+<p class="ok"><b>① 字段错填（TITLE 抓成"注：…"注记 / 电缆型号 / 房间号）</b>——根因为 COM 打散路径误用旧版 <code>extract.extract_fields</code>（抓"最长文本"）。已统一改用 <code>finder.extract_frame_fields</code>（按图名字号最大 + 标题栏标签定位真实图名，排除注记/电缆/房间号干扰）。重新跑 11/11，TITLE 全部回填为真实图名（如「标准层照明配电平面」「栋扶梯配电系统图」「首层配电干线平面」）。</p>
+<p class="ok"><b>② 旧框残线（首层配电干线 18 条、首二层商场 1 条 FRAME 层线）</b>——根因为旧删除逻辑只删"精确贴外边"或"面积&gt;80%"的线，框内旧框线（内框/标题栏网格/竖向分隔线）漏删。已新增 <code>del_frame_layer_inside</code>（删"图框层 + 完全落在旧框内"全部线类实体），接入 COM 管线。浅层核验（<code>ezdxf.bbox.extents</code>，11/11）确认 <b>残留 = 0</b>。</p>
+<p class="warn"><b>③ 非 √2 旧框比例失真（裙楼 1.77 / 首层配电 0.95 / 首二层商场 1.19）</b>——已知局限，未专门处理：新框按 √2 幅面整图幅插入（fit=max），对偏方旧框会略大/略小一圈（可接受），后续需补非标幅面模板（如 HH_FRAME_A4V 竖版 / 加长版）才能 1:1 贴合。</p>
+
 <h2>案例六：合成异常样本（多图框 / 嵌套块 / 缺字体 / 会签栏差异）</h2>
 <p><span class="tag">4 个合成 DXF</span><span class="tag">程序化生成</span><span class="tag">可控可复现</span> 用 ezdxf 直接生成，无需外部图纸。每个异常图都经过"检测图框/抽取字段/插入公司图框/渲染"全流程，下面给出工具<b>实际行为</b>与结论。</p>
 {synth_section()}

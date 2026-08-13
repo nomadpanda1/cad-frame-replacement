@@ -202,6 +202,49 @@ def del_in_region(ents, x0, y0, x1, y1, allowed_types=None, exclude_types=None):
     return len(to_del)
 
 
+# 图框类图层（设计院图纸图框常落在这些层之一；"frame" 覆盖大小写）
+FRAME_LAYERS = {"tukuang", "图框", "0", "pub_title", "图签", "tk", "title", "frame",
+                "border", "borders", "边框", "titleblock", "图框线", "图框层"}
+# 仅这些实体类型按"框内残留"策略删除（避免误删图内文本/块/标注）
+_FRAME_LINE_TYPES = ("AcDbLine", "AcDbPolyline", "AcDb2dPolyline",
+                     "AcDbLWPolyline", "AcDbArc")
+
+
+def del_frame_layer_inside(ents, frame, margin=20.0):
+    """删除图框类图层上、完全落在旧框 bbox 内的全部线类实体。
+
+    解决"双线/多线图框 + 标题栏内部分隔线"残留在新框上的问题：这些旧框内部线条
+    （内框、标题栏网格、竖向分隔线）并不与新框外边对齐，del_frame_lines_acad（按外边
+    坐标精确匹配）与 del_frame_edges（面积>80% 或贴边）都删不到。本函数按"图层 + 完全
+    落在旧框内"直接整框清除——住宅案例十首层配电(18条 FRAME 层线)、首二层商场(1条)
+    的残线正是这一类。
+
+    margin 仅用于吸收检出框与实绘外框之间几单位的拟合偏差（默认 20，相对万级图幅可忽略，
+    不会外溢到框外内容）。删层限制为线类，绝不碰图内 TEXT/INSERT/DIMENSION。
+    """
+    x0, y0, x1, y1 = frame
+    to_del = []
+    for d in ents:
+        e, et, layer, bb = d["e"], d["et"], d["layer"], d["bb"]
+        if et not in _FRAME_LINE_TYPES:
+            continue
+        ll = (layer or "").lower()
+        if ll not in FRAME_LAYERS and not ll.startswith("tukuang"):
+            continue
+        if bb is None:
+            continue
+        ex0, ey0, ex1, ey1 = bb
+        if (ex0 >= x0 - margin and ex1 <= x1 + margin and
+                ey0 >= y0 - margin and ey1 <= y1 + margin):
+            to_del.append(e)
+    for e in to_del:
+        try:
+            e.Delete()
+        except Exception:
+            pass
+    return len(to_del)
+
+
 def del_frame_edges(ents, frame, margin=500):
     """删除图框层上、与外框面积重合>80% 或贴四边的 LINE/LWPOLYLINE/CIRCLE。
 
@@ -209,15 +252,13 @@ def del_frame_edges(ents, frame, margin=500):
     再做几何兜底——删 bbox 与本框完全重合的外框多段线（只此一条，不会误删内容）。
     """
     x0, y0, x1, y1 = frame
-    frame_layers = {"tukuang", "图框", "0", "pub_title", "图签", "tk", "title", "frame",
-                    "border", "borders", "边框"}
     to_del = []
     for d in ents:
         e, et, layer, bb = d["e"], d["et"], d["layer"], d["bb"]
         if et not in ("AcDbLine", "AcDbPolyline", "AcDb2dPolyline", "AcDbCircle"):
             continue
         ll = (layer or "").lower()
-        if ll not in frame_layers and not ll.startswith("tukuang"):
+        if ll not in FRAME_LAYERS and not ll.startswith("tukuang"):
             continue
         if bb is None:
             continue
@@ -345,34 +386,43 @@ def prepare_templates(app, tpl_dir, out_dir):
     os.makedirs(out_dir, exist_ok=True)
     result = {}
     for src in sorted(glob.glob(os.path.join(tpl_dir, "HH_FRAME_*.dxf"))):
-        name = os.path.splitext(os.path.basename(src))[0]
-        size_name = name.replace("HH_FRAME_", "")
-        dst = os.path.join(out_dir, "_" + name + ".dwg")  # 前导下划线规避自参照
-        result[size_name] = dst
-        # 已有效则跳过
-        if _is_dwg(dst):
-            print("   模板 %s 已就绪，跳过" % name)
-            continue
-        # 清掉残留（可能上次写成 .dwg.dxf 或无效文件）
-        for cand in (dst, dst + ".dxf"):
-            if os.path.exists(cand):
-                try:
-                    os.remove(cand)
-                except Exception:
-                    pass
-        try:
-            app.Visible = True
-        except Exception:
-            pass
-        doc = _retry(lambda: app.Documents.Open(os.path.abspath(src)), label="Open tpl")
-        time.sleep(0.5)
-        try:
-            _retry(lambda: doc.SaveAs(os.path.abspath(dst), 12), label="SaveAs dwg")
-        except Exception as e:
-            print("   模板 %s SaveAs 失败: %r" % (name, e))
-        _retry(lambda: doc.Close(False), label="Close tpl")
-        print("   模板 %s -> %s valid=%s" % (name, dst, _is_dwg(dst)))
+        size_name = os.path.splitext(os.path.basename(src))[0].replace("HH_FRAME_", "")
+        result[size_name] = prepare_one(app, src, out_dir)
     return result
+
+
+def prepare_one(app, src_dxf, out_dir):
+    """把单个模板 DXF 转成二进制 DWG，返回 dwg 路径。
+
+    从 prepare_templates 抽出，供「按检出框比例即时生成的模板」按需转换
+    （非标幅面的模板在跑之前不可能预先枚举出来，只能边检测边生成）。
+    """
+    os.makedirs(out_dir, exist_ok=True)
+    name = os.path.splitext(os.path.basename(src_dxf))[0]
+    dst = os.path.join(out_dir, "_" + name + ".dwg")  # 前导下划线规避自参照
+    if _is_dwg(dst):
+        print("   模板 %s 已就绪，跳过" % name)
+        return dst
+    # 清掉残留（可能上次写成 .dwg.dxf 或无效文件）
+    for cand in (dst, dst + ".dxf"):
+        if os.path.exists(cand):
+            try:
+                os.remove(cand)
+            except Exception:
+                pass
+    try:
+        app.Visible = True
+    except Exception:
+        pass
+    doc = _retry(lambda: app.Documents.Open(os.path.abspath(src_dxf)), label="Open tpl")
+    time.sleep(0.5)
+    try:
+        _retry(lambda: doc.SaveAs(os.path.abspath(dst), 12), label="SaveAs dwg")
+    except Exception as e:
+        print("   模板 %s SaveAs 失败: %r" % (name, e))
+    _retry(lambda: doc.Close(False), label="Close tpl")
+    print("   模板 %s -> %s valid=%s" % (name, dst, _is_dwg(dst)))
+    return dst
 
 
 def del_frame_lines_acad(ents, frames, margin=1.0):

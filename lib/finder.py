@@ -5,6 +5,7 @@
   detect_titleblock(doc, frame) —— 用标题栏词表锚定右下角标题栏区域（紧凑，不吞主视图）。
 返回供 run_real.py 使用。
 """
+import bisect
 import re
 from ezdxf import bbox as bbox_mod
 from .concepts import SW_TITLE_VOCAB, FRAME_BLOCK_KEYWORDS, CONCEPT_ALIASES
@@ -60,90 +61,254 @@ def _seg_edges(e):
     return out
 
 
-def _union_span(intervals):
-    """合并重叠区间，返回总覆盖长度（用于按坐标聚合线段覆盖度）。"""
-    ivs = sorted(intervals)
-    total = 0.0
+def _merge_ivs(intervals, bridge=0.0):
+    """合并重叠/相邻（间隙 <= bridge）的区间，返回 [(a, b), ...]。"""
+    out = []
     cur = None
-    for a, b in ivs:
+    for a, b in sorted(intervals):
         if cur is None:
             cur = [a, b]
-        elif a <= cur[1]:
-            cur[1] = max(cur[1], b)
+        elif a <= cur[1] + bridge:
+            if b > cur[1]:
+                cur[1] = b
         else:
-            total += cur[1] - cur[0]
+            out.append((cur[0], cur[1]))
             cur = [a, b]
     if cur:
-        total += cur[1] - cur[0]
-    return total
+        out.append((cur[0], cur[1]))
+    return out
 
 
-def detect_frames(doc):
-    """检测图纸外框矩形列表 [(x0,y0,x1,y1), ...]（含外框和内框）。
+def _union_span(intervals):
+    """合并重叠区间，返回总覆盖长度（用于按坐标聚合线段覆盖度）。"""
+    return sum(b - a for a, b in _merge_ivs(intervals))
 
-    两种画法都支持：
-      (a) 连续长直线 / 闭合多段线构成的外框（单段即接近整边）；
-      (b) 被分段绘制的图框线（国标图框常把边框拆成多段短直线），
-          单段不超阈值，改用「按 x/y 坐标聚合线段覆盖度」重建矩形——
-          只要边框各边的线段在竖直/水平方向累计覆盖达到图幅的主要部分，
-          就能拼出外框，避免原实现因「单段长度 > 0.5×图幅」而被分段短
-          线滤掉的漏检。
 
-    返回最外矩形（双线边框额外返回内层矩形）。下游线框回退取面积最大者
-    作为插入区域。
+def _axis_edges(segs, orient, coord_tol, bridge, min_len, limit=900):
+    """把同方向线段重建成「整条边」：同坐标聚簇 + 区间合并。
+
+    返回 [(coord, lo, hi), ...]（按 coord 升序），只保留长度 >= min_len 的边。
+    国标图框常把边框拆成多段短直线，合并后才能还原成一条完整边。
+    """
+    buckets = {}
+    for (o, c, c0, c1) in segs:
+        if o != orient:
+            continue
+        buckets.setdefault(c, []).append((c0, c1))
+    edges = []
+
+    def flush(cl):
+        if not cl:
+            return
+        ivs = []
+        for c in cl:
+            ivs.extend(buckets[c])
+        cc = sum(cl) / len(cl)
+        for a, b in _merge_ivs(ivs, bridge):
+            if b - a >= min_len:
+                edges.append((cc, a, b))
+
+    cluster = []
+    for c in sorted(buckets):
+        # 只在「簇总宽度 <= coord_tol」时并入，避免密集平行线连成一大簇
+        if cluster and c - cluster[0] <= coord_tol:
+            cluster.append(c)
+        else:
+            flush(cluster)
+            cluster = [c]
+    flush(cluster)
+    if len(edges) > limit:      # 极端复杂图纸下限制装配规模，保留最长的边
+        edges.sort(key=lambda e: -(e[2] - e[1]))
+        edges = edges[:limit]
+    edges.sort()
+    return edges
+
+
+def _covers(edges, coords, coord, lo, hi, coord_tol, slack):
+    """edges 中是否存在坐标≈coord、且区间覆盖 [lo, hi] 的边。"""
+    i = bisect.bisect_left(coords, coord - coord_tol)
+    while i < len(edges) and edges[i][0] <= coord + coord_tol:
+        _, a, b = edges[i]
+        if a <= lo + slack and b >= hi - slack:
+            return True
+        i += 1
+    return False
+
+
+def _assemble_rects(vedges, hedges, coord_tol, min_side, rel_tol=0.01):
+    """由边线装配矩形：两条**共端点**竖边 + 两端各有一条跨越它们的横边。
+
+    关键在「共端点」约束（两竖边的上下端点必须近似相同）——图框是闭合矩形，
+    四条边首尾相接；而图内的长表格线、墙线虽然也很长，却极少与另一条竖线
+    端点严格对齐、且两端都有横边贯通，因此天然被排除。
+    """
+    hcoords = [e[0] for e in hedges]
+    out = []
+    n = len(vedges)
+    for i in range(n):
+        xi, yi0, yi1 = vedges[i]
+        for j in range(i + 1, n):
+            xj, yj0, yj1 = vedges[j]
+            w = xj - xi
+            if w < min_side:
+                continue
+            h = min(yi1, yj1) - max(yi0, yj0)
+            if h < min_side:
+                continue
+            vtol = max(coord_tol, rel_tol * h)
+            if abs(yi0 - yj0) > vtol or abs(yi1 - yj1) > vtol:
+                continue
+            yB = (yi0 + yj0) / 2.0
+            yT = (yi1 + yj1) / 2.0
+            slack = max(coord_tol, rel_tol * w)
+            htol = max(coord_tol, rel_tol * (yT - yB))
+            if not _covers(hedges, hcoords, yB, xi, xj, htol, slack):
+                continue
+            if not _covers(hedges, hcoords, yT, xi, xj, htol, slack):
+                continue
+            out.append((xi, yB, xj, yT))
+    return out
+
+
+def _bbox_overlap(a, b, tol=0.0):
+    """两 bbox 是否有实质重叠（仅贴边不算）。"""
+    return (a[0] < b[2] - tol and b[0] < a[2] - tol and
+            a[1] < b[3] - tol and b[1] < a[3] - tol)
+
+
+def detect_frame_groups(doc, min_area_share=0.35, dedup_ratio=0.8,
+                        split_cover=0.6, min_drawing_share=0.02):
+    """线框图纸（打散图框，无 INSERT 块）的图框检测。
+
+    返回 (sheet_bbox_or_None, groups)，groups = [{"outer": rect, "inner": [rect...]}]，
+    按面积降序。inner 是同一个图框的内层框线（双线边框），不是独立替换目标。
+
+    为什么不再用「按坐标取极值」
+    ----------------------------
+    原实现把「覆盖度 >= 0.6×图幅」的 x/y 坐标全收上来，然后取 xs[0]/xs[-1]、
+    ys[0]/ys[-1] 当外框四边。实测案例十的「首二层商场平面」里，图内的配电箱
+    系统表有多条横线宽达 84000（> 0.6×118800），于是最底下那条表格线被当成
+    图框底边，检出框变成 118800×99782（真框是 118800×84000），下游按这个错
+    比例插框 → 内容溢出/图框悬空。「首层配电干线平面图」同理（错成 118800×124702）。
+
+    现改为矩形装配：先把线段还原成整条边，再要求「两竖边共端点 + 两端横边贯通」
+    才算一个矩形，长表格线因端点不对齐而被排除；随后按包含关系分层（双线内框
+    归到 inner、拼版纸边识别为 sheet），并做面积占比 + 互不重叠筛选。
     """
     msp = doc.modelspace()
     segs = []
     for e in msp:
         segs.extend(_seg_edges(e))
     if not segs:
-        return []
+        return None, []
     try:
         ext = bbox_mod.extents(msp)
     except Exception:
-        return []
+        return None, []
     sw = max(1e-6, ext.extmax.x - ext.extmin.x)
     sh = max(1e-6, ext.extmax.y - ext.extmin.y)
+    maxdim = max(sw, sh)
+    coord_tol = max(0.5, 5e-4 * maxdim)
+    bridge = max(1.0, 2e-3 * maxdim)
+    min_side = max(20.0, 0.02 * maxdim)
 
-    # 按坐标聚合全部轴对齐线段的覆盖区间
-    TOL = 1.0
-    vcov = {}
-    hcov = {}
-    for (o, c, c0, c1) in segs:
-        if o == "v":
-            key = round(c / TOL) * TOL
-            vcov.setdefault(key, []).append((c0, c1))
-        else:
-            key = round(c / TOL) * TOL
-            hcov.setdefault(key, []).append((c0, c1))
-    vcov = {k: _union_span(v) for k, v in vcov.items()}
-    hcov = {k: _union_span(v) for k, v in hcov.items()}
+    vedges = _axis_edges(segs, "v", coord_tol, bridge, min_side)
+    hedges = _axis_edges(segs, "h", coord_tol, bridge, min_side)
+    rects = _assemble_rects(vedges, hedges, coord_tol, min_side)
+    if not rects:
+        return None, []
 
-    # 边需覆盖图幅主要部分（分段边框也能凑满整边）；阈值 0.6 兼顾容错
-    vmin = 0.6 * sh
-    hmin = 0.6 * sw
-    x_cand = sorted([x for x, cov in vcov.items() if cov >= vmin])
-    y_cand = sorted([y for y, cov in hcov.items() if cov >= hmin])
-    if len(x_cand) < 2 or len(y_cand) < 2:
-        return []
-    xs = sorted(set(x_cand))
-    ys = sorted(set(y_cand))
+    # 同一矩形可能被多组边线重复装配，按坐标量化去重
+    uniq = {}
+    for r in rects:
+        key = tuple(round(v / coord_tol) for v in r)
+        if key not in uniq or _bbox_area(r) > _bbox_area(uniq[key]):
+            uniq[key] = r
+    rects = sorted(uniq.values(), key=lambda r: -_bbox_area(r))
 
-    xL, xR = xs[0], xs[-1]
-    yB, yT = ys[0], ys[-1]
-    if xR - xL < 1 or yT - yB < 1:
-        return []
-    rects = [(xL, yB, xR, yT)]
-    # 双线边框：取次外/次内作为内层矩形（剔除与外框几乎重合的）
-    if len(xs) >= 4 and len(ys) >= 4:
-        ixL, ixR = xs[1], xs[-2]
-        iyB, iyT = ys[1], ys[-2]
-        if ixR - ixL >= 1 and iyT - iyB >= 1:
-            outer_area = (xR - xL) * (yT - yB)
-            inner_area = (ixR - ixL) * (iyT - iyB)
-            if inner_area < 0.99 * outer_area:
-                rects.append((ixL, iyB, ixR, iyT))
-    return rects
+    def children_of(r):
+        return [c for c in rects
+                if c is not r and _bbox_contains(r, c, coord_tol) and
+                _bbox_area(c) < dedup_ratio * _bbox_area(r)]
+
+    def tops_of(pool):
+        out = []
+        for r in pool:
+            if any(o is not r and _bbox_area(o) > _bbox_area(r) * 1.0001 and
+                   _bbox_contains(o, r, coord_tol) for o in pool):
+                continue
+            out.append(r)
+        return out
+
+    tops = tops_of(rects)
+
+    # 拼版纸边：最外框内含 >=2 个互不重叠的子框且合计占其大半，则它是纸边，
+    # 真正的替换目标是子框（对应 detect_frames_hierarchical 的 sheet 概念）。
+    sheet = None
+    if len(tops) == 1:
+        kids = children_of(tops[0])
+        sel = []
+        for c in sorted(kids, key=lambda x: -_bbox_area(x)):
+            if all(not _bbox_overlap(c, s, coord_tol) for s in sel):
+                sel.append(c)
+        if len(sel) >= 2 and \
+                sum(_bbox_area(c) for c in sel) >= split_cover * _bbox_area(tops[0]):
+            sheet = tops[0]
+            rects = [r for r in rects if r is not sheet]
+            tops = tops_of(rects)
+
+    if len(tops) > 1:
+        max_area = max(_bbox_area(r) for r in tops)
+        # 并排多框的图幅普遍同规格，占比过小的是图内表格/图例，不是图框
+        tops = [r for r in tops if _bbox_area(r) >= min_area_share * max_area]
+        kept = []
+        for r in sorted(tops, key=lambda x: -_bbox_area(x)):
+            if any(_bbox_overlap(r, k, coord_tol) for k in kept):
+                continue
+            kept.append(r)
+        tops = kept
+
+    # 全局占比护栏：真实图框应占整图 min_drawing_share 以上；占比过小（如控制原理图里
+    # 满屏继电器/接触器小方框，单个仅占整图 ~1%）的闭合矩形极可能是元件轮廓，应剔除，
+    # 避免误插公司框破坏原图。仅在出现多个候选框时启用——单框图纸保持旧行为（1 框即 1 目标），
+    # 不误杀小图幅里那唯一一个大框。参见 detect_frames_hierarchical 的同名护栏。
+    if min_drawing_share and min_drawing_share > 0 and len(tops) > 1:
+        try:
+            dext = bbox_mod.extents(msp)
+            drawing_area = float((dext.extmax.x - dext.extmin.x) *
+                                 (dext.extmax.y - dext.extmin.y))
+        except Exception:
+            drawing_area = 1e-9
+        if drawing_area > 0 and drawing_area != float("inf"):
+            kept_g = [r for r in tops if _bbox_area(r) >= min_drawing_share * drawing_area]
+            if kept_g:
+                tops = kept_g
+            else:
+                # 没有任何框占整图 min_drawing_share 以上 → 视为无有效图框
+                # （给煤机控制原理图即此情形：全图无 A 幅面边框）
+                return None, []
+
+    tops.sort(key=lambda r: -_bbox_area(r))
+    groups = []
+    for t in tops:
+        inner = [r for r in rects
+                 if r is not t and _bbox_contains(t, r, coord_tol) and
+                 _bbox_area(r) >= dedup_ratio * _bbox_area(t)]
+        groups.append({"outer": t, "inner": inner})
+    return sheet, groups
+
+
+def detect_frames(doc):
+    """检测图纸外框矩形列表 [(x0,y0,x1,y1), ...]（含外框和内框）。
+
+    兼容旧接口：把 detect_frame_groups 的结果摊平，每个图框先外框后内框；
+    下游取面积最大者即最外框。多图框图纸请直接用 detect_frame_groups。
+    """
+    out = []
+    for g in detect_frame_groups(doc)[1]:
+        out.append(g["outer"])
+        out.extend(g["inner"])
+    return out
 
 
 def detect_titleblock(doc, outer):
@@ -344,18 +509,19 @@ def detect_frames_hierarchical(doc, min_side=80, min_area=5000,
     return sheet, targets
 
 
-def extract_frame_fields(doc, frame_bbox, concepts=("TITLE", "DWG_NO", "SCALE", "STAGE")):
-    """从单个图框 frame_bbox 的右下角标题区提取字段，返回 {concept: value}。
+# ---------- 字段提取（打散图框）：标题名 + 裸比例 ----------
+_TITLE_KW = ("系统图", "平面图", "布置图", "接线图", "配置图", "原理图", "干线图",
+             "大样图", "详图", "示意图", "平面", "系统", "干线", "配电", "图")
+_TITLE_FULL = ("系统图", "平面图", "布置图", "接线图", "配置图", "原理图", "干线图",
+               "大样图", "详图", "示意图")
+_RATIO_RE = re.compile(r"^\d+\s*[:：xX×]\s*\d+$")
 
-    标题区定义为：右 45% × 底 60%。命中 图名/图号/比例/阶段 等规范概念则按冒号后取值；
-    若未抽到图名，用标题区内最长文本兜底为 TITLE。
-    """
-    fx0, fy0, fx1, fy1 = frame_bbox
-    W = fx1 - fx0
-    H = fy1 - fy0
-    msp = doc.modelspace()
-    items = []  # (cx, cy, raw)
-    for e in msp:
+
+def _collect_items(doc, box):
+    """收集 box 内 TEXT/MTEXT 实体：(cx, cy, raw, height)。"""
+    x0, y0, x1, y1 = box
+    out = []
+    for e in doc.modelspace():
         dt = e.dxftype()
         if dt not in ("TEXT", "MTEXT"):
             continue
@@ -370,54 +536,198 @@ def extract_frame_fields(doc, frame_bbox, concepts=("TITLE", "DWG_NO", "SCALE", 
             continue
         cx = (b.extmin.x + b.extmax.x) / 2
         cy = (b.extmin.y + b.extmax.y) / 2
-        # 限定标题区：右 45% 且 底 60%，且必须落在「当前图框」内。
-        # 注意四向都要约束：否则多图框（尤其 2×2 拼贴）时，相邻框的标题文字
-        # 会落入本框"标题区"（原实现只约束 cx 左界/cy 上界，区域向右下无限延伸）。
-        if not (fx0 + 0.45 * W <= cx <= fx1 and fy0 <= cy <= fy0 + 0.60 * H):
+        if x0 - 5 <= cx <= x1 + 5 and y0 - 5 <= cy <= y1 + 5:
+            h = float(getattr(e.dxf, "height", 0) or 0)
+            out.append((cx, cy, raw.strip(), h))
+    return out
+
+
+def _is_note(raw):
+    """判断是否为注记/说明文本（不应作为图名）。"""
+    s = (raw or "").strip()
+    if not s:
+        return True
+    if s.startswith(("注", "说明")):
+        return True
+    if re.match(r"^\d+[、.．]", s):
+        return True
+    if "同B1" in s or "同B2" in s or ("同" in s and "栋" in s):
+        return True
+    return False
+
+
+def _pick_title(items):
+    """从文本项里挑出最可能的图名：含图名关键词、非注记。
+    排序：① 完整图类名（系统图/平面图/…）加权 +100；② 字高最大（标题名单元格通常
+    字高最大）；③ 同分取标题栏最上方（cy 最大）。
+    """
+    cands = []
+    for cx, cy, raw, h in items:
+        if _is_note(raw):
             continue
-        items.append((cx, cy, raw.strip()))
+        if not any(k in raw for k in _TITLE_KW):
+            continue
+        if raw.startswith(("接", "由", "详见", "做法")):
+            continue
+        full = any(k in raw for k in _TITLE_FULL)
+        cands.append((h + (100.0 if full else 0.0), cy, raw))
+    if not cands:
+        return None
+    cands.sort(key=lambda r: (r[0], r[1]), reverse=True)
+    return cands[0][2]
+
+
+def _pick_scale(items):
+    """从文本项里挑比例：优先最常见值，同频按标准比例优先级。"""
+    std = ["1:100", "1:50", "1:150", "1:200", "1:250", "1:20",
+           "1:500", "1:1000", "1:2", "1:5", "1:10"]
+    ratios = [raw.strip() for cx, cy, raw, h in items if _RATIO_RE.match(raw.strip())]
+    if not ratios:
+        return None
+    cnt = {}
+    for r in ratios:
+        cnt[r] = cnt.get(r, 0) + 1
+    def _idx(r):
+        return std.index(r) if r in std else len(std)
+    order = sorted(cnt.items(), key=lambda kv: (-kv[1], _idx(kv[0])))
+    return order[0][0]
+
+
+def _title_from_label(items):
+    """标题栏内有「图名：xxx」合并标签，或「图名」标签+同行右侧值，则返回其值。"""
+    for cx, cy, raw, h in items:
+        n = _norm(raw)
+        for al in CONCEPT_ALIASES.get("TITLE", []):
+            if not al:
+                continue
+            if al in n and (":" in raw or "：" in raw):
+                val = re.split(r"[:：]", raw, maxsplit=1)[-1].strip()
+                if val:
+                    return val
+    for cx, cy, raw, h in items:
+        if _norm(raw) in [a for a in CONCEPT_ALIASES.get("TITLE", []) if a]:
+            best = None
+            best_dx = 1e9
+            for cx2, cy2, raw2, h2 in items:
+                if raw2 == raw:
+                    continue
+                if abs(cy2 - cy) < 6 and cx2 > cx:
+                    dx = cx2 - cx
+                    if dx < best_dx:
+                        best_dx = dx
+                        best = raw2
+            if best:
+                return best
+    return None
+
+
+def _longest_in_region(doc, fx0, fy0, fx1, fy1):
+    """兼容旧行为：右45%×底60% 区域内最长（≥2字、非注记）文本兜底为 TITLE。"""
+    W = max(1e-6, fx1 - fx0)
+    H = max(1e-6, fy1 - fy0)
+    cand = []
+    for e in doc.modelspace():
+        dt = e.dxftype()
+        if dt not in ("TEXT", "MTEXT"):
+            continue
+        raw = e.text if dt == "MTEXT" else e.dxf.text
+        if not raw:
+            continue
+        try:
+            b = bbox_mod.extents([e])
+        except Exception:
+            continue
+        if not (b and b.has_data):
+            continue
+        cx = (b.extmin.x + b.extmax.x) / 2
+        cy = (b.extmin.y + b.extmax.y) / 2
+        if fx0 + 0.45 * W <= cx <= fx1 and fy0 <= cy <= fy0 + 0.60 * H:
+            t = raw.strip()
+            if len(t) >= 2 and not _is_note(t):
+                cand.append(t)
+    if cand:
+        cand.sort(key=lambda t: -len(t))
+        return cand[0]
+    return None
+
+
+def extract_frame_fields(doc, frame_bbox, concepts=("TITLE", "DWG_NO", "SCALE", "STAGE", "DATE", "DESIGN")):
+    """从单个图框 frame_bbox 的右下角标题栏提取字段，返回 {concept: value}。
+
+    打散图框（无块式标题栏）的字段提取质量关键点：
+      - TITLE 解析顺序：①「图名：xxx」标签值；② 标题栏框内含图名关键词(平面/系统图/…)
+        且非注记(注：/同B1栋/2、…)的文本，按 字高(+完整图类名) 取最大者（标题名单元格
+        通常字高最大）；③ 标题栏框未命中时回退整图右35%；④ 最后兜底旧行为（右45%×底60%
+        最长非注记文本）。②③④对案例十这类「标题是自由文本、注记更长」的图至关重要，避免
+        把注记/电缆型号/房间号误当图名。
+      - SCALE：优先「比例：」标签值；否则取标题栏框内裸比例文本（1:100），最常见/标准值优先；
+        框外疑似视图比例不纳入，避免错填。
+      - DWG_NO/STAGE/DATE/DESIGN：标题栏框内标签+值匹配；无对应文本则留空。
+    """
+    fx0, fy0, fx1, fy1 = frame_bbox
+    W = max(1e-6, fx1 - fx0)
+    H = max(1e-6, fy1 - fy0)
+    tb = detect_titleblock(doc, frame_bbox)
+    items_tb = _collect_items(doc, tb)
     fields = {}
+    # 1) 标签+值概念（DWG_NO/STAGE/DATE/DESIGN/SCALE）
     for concept in concepts:
+        if concept == "TITLE":
+            continue
         aliases = CONCEPT_ALIASES.get(concept, [concept.lower()])
-        matched = False
+        found = None
         for al in aliases:
             if not al:
                 continue
-            # 1) 合并实体：如 "图名：减速器箱体"
-            for cx, cy, raw in items:
-                n = _norm(raw)
-                if al in n and (":" in raw or "：" in raw):
+            for cx, cy, raw, h in items_tb:
+                if al in _norm(raw) and (":" in raw or "：" in raw):
                     val = re.split(r"[:：]", raw, maxsplit=1)[-1].strip()
                     if val:
-                        fields[concept] = val
-                        matched = True
+                        found = val
                         break
-            if matched:
+            if found:
                 break
-            # 2) 标签实体 + 同行右侧的值实体（标签与值分两个 TEXT）
-            for cx, cy, raw in items:
+            for cx, cy, raw, h in items_tb:
                 if _norm(raw) == al:
                     best_val = None
                     best_dx = 1e9
-                    for cx2, cy2, raw2 in items:
+                    for cx2, cy2, raw2, h2 in items_tb:
                         if raw2 == raw:
                             continue
-                        if abs(cy2 - cy) < 4 and cx2 > cx:
+                        if abs(cy2 - cy) < 6 and cx2 > cx:
                             dx = cx2 - cx
                             if dx < best_dx:
                                 best_dx = dx
                                 best_val = raw2
                     if best_val:
-                        fields[concept] = best_val
-                        matched = True
+                        found = best_val
                         break
-            if matched:
+            if found:
                 break
-    if "TITLE" not in fields:
-        cand = [raw for cx, cy, raw in items if len(raw) >= 3]
-        if cand:
-            cand.sort(key=lambda t: -len(t))
-            fields["TITLE"] = cand[0]
+        if found:
+            fields[concept] = found
+    # 2) SCALE 裸比例文本兜底（标签未命中时）
+    if "SCALE" not in fields:
+        sc = _pick_scale(items_tb)
+        if sc:
+            fields["SCALE"] = sc
+    # 3) TITLE
+    title = _title_from_label(items_tb)
+    if not title:
+        title = _pick_title(items_tb)
+    if not title:
+        try:
+            dext = bbox_mod.extents(doc.modelspace())
+            ex = (dext.extmin.x, dext.extmin.y, dext.extmax.x, dext.extmax.y)
+        except Exception:
+            ex = (fx0, fy0, fx1, fy1)
+        fw = max(1e-6, ex[2] - ex[0])
+        fb2 = (ex[2] - 0.35 * fw, ex[1], ex[2], ex[3])
+        title = _pick_title(_collect_items(doc, fb2))
+    if not title:
+        title = _longest_in_region(doc, fx0, fy0, fx1, fy1)
+    if title:
+        fields["TITLE"] = title
     return fields
 
 

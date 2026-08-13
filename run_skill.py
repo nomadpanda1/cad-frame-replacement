@@ -24,7 +24,7 @@ import shutil
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
-from lib import template_learn, finder, extract, mapper, block_replace, acad, logbook, raw_replace, acad_pipeline, acad_com  # noqa
+from lib import template_learn, finder, extract, mapper, block_replace, acad, logbook, raw_replace, acad_pipeline, acad_com, sheet, frame_gen  # noqa
 
 
 def _count_entities(doc):
@@ -110,15 +110,28 @@ def _titleblock_plausible(doc, regions, min_ratio=0.05):
 def _plan_frames(doc, mode):
     """决定这张图走单框还是多图框逐框替换。
 
-    返回 (use_multi, sheet_bbox, targets)。auto 模式下只有检出 >= 2 个图框才走多框分支，
-    单框图纸继续走原来的 find_titleblocks 逻辑，保证向后兼容。
+    返回 (use_multi, sheet_bbox, groups)。groups 是图框对象列表，每个元素为
+    {"outer": (x0,y0,x1,y1), "inner": [(x0,y0,x1,y1), ...]}——outer 是最外框，
+    inner 是同框的内层框线（双线边框），用于出图比例消歧（scale_from_margins）。
+
+    检测核心用 detect_frame_groups（边线重建成矩形 + 共端点装配），它比旧版
+    detect_frames_hierarchical 更准：能排除图内长表格线的“并集”误检（案例十
+    首二层商场/首层配电曾因此把框算错），且自然给出内层框边距。若 detect_frame_groups
+    落空，再回退 detect_frames_hierarchical（闭合多段线式图框，如案例十一原理图）。
     """
     if mode == "single":
         return False, None, []
-    sheet, targets = finder.detect_frames_hierarchical(doc)
+    # 注意：这里不能用 sheet 作变量名，会遮蔽 lib.sheet 模块（幅面推断）
+    sheet_bbox, groups = finder.detect_frame_groups(doc)
+    if not groups:
+        # 兜底：闭合多段线式图框（案例十一原理图等），无 inner 不消歧
+        sheet_b, targets = finder.detect_frames_hierarchical(doc)
+        if targets:
+            groups = [{"outer": t, "inner": []} for t in targets]
+            sheet_bbox = sheet_b
     if mode == "multi":
-        return bool(targets), sheet, targets
-    return len(targets) >= 2, sheet, targets
+        return bool(groups), sheet_bbox, groups
+    return len(groups) >= 2, sheet_bbox, groups
 
 
 def _process_multiframe(doc, template, targets, override, fit):
@@ -129,7 +142,8 @@ def _process_multiframe(doc, template, targets, override, fit):
     mappings = []
     all_written = []
     total_del = 0
-    for i, fb in enumerate(targets):
+    for i, t in enumerate(targets):
+        fb = t["outer"]
         fields = finder.extract_frame_fields(doc, fb)
         values, unmatched, unused = mapper.map_fields(template["fields"], fields, override)
         ndel = block_replace.delete_frame_border(doc, fb)
@@ -146,27 +160,73 @@ def _process_multiframe(doc, template, targets, override, fit):
     return mappings, all_written, total_del
 
 
-A_SIZES = [("A0", 1189, 841), ("A1", 841, 594), ("A2", 594, 420),
-           ("A3", 420, 297), ("A4", 297, 210)]
+class TemplateCtx(object):
+    """按检出框比例即时生成 / 缓存图框模板。
 
+    为什么不再用「查最近的 A 幅面」
+    ------------------------------
+    原 _guess_size 把图形单位下的框尺寸直接和毫米制 A 幅面表比大小，建筑图
+    84100x59400（1:100 的 A1）会被判成 A0——实测 case 10 的 10 张图**全部**
+    被判成 A0。因为 A0~A4 同为 √2 比例，等比缩放后看不出来，bug 被长期掩盖；
+    但遇到非 √2 图幅（加长图幅、竖版图幅）就会暴露：
 
-def _guess_size(bbox):
-    """按外框尺寸推断幅面（返回 A0/A1/A2/A3/A4）。
+      * 竖版图套横版模板 -> 新框只占底部，内容跑到框上方；
+      * 长宽比 1.77 的加长图 -> 新框比内容窄，右侧内容溢出框外。
 
-    注：insert_frame 会把模板等比缩放到检出框的实际尺寸，故这里只需选到
-    最近的 A 幅面即可；不再设严格阈值回退 A3，否则大图/非标图幅会被错判成 A3。
+    现在改为：sheet.guess_sheet 先猜出图比例再匹配幅面（含竖版/加长/非标），
+    然后 frame_gen.retarget 从用户给的模板重定向出一个**比例完全一致**的模板，
+    使 insert_frame 的 min(W/tw, H/th) 两项相等，等比缩放严丝合缝。
+
+    模板依然「随时可换」：重定向的源就是 --template 指定的那个文件。
     """
-    w = bbox[2] - bbox[0]
-    h = bbox[3] - bbox[1]
-    if w <= 0 or h <= 0:
-        return "A3"
-    best, best_err = None, 1e9
-    for name, sw, sh in A_SIZES:
-        for cand in [(sw, sh), (sh, sw)]:
-            err = abs(w - cand[0]) / cand[0] + abs(h - cand[1]) / cand[1]
-            if err < best_err:
-                best_err, best = err, name
-    return best
+
+    def __init__(self, app, src_template, auto_dir, dwg_dir, tpl_dwgs=None):
+        self.app = app
+        self.src_template = src_template
+        self.auto_dir = auto_dir
+        self.dwg_dir = dwg_dir
+        self.cache = {}          # size_name -> (dwg_path, (W, H), spec)
+        self.prebuilt = tpl_dwgs or {}   # prepare_templates 预转的 A0~A4
+        self.log = []            # 记录每帧的幅面判定，写进报告便于复核
+
+    def for_frame(self, bbox, inner=None):
+        """返回 (tpl_dwg_path, (tpl_w, tpl_h), spec)。
+
+        inner 给出同一图框的内层框线 bbox 时，用其边距反推出图比例作为 hint，
+        消解「A0@1:100 vs A2@1:200」这类数值等价但比例不同的歧义（见 sheet.scale_from_margins）。
+        """
+        spec = sheet.guess_sheet_bbox(bbox, inner)
+        if spec.name in self.cache:
+            return self.cache[spec.name]
+        dxf, size = frame_gen.ensure_template(
+            self.src_template, self.auto_dir, spec)
+        dwg = None
+        if self.app is not None:
+            try:
+                dwg = acad_com.prepare_one(self.app, dxf, self.dwg_dir)
+            except Exception as e:
+                print("   [WARN] 模板 %s 转 DWG 失败: %r" % (spec.name, e))
+        if dwg is None:
+            # 没有 AutoCAD（或转换失败）时退回预转好的同名/A3 模板，保证不中断
+            dwg = self.prebuilt.get(spec.name) or self.prebuilt.get("A3")
+            if dwg:
+                size = acad_com.A_SIZES.get(
+                    acad_com._size_name_from_tpl(dwg), size)
+        out = (dwg, size, spec)
+        self.cache[spec.name] = out
+        return out
+
+    def note(self, bbox, spec, size):
+        """记一条幅面判定日志。"""
+        w = bbox[2] - bbox[0]
+        h = bbox[3] - bbox[1]
+        rec = spec.as_dict()
+        rec["frame_size"] = [round(w, 1), round(h, 1)]
+        rec["tpl_size"] = [round(size[0], 2), round(size[1], 2)]
+        self.log.append(rec)
+        print("   幅面判定: 旧框 %.0fx%.0f (比例 %.3f) -> %s %.0fx%.0f%s" % (
+            w, h, w / h if h else 0, spec.name, size[0], size[1],
+            "  出图比例 1:%g" % spec.plot_scale if spec.exact else "  [非标，按精确比例定制]"))
 
 
 def _values_to_fields(template_fields, values):
@@ -178,7 +238,7 @@ def _values_to_fields(template_fields, values):
     return out
 
 
-def _process_one_acad(app, src, doc, args, template, override, tpl_dwgs):
+def _process_one_acad(app, src, doc, args, template, override, tplctx):
     """当本机有 AutoCAD 且请求 DWG 输出时，用 ezdxf 做计划、AutoCAD COM 执行替换。
 
     返回 (rec, out_dwg_path)。
@@ -206,17 +266,22 @@ def _process_one_acad(app, src, doc, args, template, override, tpl_dwgs):
         rec["mode"] = "multi"
         rec["found"] = len(targets)
         rec["sheet"] = [round(v, 1) for v in sheet_bbox] if sheet_bbox else None
-        for i, fb in enumerate(targets):
+        for i, t in enumerate(targets):
+            fb = t["outer"]
+            inner = t.get("inner") or []
             fields = finder.extract_frame_fields(doc, fb)
             values, unmatched, unused = mapper.map_fields(
                 template["fields"], fields, override)
-            size_name = _guess_size(fb)
-            tpl_dwg = tpl_dwgs.get(size_name) or tpl_dwgs.get("A3") or next(iter(tpl_dwgs.values()))
             fb_f = [float(v) for v in fb]
+            tpl_dwg, tpl_size, spec = tplctx.for_frame(
+                fb_f, inner[0] if inner else None)
+            tplctx.note(fb_f, spec, tpl_size)
             plan["frames"].append({
                 "frame": fb_f,
                 "titleblock": _title_strip(fb_f),
                 "tpl_dwg": tpl_dwg,
+                "tpl_size": list(tpl_size),
+                "sheet": spec.as_dict(),
                 "fields": _values_to_fields(template["fields"], values),
                 "mode": "multiframe",
             })
@@ -240,37 +305,50 @@ def _process_one_acad(app, src, doc, args, template, override, tpl_dwgs):
                 old = extract.extract_fields(doc, r)
                 values, unmatched, unused = mapper.map_fields(
                     template["fields"], old, override)
-                size_name = _guess_size(r["bbox"])
-                tpl_dwg = tpl_dwgs.get(size_name) or tpl_dwgs.get("A3") or next(iter(tpl_dwgs.values()))
+                bb = [float(v) for v in r["bbox"]]
+                tpl_dwg, tpl_size, spec = tplctx.for_frame(bb)
+                tplctx.note(bb, spec, tpl_size)
                 plan["frames"].append({
-                    "frame": [float(v) for v in r["bbox"]],
-                    "titleblock": [float(v) for v in r["bbox"]],
+                    "frame": bb,
+                    "titleblock": bb,
                     "tpl_dwg": tpl_dwg,
+                    "tpl_size": list(tpl_size),
+                    "sheet": spec.as_dict(),
                     "fields": _values_to_fields(template["fields"], values),
                     "mode": "block",
                 })
         else:
             # 线框检测回退（SolidWorks 打散图框）
-            frames = finder.detect_frames(doc)
-            if not frames:
+            sg0, groups0 = finder.detect_frame_groups(doc)
+            if not groups0:
                 raise RuntimeError("未检测到图框")
-            outer = max(frames, key=lambda r: (r[2] - r[0]) * (r[3] - r[1]))
+            outer_g = max(groups0, key=lambda g: (g["outer"][2] - g["outer"][0]) *
+                          (g["outer"][3] - g["outer"][1]))
+            outer = list(outer_g["outer"])
+            inner0 = outer_g["inner"][0] if outer_g["inner"] else None
             tb = finder.detect_titleblock(doc, outer)
-            old = extract.extract_fields(doc, {"bbox": tb, "method": "keyword", "entity": None})
+            # 【#99 修复】打散图框（无块式标题栏）必须用 finder.extract_frame_fields：
+            # 它按"图名字号最大 / 标题栏标签"定位真实图名，能排除「注：…」注记、电缆型号、
+            # 房间号等干扰（此前错用 extract.extract_fields 抓"最长文本"，把注记/电缆当图名）。
+            # extract_frame_fields 内部会自行 detect_titleblock，这里 tb 仅用于 plan 删除区。
+            old = finder.extract_frame_fields(doc, outer)
             values, unmatched, unused = mapper.map_fields(
                 template["fields"], old, override)
-            size_name = _guess_size(outer)
-            tpl_dwg = tpl_dwgs.get(size_name) or tpl_dwgs.get("A3") or next(iter(tpl_dwgs.values()))
+            outer_f = [float(v) for v in outer]
+            tpl_dwg, tpl_size, spec = tplctx.for_frame(outer_f, inner0)
+            tplctx.note(outer_f, spec, tpl_size)
             plan["frames"].append({
-                "frame": [float(v) for v in outer],
+                "frame": outer_f,
                 "titleblock": [float(v) for v in tb],
                 "tpl_dwg": tpl_dwg,
+                "tpl_size": list(tpl_size),
+                "sheet": spec.as_dict(),
                 "fields": _values_to_fields(template["fields"], values),
                 "mode": "raw-frame",
             })
             rec["mode"] = "raw-frame"
             rec["found"] = 1
-            print("   块式 0 命中 → 回退线框检测：外框 %s" % [tuple(round(c, 1) for c in f) for f in frames])
+            print("   块式 0 命中 → 回退线框检测：外框 %s" % [tuple(round(c, 1) for c in outer)])
 
     results = acad_pipeline.process_file(app, src, out_dwg, plan)
     rec["status"] = "ok"
@@ -317,6 +395,7 @@ def main():
     use_acad_direct = False
     acad_app = None
     tpl_dwgs = {}
+    tplctx = None
     if args.dwg:
         if not conv_info:
             print("[WARN] 请求输出 DWG 但本机无转换器，将只输出 DXF。")
@@ -331,6 +410,9 @@ def main():
                 tpl_dwgs = acad_com.prepare_templates(acad_app, tpl_dir, tpl_dwgs_dir)
                 print("   模板 DWG:", list(tpl_dwgs.keys()))
                 use_acad_direct = True
+                tplctx = TemplateCtx(
+                    acad_app, args.template,
+                    os.path.join(tpl_dir, "auto"), tpl_dwgs_dir, tpl_dwgs)
             except Exception as e:
                 print("[WARN] AutoCAD COM 连接失败，回退为 DXF+dxf_to_dwg:", e)
 
@@ -357,7 +439,7 @@ def main():
             # AutoCAD COM 直接处理原文件（绕过 ezdxf saveas 兼容性问题）
             if use_acad_direct and not args.detect_only and not args.dry_run:
                 rec, out_dwg = _process_one_acad(
-                    acad_app, src, doc, args, template, override, tpl_dwgs)
+                    acad_app, src, doc, args, template, override, tplctx)
                 report["files"].append(rec)
                 written_tags = [tag for fr in rec.get("acad_results", [])
                                 for tag in fr.get("fields", {})]
@@ -379,8 +461,8 @@ def main():
                 rec["sheet"] = [round(v, 1) for v in sheet_bbox] if sheet_bbox else None
                 print("   多图框模式：检测到 %d 个图框%s" % (
                     len(targets), "（另有整图纸边，不替换）" if sheet_bbox else ""))
-                for i, fb in enumerate(targets):
-                    print("     [%d] bbox=%s" % (i, [float(round(x, 1)) for x in fb]))
+                for i, t in enumerate(targets):
+                    print("     [%d] bbox=%s" % (i, [float(round(x, 1)) for x in t["outer"]]))
             else:
                 regions = finder.find_titleblocks(doc)
                 if regions and not _titleblock_plausible(doc, regions):
@@ -451,7 +533,8 @@ def main():
 
             if use_multi:
                 if args.dry_run:
-                    for fb in targets:
+                    for t in targets:
+                        fb = t["outer"]
                         fields = finder.extract_frame_fields(doc, fb)
                         values, unmatched, unused = mapper.map_fields(
                             template["fields"], fields, override)
@@ -527,6 +610,9 @@ def main():
             print("   [ERROR]", e)
             traceback.print_exc()
 
+    if tplctx is not None and tplctx.log:
+        # 幅面判定明细写进报告，便于事后复核「这张图为什么选了这个幅面」
+        report["sheet_decisions"] = tplctx.log
     rp = logbook.close(lb, args.out, report)
     print("\n== 完成。报告:", rp)
     return 0
