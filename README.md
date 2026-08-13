@@ -82,109 +82,66 @@
 </tr>
 </table>
 
-#### 二、其他场景测试（20 张，case 01/03/06/07/08）
+#### 二、其他场景测试（11 张，用 exe 核心 run_skill 重跑 case 03/06/07/08，与「exe 真实测试」不重复）
+
+> 以下图纸**均经 exe 核心（`run_skill.py`，块式/线框双检测 + 自动按幅面选模板）实际处理**，与上方「exe 真实测试」的 9 张 SolidWorks 图纸无重叠。
 
 <table>
 <tr><th align='center'>图纸</th><th>替换前</th><th>替换后</th></tr>
 <tr>
-<td align='center'><b>案例 01 · 从法兰(2)</b></td>
-<td><img src='assets/thumbnails/other_01__从法兰(2)_before.png' width='280' alt='before'></td>
-<td><img src='assets/thumbnails/other_01__从法兰(2)_after.png' width='280' alt='after'></td>
-</tr>
-<tr>
-<td align='center'><b>案例 01 · 前叉(1)</b></td>
-<td><img src='assets/thumbnails/other_01__前叉(1)_before.png' width='280' alt='before'></td>
-<td><img src='assets/thumbnails/other_01__前叉(1)_after.png' width='280' alt='after'></td>
-</tr>
-<tr>
-<td align='center'><b>案例 01 · 圆柱齿轮13×1(2)</b></td>
-<td><img src='assets/thumbnails/other_01__圆柱齿轮13×1(2)_before.png' width='280' alt='before'></td>
-<td><img src='assets/thumbnails/other_01__圆柱齿轮13×1(2)_after.png' width='280' alt='after'></td>
-</tr>
-<tr>
-<td align='center'><b>案例 01 · 圆柱齿轮65×1(1)</b></td>
-<td><img src='assets/thumbnails/other_01__圆柱齿轮65×1(1)_before.png' width='280' alt='before'></td>
-<td><img src='assets/thumbnails/other_01__圆柱齿轮65×1(1)_after.png' width='280' alt='after'></td>
-</tr>
-<tr>
-<td align='center'><b>案例 01 · 法兰(2)</b></td>
-<td><img src='assets/thumbnails/other_01__法兰(2)_before.png' width='280' alt='before'></td>
-<td><img src='assets/thumbnails/other_01__法兰(2)_after.png' width='280' alt='after'></td>
-</tr>
-<tr>
-<td align='center'><b>案例 01 · 等轴测图(1)</b></td>
-<td><img src='assets/thumbnails/other_01__等轴测图(1)_before.png' width='280' alt='before'></td>
-<td><img src='assets/thumbnails/other_01__等轴测图(1)_after.png' width='280' alt='after'></td>
-</tr>
-<tr>
-<td align='center'><b>案例 01 · 装配体图纸(1)</b></td>
-<td><img src='assets/thumbnails/other_01__装配体图纸(1)_before.png' width='280' alt='before'></td>
-<td><img src='assets/thumbnails/other_01__装配体图纸(1)_after.png' width='280' alt='after'></td>
-</tr>
-<tr>
-<td align='center'><b>案例 01 · 装配体爆炸图1(1)</b></td>
-<td><img src='assets/thumbnails/other_01__装配体爆炸图1(1)_before.png' width='280' alt='before'></td>
-<td><img src='assets/thumbnails/other_01__装配体爆炸图1(1)_after.png' width='280' alt='after'></td>
-</tr>
-<tr>
-<td align='center'><b>案例 01 · 龙门架</b></td>
-<td><img src='assets/thumbnails/other_01__龙门架_before.png' width='280' alt='before'></td>
-<td><img src='assets/thumbnails/other_01__龙门架_after.png' width='280' alt='after'></td>
-</tr>
-<tr>
 <td align='center'><b>案例 03 · 16MW_32MWh_一次设备表</b></td>
-<td><img src='assets/thumbnails/other_03__16MW_32MWh_一次设备表_before.png' width='280' alt='before'></td>
-<td><img src='assets/thumbnails/other_03__16MW_32MWh_一次设备表_after.png' width='280' alt='after'></td>
+<td><img src='assets/thumbnails/exe_03__16MW_32MWh_一次设备表_before.png' width='280' alt='before'></td>
+<td><img src='assets/thumbnails/exe_03__16MW_32MWh_一次设备表_after.png' width='280' alt='after'></td>
 </tr>
 <tr>
 <td align='center'><b>案例 03 · 16MW_32MWh_二次系统信号表</b></td>
-<td><img src='assets/thumbnails/other_03__16MW_32MWh_二次系统信号表_before.png' width='280' alt='before'></td>
-<td><img src='assets/thumbnails/other_03__16MW_32MWh_二次系统信号表_after.png' width='280' alt='after'></td>
+<td><img src='assets/thumbnails/exe_03__16MW_32MWh_二次系统信号表_before.png' width='280' alt='before'></td>
+<td><img src='assets/thumbnails/exe_03__16MW_32MWh_二次系统信号表_after.png' width='280' alt='after'></td>
 </tr>
 <tr>
 <td align='center'><b>案例 03 · 16MW_32MWh_二次系统柜体表</b></td>
-<td><img src='assets/thumbnails/other_03__16MW_32MWh_二次系统柜体表_before.png' width='280' alt='before'></td>
-<td><img src='assets/thumbnails/other_03__16MW_32MWh_二次系统柜体表_after.png' width='280' alt='after'></td>
+<td><img src='assets/thumbnails/exe_03__16MW_32MWh_二次系统柜体表_before.png' width='280' alt='before'></td>
+<td><img src='assets/thumbnails/exe_03__16MW_32MWh_二次系统柜体表_after.png' width='280' alt='after'></td>
 </tr>
 <tr>
 <td align='center'><b>案例 03 · 16MW_32MWh_储能系统简化主接线图</b></td>
-<td><img src='assets/thumbnails/other_03__16MW_32MWh_储能系统简化主接线图_before.png' width='280' alt='before'></td>
-<td><img src='assets/thumbnails/other_03__16MW_32MWh_储能系统简化主接线图_after.png' width='280' alt='after'></td>
+<td><img src='assets/thumbnails/exe_03__16MW_32MWh_储能系统简化主接线图_before.png' width='280' alt='before'></td>
+<td><img src='assets/thumbnails/exe_03__16MW_32MWh_储能系统简化主接线图_after.png' width='280' alt='after'></td>
 </tr>
 <tr>
 <td align='center'><b>案例 06 · 06a_multiframe</b></td>
-<td><img src='assets/thumbnails/other_06__06a_multiframe_before.png' width='280' alt='before'></td>
-<td><img src='assets/thumbnails/other_06__06a_multiframe_after.png' width='280' alt='after'></td>
+<td><img src='assets/thumbnails/exe_06__06a_multiframe_before.png' width='280' alt='before'></td>
+<td><img src='assets/thumbnails/exe_06__06a_multiframe_after.png' width='280' alt='after'></td>
 </tr>
 <tr>
 <td align='center'><b>案例 06 · 06b_nested_title</b></td>
-<td><img src='assets/thumbnails/other_06__06b_nested_title_before.png' width='280' alt='before'></td>
-<td><img src='assets/thumbnails/other_06__06b_nested_title_after.png' width='280' alt='after'></td>
+<td><img src='assets/thumbnails/exe_06__06b_nested_title_before.png' width='280' alt='before'></td>
+<td><img src='assets/thumbnails/exe_06__06b_nested_title_after.png' width='280' alt='after'></td>
 </tr>
 <tr>
 <td align='center'><b>案例 06 · 06c_missing_font</b></td>
-<td><img src='assets/thumbnails/other_06__06c_missing_font_before.png' width='280' alt='before'></td>
-<td><img src='assets/thumbnails/other_06__06c_missing_font_after.png' width='280' alt='after'></td>
+<td><img src='assets/thumbnails/exe_06__06c_missing_font_before.png' width='280' alt='before'></td>
+<td><img src='assets/thumbnails/exe_06__06c_missing_font_after.png' width='280' alt='after'></td>
 </tr>
 <tr>
 <td align='center'><b>案例 06 · 06d_countersign</b></td>
-<td><img src='assets/thumbnails/other_06__06d_countersign_before.png' width='280' alt='before'></td>
-<td><img src='assets/thumbnails/other_06__06d_countersign_after.png' width='280' alt='after'></td>
+<td><img src='assets/thumbnails/exe_06__06d_countersign_before.png' width='280' alt='before'></td>
+<td><img src='assets/thumbnails/exe_06__06d_countersign_after.png' width='280' alt='after'></td>
 </tr>
 <tr>
 <td align='center'><b>案例 07 · 07a_tiled</b></td>
-<td><img src='assets/thumbnails/other_07__07a_tiled_before.png' width='280' alt='before'></td>
-<td><img src='assets/thumbnails/other_07__07a_tiled_after.png' width='280' alt='after'></td>
+<td><img src='assets/thumbnails/exe_07__07a_tiled_before.png' width='280' alt='before'></td>
+<td><img src='assets/thumbnails/exe_07__07a_tiled_after.png' width='280' alt='after'></td>
 </tr>
 <tr>
 <td align='center'><b>案例 07 · 07b_side_by_side</b></td>
-<td><img src='assets/thumbnails/other_07__07b_side_by_side_before.png' width='280' alt='before'></td>
-<td><img src='assets/thumbnails/other_07__07b_side_by_side_after.png' width='280' alt='after'></td>
+<td><img src='assets/thumbnails/exe_07__07b_side_by_side_before.png' width='280' alt='before'></td>
+<td><img src='assets/thumbnails/exe_07__07b_side_by_side_after.png' width='280' alt='after'></td>
 </tr>
 <tr>
 <td align='center'><b>案例 08 · 08_real_multiframe</b></td>
-<td><img src='assets/thumbnails/other_08__08_real_multiframe_before.png' width='280' alt='before'></td>
-<td><img src='assets/thumbnails/other_08__08_real_multiframe_after.png' width='280' alt='after'></td>
+<td><img src='assets/thumbnails/exe_08__08_real_multiframe_before.png' width='280' alt='before'></td>
+<td><img src='assets/thumbnails/exe_08__08_real_multiframe_after.png' width='280' alt='after'></td>
 </tr>
 </table>
 
