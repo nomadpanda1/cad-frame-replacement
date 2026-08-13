@@ -2,6 +2,7 @@
 """把 exe 测试的输入/输出 DXF 渲染成 SVG，用于 HTML 前后对比。
 输入/输出 DXF 均为真实产物（exe 真跑得到）。"""
 import os
+import re
 import ezdxf
 from ezdxf.addons.drawing import Frontend
 from ezdxf.addons.drawing.svg import SVGBackend
@@ -49,9 +50,18 @@ def render(dxf_path, out_svg):
     except Exception:
         page = layout_mod.Page(0, 0, layout_mod.Units.mm)
     svg = backend.get_string(page)
-    # 注入白底，保证在网页里线条可见
-    if "<rect" not in svg[:500]:
-        svg = svg.replace(">", '>\n<rect x="0" y="0" width="100%" height="100%" fill="#ffffff"/>', 1)
+    # 统一注入深色背景矩形：必须插入到 <svg> 开标签之后（而非首个 `>`，
+    # 否则会误插到 <?xml?> 外侧，破坏 SVG 结构导致图纸空白）。
+    # 深色底 + 白/浅色线条，与 exe_test.html 视觉一致，且保证白色线条可见。
+    # 判定是否有背景：以本渲染器专用的深色标记 fill="#212830" 为准
+    # （不能用泛指的 "<rect"，否则原理图里的内容矩形会误判为背景已存在）。
+    if 'fill="#212830"' not in svg[:5000]:
+        m = re.search(r"<svg[^>]*>", svg)
+        if m:
+            pos = m.end()
+            svg = svg[:pos] + '\n<rect x="0" y="0" width="100%" height="100%" fill="#212830"/>' + svg[pos:]
+        else:
+            svg = svg.replace(">", '>\n<rect x="0" y="0" width="100%" height="100%" fill="#212830"/>', 1)
     with open(out_svg, "w", encoding="utf-8") as f:
         f.write(svg)
     return len(svg)

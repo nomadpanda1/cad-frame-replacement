@@ -2,6 +2,7 @@
 """生成 exe 真实测试报告 HTML（自包含，SVG 内联）。
 所有数据均来自真实 exe 运行产物：Execution_Log.csv / run_report.json / *_HH.dxf。"""
 import os
+import re
 import json
 import csv
 import ezdxf
@@ -34,8 +35,10 @@ def read_svg(name):
     # 去掉 xml 声明，便于内联（html 已有自己的 head）
     if s.startswith("<?xml"):
         s = s.split("?>", 1)[1].lstrip()
-    # 去掉宽度/高度硬编码，交由 CSS 控制响应式
-    s = s.replace('width="100%"', "", 1) if 'width="100%"' in s else s
+    # 仅移除 <svg> 元素自身的 width/height，交由 CSS 控制响应式；
+    # 切勿移除内部背景 rect 的 width/height=100%（否则背景塌缩为空白）。
+    s = re.sub(r'(<svg\b[^>]*?)\s+width="[^"]*"', r'\1', s, count=1)
+    s = re.sub(r'(<svg\b[^>]*?)\s+height="[^"]*"', r'\1', s, count=1)
     return s
 
 

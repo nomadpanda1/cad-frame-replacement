@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """生成「其他测试场景」汇总报告（case 01/03/06/07/08 用自动选模板+标题栏修复后的代码跑）。
 自包含 HTML，内联 before/after SVG，本地打开无依赖。"""
-import os, json, glob, importlib.util
+import os, re, json, glob, importlib.util
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(HERE, "test_other", "test_other.html")
@@ -26,7 +26,10 @@ def read_svg(cid, name):
             s = f.read()
         if s.startswith("<?xml"):
             s = s.split("?>", 1)[1].lstrip()
-        s = s.replace('width="100%"', "", 1) if 'width="100%"' in s else s
+        # 仅移除 <svg> 元素自身的 width/height，交由 CSS 控制响应式；
+        # 切勿移除内部背景 rect 的 width/height=100%（否则背景塌缩为空白）。
+        s = re.sub(r'(<svg\b[^>]*?)\s+width="[^"]*"', r'\1', s, count=1)
+        s = re.sub(r'(<svg\b[^>]*?)\s+height="[^"]*"', r'\1', s, count=1)
         out.append(s)
     return out[0], out[1]
 
