@@ -134,24 +134,32 @@ def _plan_frames(doc, mode):
     return len(groups) >= 2, sheet_bbox, groups
 
 
-def _process_multiframe(doc, template, targets, override, fit):
+def _process_multiframe(doc, template, targets, override, fit, tplctx=None):
     """逐框替换：每个图框各自提取字段、删旧边框与旧标题栏、插入公司图框并回填。
 
     与整图幅插一张框的老路径相比，这条路径才能正确处理一个 DXF 里排布多个图框的图纸。
+    若传入 tplctx，则每个图框按其自身幅面从 --template 重定向出对应尺寸模板（自动按幅面选模板）。
     """
     mappings = []
     all_written = []
     total_del = 0
     for i, t in enumerate(targets):
         fb = t["outer"]
+        inner = t.get("inner") or []
+        tpl = template
+        spec = None
+        if tplctx is not None:
+            tpl, spec = tplctx.template_for(list(fb), inner[0] if inner else None)
+            if spec is not None:
+                tplctx.note(list(fb), spec, (spec.width, spec.height))
         fields = finder.extract_frame_fields(doc, fb)
-        values, unmatched, unused = mapper.map_fields(template["fields"], fields, override)
+        values, unmatched, unused = mapper.map_fields(tpl["fields"], fields, override)
         ndel = block_replace.delete_frame_border(doc, fb)
         ndel += block_replace.delete_title_strip(doc, fb)
         total_del += ndel
         region = {"bbox": fb, "confidence": 1.0, "method": "frame",
                   "source": "multiframe", "entity": None}
-        _, written = block_replace.insert_template(doc, template, region, values, fit=fit)
+        _, written = block_replace.insert_template(doc, tpl, region, values, fit=fit)
         all_written += written
         mappings.append({"region": [round(v, 1) for v in fb], "extracted": fields,
                          "unmatched": unmatched, "unused": unused, "written": written})
@@ -187,6 +195,8 @@ class TemplateCtx(object):
         self.dwg_dir = dwg_dir
         self.cache = {}          # size_name -> (dwg_path, (W, H), spec)
         self.prebuilt = tpl_dwgs or {}   # prepare_templates 预转的 A0~A4
+        self.dict_cache = {}     # size_name -> learn_template(retargeted_dxf)，
+                                  # 供 ezdxf 路径按帧插入正确幅面的模板块
         self.log = []            # 记录每帧的幅面判定，写进报告便于复核
 
     def for_frame(self, bbox, inner=None):
@@ -200,6 +210,12 @@ class TemplateCtx(object):
             return self.cache[spec.name]
         dxf, size = frame_gen.ensure_template(
             self.src_template, self.auto_dir, spec)
+        # ezdxf 路径需要「按帧重定向好的模板 dict」，这里一并 learn 并缓存
+        if spec.name not in self.dict_cache:
+            try:
+                self.dict_cache[spec.name] = template_learn.learn_template(dxf)
+            except Exception as e:
+                print("   [WARN] 模板 %s learn 失败: %r" % (spec.name, e))
         dwg = None
         if self.app is not None:
             try:
@@ -215,6 +231,15 @@ class TemplateCtx(object):
         out = (dwg, size, spec)
         self.cache[spec.name] = out
         return out
+
+    def template_for(self, bbox, inner=None):
+        """ezdxf 路径用：返回 (template_dict, spec)。
+
+        template_dict 已按检出框比例从 --template 重定向出对应幅面并 learn 好，
+        可直接喂给 block_replace.insert_template / mapper.map_fields。
+        """
+        _, _, spec = self.for_frame(bbox, inner)
+        return self.dict_cache.get(spec.name), spec
 
     def note(self, bbox, spec, size):
         """记一条幅面判定日志。"""
@@ -395,7 +420,13 @@ def main():
     use_acad_direct = False
     acad_app = None
     tpl_dwgs = {}
-    tplctx = None
+    tpl_dir = os.path.join(HERE, "templates")
+    tpl_dwgs_dir = os.path.join(HERE, "tpl_dwgs")
+    auto_dir = os.path.join(tpl_dir, "auto")
+    # 始终建立 TemplateCtx：用于「按检出框幅面自动选/重定向模板」。
+    # 这是纯几何判定（sheet.guess_sheet_bbox + frame_gen.retarget），不依赖 AutoCAD COM。
+    # 仅当 --dwg 且本机有 AutoCAD 时，再挂上 app，使其额外把模板转成 DWG 供 COM 直接处理。
+    tplctx = TemplateCtx(None, args.template, auto_dir, tpl_dwgs_dir)
     if args.dwg:
         if not conv_info:
             print("[WARN] 请求输出 DWG 但本机无转换器，将只输出 DXF。")
@@ -405,18 +436,15 @@ def main():
                 acad_app = win32com.client.Dispatch("AutoCAD.Application")
                 time.sleep(2)
                 print("== AutoCAD COM 直接处理模式:", acad_app.Caption)
-                tpl_dir = os.path.join(HERE, "templates")
-                tpl_dwgs_dir = os.path.join(HERE, "tpl_dwgs")
                 tpl_dwgs = acad_com.prepare_templates(acad_app, tpl_dir, tpl_dwgs_dir)
                 print("   模板 DWG:", list(tpl_dwgs.keys()))
                 use_acad_direct = True
-                tplctx = TemplateCtx(
-                    acad_app, args.template,
-                    os.path.join(tpl_dir, "auto"), tpl_dwgs_dir, tpl_dwgs)
+                tplctx.app = acad_app
+                tplctx.prebuilt = tpl_dwgs
             except Exception as e:
                 print("[WARN] AutoCAD COM 连接失败，回退为 DXF+dxf_to_dwg:", e)
 
-    # 学习模板（一次）
+    # 学习模板（一次，作为字段映射的基准 schema；实际插入按每帧幅面重定向到对应尺寸模板）
     print("== 学习模板:", args.template)
     template = template_learn.learn_template(args.template)
     print("   类型:%s 块名:%s 字段数:%d bbox:%s" % (
@@ -485,10 +513,14 @@ def main():
                         # #4：用检测到的 outer 框作为插入区域，而非全局 sheet_extents，
                         #     避免图内 stray 远点实体把新公司图框撑大/错位
                         maxdim = max(outer[2] - outer[0], outer[3] - outer[1])
+                        # 按检出框幅面自动选/重定向模板（A0~A4/A4V/加长），不再硬套 --template 单一幅面
+                        tpl, spec = tplctx.template_for(list(outer))
+                        if spec is not None:
+                            tplctx.note(list(outer), spec, (spec.width, spec.height))
                         old = extract.extract_fields(doc, {"bbox": tb, "method": "keyword", "entity": None})
-                        values, unmatched, unused = mapper.map_fields(template["fields"], old, override)
+                        values, unmatched, unused = mapper.map_fields(tpl["fields"], old, override)
                         if args.dry_run:
-                            rec["written"] = [f["tag"] for f, v in zip(template["fields"], values) if v]
+                            rec["written"] = [f["tag"] for f, v in zip(tpl["fields"], values) if v]
                             rec["deleted"] = 0
                         else:
                             n_edge = raw_replace.delete_frame_lines(doc, frames)
@@ -498,7 +530,7 @@ def main():
                                       "source": "sheet", "entity": None}
                             # #3：尊重 GUI「缩放」选择（args.fit），不再写死 "max"
                             _, written = block_replace.insert_template(
-                                doc, template, region, values, fit=args.fit or "max")
+                                doc, tpl, region, values, fit=args.fit or "max")
                             rec["written"] = list(dict.fromkeys(written))
                             rec["deleted"] = n_edge + n_tb + n_mark
                         rec["found"] = 1
@@ -535,27 +567,32 @@ def main():
                 if args.dry_run:
                     for t in targets:
                         fb = t["outer"]
+                        inner = t.get("inner") or []
+                        tpl, _ = tplctx.template_for(list(fb), inner[0] if inner else None)
                         fields = finder.extract_frame_fields(doc, fb)
                         values, unmatched, unused = mapper.map_fields(
-                            template["fields"], fields, override)
+                            tpl["fields"], fields, override)
                         mappings.append({"region": [round(v, 1) for v in fb],
                                          "extracted": fields,
                                          "unmatched": unmatched, "unused": unused})
                 else:
                     mappings, all_written, total_del = _process_multiframe(
-                        doc, template, targets, override, args.fit)
+                        doc, template, targets, override, args.fit, tplctx)
                 regions = []
 
             for r in regions:
+                tpl, spec = tplctx.template_for(r["bbox"])
+                if spec is not None:
+                    tplctx.note(list(r["bbox"]), spec, (spec.width, spec.height))
                 old = extract.extract_fields(doc, r)
-                values, unmatched, unused = mapper.map_fields(template["fields"], old, override)
+                values, unmatched, unused = mapper.map_fields(tpl["fields"], old, override)
                 mappings.append({"region": [round(x, 1) for x in r["bbox"]],
                                   "extracted": old, "unmatched": unmatched, "unused": unused})
                 if args.dry_run:
                     continue
                 ndel = block_replace.delete_old(doc, r, margin=args.margin)
                 total_del += ndel
-                _, written = block_replace.insert_template(doc, template, r, values, fit=args.fit)
+                _, written = block_replace.insert_template(doc, tpl, r, values, fit=args.fit)
                 all_written += written
                 print("   替换: 删 %d 旧实体, 回填 %d 字段 -> %s" % (ndel, len(written), written))
 

@@ -60,11 +60,25 @@ def delete_frame_lines(doc, frames):
     return n
 
 
+def _spans_beyond(eb, tb, margin):
+    """实体是否「大幅越出」标题栏 bbox（在某一侧超出 margin 以上）。
+
+    用于区分两类跨越标题栏边界的长线：
+      - 真实尺寸线：横穿整张图纸，会在标题栏角之外大幅延伸（往往延伸到图框边）；
+      - 旧图框/标题栏的格线：被限制在标题栏区域，仅轻微探出角外。
+    仅当大幅越出时才判定为「应保留的尺寸线」。
+    """
+    return (eb[0] < tb[0] - margin or eb[2] > tb[2] + margin or
+            eb[1] < tb[1] - margin or eb[3] > tb[3] + margin)
+
+
 def delete_titleblock(doc, tb, maxdim):
     """删标题栏区域内实体：文本全删；完全落在标题栏内的线/多段线全删，
-    仅对跨越标题栏边界的线保留"短线删、长线（可能是真实尺寸线）保留"策略。"""
+    跨越边界的线按「长度 + 是否大幅越出标题栏」判定——
+    仅「长线 且 大幅越出」（真·尺寸线）保留，其余（旧图框标题栏残留）删除。"""
     msp = doc.modelspace()
     thr = 0.30 * maxdim
+    margin = 0.15 * maxdim
     n = 0
     for e in list(msp):
         dt = e.dxftype()
@@ -84,7 +98,9 @@ def delete_titleblock(doc, tb, maxdim):
                             eb[1] >= tb[1] and eb[3] <= tb[3])
             if not fully_inside:
                 L = max(eb[2] - eb[0], eb[3] - eb[1])
-                if L > thr:
+                # 长线但并未大幅越出标题栏 → 是旧图框标题栏格线，删；
+                # 只有「长且大幅越出」才是横穿图纸的真实尺寸线，保留。
+                if L > thr and _spans_beyond(eb, tb, margin):
                     continue
         msp.delete_entity(e); n += 1
     return n

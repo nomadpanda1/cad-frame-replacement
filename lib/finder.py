@@ -311,6 +311,52 @@ def detect_frames(doc):
     return out
 
 
+def _expand_tb_by_grid(doc, tb, outer, max_left_span=200.0, max_top_span=70.0):
+    """根据右下角实际网格线扩展标题栏 bbox。
+
+    文本锚点检测有时会低估标题栏宽度（例如 SW 机械小图的标题栏文字集中在右侧，
+    左侧格子线没有文字），导致旧标题栏残线留在新框里。此函数扫描右下固定区域
+    （右缘向内 200mm、下缘向上 70mm）内的长竖线/长横线，把 tb 扩展到真实网格边界。
+    """
+    xL, yB, xR, yT = outer
+    x0, y0, x1, y1 = tb
+    tb_h = max(1.0, y1 - y0)
+    min_v_span = 0.55 * tb_h
+    leftmost_x = xR - max_left_span
+    topmost_y = yB + max_top_span
+
+    v_lines = []
+    h_lines = []
+    for e in doc.modelspace().query("LINE LWPOLYLINE POLYLINE"):
+        pts = []
+        dt = e.dxftype()
+        if dt == "LINE":
+            pts = [(e.dxf.start[0], e.dxf.start[1]),
+                   (e.dxf.end[0], e.dxf.end[1])]
+        elif dt == "POLYLINE":
+            pts = [(v.dxf.location.x, v.dxf.location.y) for v in e.vertices]
+        else:
+            pts = [(p[0], p[1]) for p in e.get_points("xy")]
+        if not pts:
+            continue
+        xs = [p[0] for p in pts]
+        ys = [p[1] for p in pts]
+        bx0, by0, bx1, by1 = min(xs), min(ys), max(xs), max(ys)
+        # 长竖线：标题栏左边界
+        if (bx1 - bx0) <= 0.5 and (by1 - by0) >= min_v_span:
+            if leftmost_x - 1 <= bx0 <= xR + 2 and by0 <= y1 + 2 and by1 >= y0 - 2:
+                v_lines.append(bx0)
+        # 长横线：标题栏上边界（或内部主横线）
+        if (by1 - by0) <= 0.5 and (bx1 - bx0) >= 30.0:
+            if yB - 2 <= by0 <= topmost_y and bx0 <= xR + 2 and bx1 >= x0 - 2:
+                h_lines.append(by0)
+    if v_lines:
+        x0 = min(x0, min(v_lines) - 1.0)
+    if h_lines:
+        y1 = max(y1, max(h_lines) + 1.0)
+    return (x0, y0, x1, y1)
+
+
 def detect_titleblock(doc, outer):
     """用标题栏词表锚定右下角标题栏紧凑区域。outer=(x0,y0,x1,y1)。"""
     msp = doc.modelspace()
@@ -344,8 +390,9 @@ def detect_titleblock(doc, outer):
                 continue
             anchors.append((b.extmin.x, b.extmin.y, b.extmax.x, b.extmax.y))
     if not anchors:
-        # 兜底：右下角 0.45W × 0.32H
-        return (xR - 0.45 * W, yB, xR, yB + 0.32 * H)
+        # 兜底：右下角 0.45W × 0.32H，再按网格线扩展
+        tb = (xR - 0.45 * W, yB, xR, yB + 0.32 * H)
+        return _expand_tb_by_grid(doc, tb, outer)
     minx = min(a[0] for a in anchors)
     miny = min(a[1] for a in anchors)
     maxy = max(a[3] for a in anchors)
@@ -373,7 +420,9 @@ def detect_titleblock(doc, outer):
             top_y = max(top_y, b.extmax.y)
     top_y = min(top_y, top_scan)
     # 小余量
-    return (left, yB - 2.0, xR + 2.0, top_y + 4.0)
+    tb = (left, yB - 2.0, xR + 2.0, top_y + 4.0)
+    # 再按实际网格线扩展，防止文字偏右导致左侧格子线漏删
+    return _expand_tb_by_grid(doc, tb, outer)
 
 
 # ---------- 多图框逐框检测（案例七） ----------

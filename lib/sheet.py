@@ -191,7 +191,9 @@ def guess_sheet(width, height, scale_hint=None):
                     best = (name, cw, ch, s)
         return best, best_err
 
-    best, best_err = search(scales)
+    best, best_err = search([1.0])   # 优先按 1:1 实尺判定：CAD 图纸在模型空间通常按 1:1 绘制
+    if best is None or best_err > EXACT_TOL:
+        best, best_err = search(scales)
     if best is None or best_err > EXACT_TOL:
         # 限定比例后找不到标准幅面，说明它本来就是非标幅面；
         # 此时**不要**放开比例去硬凑标准幅面（那会选错纸面大小），走非标定制分支。

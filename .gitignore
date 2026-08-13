@@ -74,3 +74,4 @@ build_*_log*.txt
 cases/12_detect_negative/inputs/std_A3.dwg
 
 cases/12_detect_negative/_conv/
+templates/auto/
