@@ -23,6 +23,8 @@
 - 📊 **[cases/report.html](cases/report.html)** —— 完整效果对比报告（链接图，含各案例前后对比 + 使用说明 + 修复记录）
 - 📦 **[cases/showcase.html](cases/showcase.html)** —— 单文件离线版，图片全部内嵌（约 10 MB），可直接下载发微信 / 邮件
 - 🏠 **[cases/index.html](cases/index.html)** —— 案例导航首页
+- 🧪 **[exe_test_out/exe_test.html](exe_test_out/exe_test.html)** —— 打包 **exe 真实运行** 9 张 SolidWorks 图纸前后对比（实测命令 + 逐图指标 + 提取到的真实字段）
+- 🧪 **[test_other/test_other.html](test_other/test_other.html)** —— 其他场景 20 张前后对比（自动按幅面选模板 + 标题栏残线修复，case 01/03/06/07/08）
 
 ### 前后对比缩略图
 
@@ -111,6 +113,30 @@
 
 - **案例十一 · 边框 less 密集小方框误检（已修复 ✅）**
   `detect_frames_hierarchical` 新增**全局占比护栏**：候选框面积须 ≥ 整图范围的 `min_drawing_share`（默认 2%），否则视为元件 / 符号方框剔除；过滤后若全空判定为「无有效图框」（不回退 raw，避免误插）。回归测试 `test_no_false_positive_borderless_dense` 复刻 15 元件方框 → 期望 `targets == []`。
+
+---
+
+## 🧪 端到端实测报告（真实数据 · 点开看前后对比）
+
+两份自包含 HTML 报告，将**真实输入 / 输出 DXF** 用 ezdxf 渲染成 SVG 内联，浏览器直接看「替换前 → 替换后」；所有数字、字段均来自真实运行，未做任何虚构。
+
+### 一、exe 真实测试（9 张 SolidWorks「打散」图纸）
+
+打包好的 `dist/cad-frame-cli.exe`（PyInstaller 单文件，系统 Python 3.14）真跑 9 张微信工程图，验证「从源码到成品」全链路：
+
+- **结果**：9 / 9 成功（`status=ok`），共删除 **746** 个旧图框相关实体；旧图框属性（图名 / 材料 / 比例 / 图号 / 重量 …）回填至新标题栏。
+- **按幅面自动选模板**：A4 × 6 + 非标 C429X297 × 3（400×277 真漂移非标，不被误判成标准幅面）。
+- **提取到的真实字段示例**：`TITLE=从动轮法兰 / 前叉 / 圆柱齿轮`、`MATERIAL=PLA / ABS / 亚克力`、`SCALE=2:1 / 1:5`、`WEIGHT=0.681`。
+- 👉 [exe_test_out/exe_test.html](exe_test_out/exe_test.html)
+
+### 二、其他场景测试（20 张，自动选模板 + 标题栏残线修复）
+
+覆盖 case 01/03/06/07/08，验证两处修复在真实图纸上的端到端效果：
+
+- **结果**：20 / 20 张标题栏残线 = **0**（清洁率 100%）。
+- **自动按幅面选模板全覆盖**：A1 × 9（ESS 储能大图幅）、A2V × 2（竖版）、A3 × 2、A4 × 6，加长非标 C429X297 × 3 / C867X420 × 1 / C423X210 × 1（多图框图纸按逐框计）。
+- **两处修复**：① 大图幅误判（约 A1 框原被误判 A3@1:2，现优先按 1:1 实尺 → 正确选 A1）；② 标题栏残线（旧长格线原因略超 0.30×maxdim 被当尺寸线保留，现仅「长且大幅越出标题栏」的尺寸线才保留）。
+- 👉 [test_other/test_other.html](test_other/test_other.html)
 
 ---
 
