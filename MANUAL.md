@@ -1,220 +1,242 @@
-# CAD 图框批量置换 · 使用手册（说明书）
+# CAD 图框批量置换 · 使用说明书
 
-> 对历史 CAD 图纸做"换芯手术"：识别旧图框 → 插入公司标准图框 → 无损迁移图号/图名/阶段/比例/日期等属性 → 输出符合标准的图纸。
-> 适用：电气/电路图、零件图、装配图、设计院系统图等一切"换公司图框"场景。
+> 把历史 CAD 图纸上的旧图框，自动换成你们公司的标准图框，并**无损迁移**旧图框里的字段
+> （图名 / 图号 / 比例 / 阶段 / 日期 / 设计人 …）。支持批量处理，公司图框**随时会变**——换模板重跑即可，代码零改动。
+> 适用：电气 / 电路图、机械零件图、装配图、设计院系统图、住宅楼电气设计方案等一切"换公司图框"场景。
+
+> ⚠️ **分发方式：源码运行，不提供 exe。** 本工具以源码方式分发——clone 仓库后直接用 Python 运行，无需打包成 exe。
+> 曾试过 PyInstaller 单文件 exe，但冻结后目标机生成的 DXF 打不开、CLI 也起不来，故弃用 exe 方案。
+> **弃用 exe 不会丢失任何测试效果**——下方"§6 已验证的测试效果"全部由源码直接跑出，与 exe 无关，全部完好保留。
 
 ---
 
 ## 0. 两条策略，先看清再选
 
-| 策略 | 适用对象 | 核心引擎 | 稳定性 | 命令 |
+| 策略 | 适用对象 | 核心引擎 | 稳定性 | 入口命令 |
 |---|---|---|---|---|
-| **一 · 普通图纸** | 自己导出的 DXF/DWG、无加密实体 | 纯 ezdxf 离线读→写 | 高（零 AutoCAD 依赖） | `python run_skill.py ...` |
-| **二 · 加密/代理实体图纸** | 设计院原图（打开空白 `Drawing1`、报"解密数据时出错"） | ezdxf 提字段 + **AutoCAD COM 直接处理原 DWG** | 中（需 AutoCAD 已打开） | `python run_cng_acad.py` |
+| **一 · 离线核心** | DXF / 普通 DWG（无加密实体） | 纯 ezdxf 离线读→写，跨平台 | 高（零 AutoCAD 依赖，输出 DXF） | `python run_skill.py ...`（不加 `--dwg`） |
+| **二 · AutoCAD COM 直接处理** | 本机装有 AutoCAD 时的 DWG（含设计院原图、含中文 SHX 字体、"打散"无块图框） | ezdxf 做"检测 + 字段计划"，实际删框 / 插框 / 回填 / 保存全部交给 AutoCAD COM 在原文件副本上完成，输出**真正被 AutoCAD 认可的 DWG** | 中（需本机 AutoCAD） | `python run_skill.py ... --dwg` |
 
-**怎么判断走哪条？** 先用策略一跑；若 AutoCAD 打开生成文件是空白/报错而 PNG 正常 → 原图含加密实体，改用策略二。
+**怎么判断走哪条？**
+- 手上是 DXF、或只要 DXF 成品 → 策略一（默认，最稳）。
+- 手上是 DWG、且本机装了 AutoCAD、想要真正可被 AutoCAD 打开的 DWG → 策略二（加 `--dwg`）。策略二会先用 ezdxf 检测 + 抽字段，再用 AutoCAD COM 在源文件**副本**上删旧框 / 插公司框 / 回填 14 属性 / `SaveAs .dwg`，**不改动源文件**。
+- 微信发来的"打散"类真实图纸（0 个 INSERT 块标题栏、含中文 SHX 字体）走策略二；实测住宅楼电气整套 11 张 DWG **11/11 全部成功**插入公司图框，旧框残线 **11/11 = 0**。
 
 ---
 
 ## 1. 环境准备
 
-- **Python 3.13**（项目用 managed venv：`C:/Users/86308/.workbuddy/binaries/python/versions/3.13.12/python.exe`）
-- **依赖**：`ezdxf`（已装）、`pywin32`（策略二需要，脚本里 `import win32com.client`）
-- **AutoCAD 2026**：策略二必须**手动先打开**（脚本用 `GetActiveObject`，不自动启动实例）
-- **字体映射**（策略二必做，否则 COM 卡死）：
-  - 编辑 `acad.fmp`，格式严格 `原字体;替代字体`（分号紧贴无空格），替代字体只写纯文件名如 `simhei.ttf`
-  - 改完**重启 AutoCAD** 生效；否则会一直弹 SHX 对话框 → COM 全部"拒绝接收呼叫"
-- **公司图框模板**（WBLOCK 二进制 DWG）：`tpl_dwgs/HH_FRAME_*.dwg`
-  - 若缺失，用 `python make_tpl_dwgs_wblock.py` 从 `HH_FRAME_*.dxf` 生成（magic=AC1032）
-  - `InsertBlock` **不支持 DXF 源**，模板必须是 DWG
+- **命令行 / 批量（CLI + 离线核心）**：Python 3.13+，已装 `ezdxf` 1.4.x。本机 managed venv 即可：
+  ```
+  C:/Users/86308/.workbuddy/binaries/python/envs/default/Scripts/python.exe
+  ```
+- **图文界面（GUI）**：用**系统 Python 3.14** 运行 `python gui_app.py`（`C:\Python314\python.exe`）。
+  managed 3.13 venv 未带 `tcl/tk`，`import tkinter` 会失败，所以 GUI 必须走系统 3.14。
+- **策略二依赖**：本机装 AutoCAD（测试环境为 AutoCAD 2026）；`pywin32`（`import win32com.client`）。
+- **字体映射（策略二处理中文 SHX 时建议做，否则 COM 可能卡在 SHX 弹窗）**：
+  编辑 `acad.fmp`，格式严格 `原字体;替代字体`（分号紧贴无空格），替代字体只写纯文件名如 `simhei.ttf`；
+  改完**重启 AutoCAD** 生效。
+- **公司图框模板**：`templates/` 下已带 `HH_FRAME_A0/A1/A2/A3/A4.dxf` + 竖版 `HH_FRAME_A4V.dxf`（块名、字段措辞、字段增减都能自动学习，无需改代码）。
+  注：COM 插框时模板须是 DWG，`lib/acad_com.py` 会先用 `SaveAs(_HH_FRAME_Ax.dwg, 12)`（acNative）把 DXF 模板即时转成 DWG，无需手工预转。
 
----
-
-## 2. 快速开始
-
-### 策略一 · 普通图纸（纯 ezdxf）
-```bash
-# 默认只输出 DXF
-python run_skill.py --template templates/公司图框.dwg 图纸1.dwg 图纸2.dxf ...
-# 完整 DWG（自动简化 + COM 转换，失败降级 DXF）
-python run_skill.py --template templates/公司图框.dwg --dwg 图纸.dwg ...
+依赖安装（装包请用官方源，清华源个别包缺失）：
 ```
-- 模板"随时会变"：重跑自动适应（ATTDEF tag 或 `<图名>` 占位符都识别），代码零改动
-- 输出 DXF（核心稳定）；DWG 需 COM 转换（不稳定，降级交付 DXF）
-
-### 策略二 · 设计院加密 DWG（AutoCAD COM 直接处理）
-```bash
-# 前提：先手动打开 AutoCAD 2026
-python run_cng_acad.py
-# 产出 output_cng_acad/CNG_电气系统图_HH.dwg（可直接在 AutoCAD 打开）
+pip install -r requirements.txt -i https://pypi.org/simple
 ```
-- ezdxf 只读提取字段（`plan()`），删框/插框/回填全部由 `lib/acad_com.py` 经 AutoCAD COM 在原 DWG 副本上完成
-- 换别的加密图纸：只改 `run_cng_acad.py` 里的 `plan()`（图框检测 + 字段提取），COM 通用函数零改动
 
 ---
 
-## 3. 标准流程（设计院加密 DWG，逐步）
+## 2. 快速开始（跑你自己的图）
 
-1. **准备输入**：原 DWG 放 `input_cng/`，其 ezdxf 可读 DXF 放 `dxf_cng/`（用 ODA/LibreCAD 转一份，仅用于字段提取，不写回）
-2. **准备模板**：`tpl_dwgs/HH_FRAME_A0..A4/A3_WIDE.dwg`（WBLOCK 生成）
-3. **手动打开 AutoCAD 2026**（关键，脚本不自动启动）
-4. **运行**：`python run_cng_acad.py`
-   - `plan()`：ezdxf 检测大坐标图框（LWPOLYLINE 闭合矩形）、按比例选模板、提取标题栏字段
-   - COM 循环每个图框：`del_frame_edges` 删外框线 → `del_in_region` 删会签栏 → `insert_frame` 插公司图框块并回填属性
-5. **保存**：`doc.Save()` 在副本上保存（不用 SaveAs，format 本机失效）
-6. **验收**：用 AutoCAD 打开 `output_cng_acad/CNG_电气系统图_HH.dwg`，确认不再是空白
+通用主入口是 **`run_skill.py`**：`--template` 指定公司图框，`inputs` 接一张或多张源图（支持 `*.dxf` / `*.dwg` 或通配符）。
 
-> 关键约束（逐一踩过）：打开副本后 `time.sleep(2)` 等加载；实体 bbox 用 `GetBoundingBox()`；插入点用 `VARIANT(VT_ARRAY|VT_R8,[x,y,0])`；属性用 `insert.GetAttributes()` 的 `.TextString` 写。
+```bash
+# 默认：输出 DXF（策略一，核心稳定）
+python run_skill.py --template templates/HH_FRAME_A3.dxf  samples/*.dxf
+
+# 多张混批
+python run_skill.py --template templates/HH_FRAME_A4.dxf  samples/old1.dxf samples/old2.dxf
+
+# 需要 DWG 输入输出（本机有 AutoCAD 时走策略二）
+python run_skill.py --template templates/HH_FRAME_A3.dxf --dwg --fit max  samples/*.dwg
+
+# 只检测标题栏，生成 detection.json（不改图，先确认识别对不对）
+python run_skill.py --template templates/HH_FRAME_A3.dxf --detect-only  samples/*.dxf
+
+# 只提取+映射，预览迁移结果（不改图）
+python run_skill.py --template templates/HH_FRAME_A3.dxf --dry-run  samples/*.dxf
+```
+
+**常用参数（`run_skill.py`）**
+
+| 参数 | 说明 |
+|---|---|
+| `--template` | 公司图框模板（**必填**，`.dxf`/`.dwg`） |
+| `--out` | 输出目录（默认 `output/`） |
+| `--suffix` | 输出文件后缀（默认 `_HH`，即 `原名_HH.dxf` / `原名_HH.dwg`） |
+| `--dwg` | 输出 DWG（本机有 AutoCAD 走策略二；否则依赖 ODA / LibreCAD 转换器） |
+| `--fit` | 新框缩放：`min` 保比例居中(默认) / `max` 满填 / `width` 按宽 / `height` 按高 |
+| `--margin` | 打散图框删除边距（默认 5.0） |
+| `--override` | 字段映射覆盖，如 `{"TITLE":"OLD_TITLE"}` |
+| `--mode` | 单框/多图框判定：`auto` 自动(默认，≥2 框走逐框替换) / `single` 强制整图幅一张框 / `multi` 强制逐框替换 |
+| `--detect-only` / `--dry-run` | 分阶段调试，不改图 |
+
+> 其它入口脚本也都可用（见 §8）：`run_real.py`(案例一)、`run_cng.py`(案例二)、`run_ess.py`(案例三)、`run_asm.py`(案例四)、`run_synth.py`(案例六)、`run_multiframe.py`(案例七)、`run_real_mf.py`(案例八)、`run_residential.py`(案例十) 等。
+
+**图文界面（GUI）**——不想敲命令时用：
+```bash
+C:\Python314\python.exe gui_app.py
+```
+GUI 复用 `run_skill.main`，核心逻辑零改动；界面里选模板、加文件、勾选 `--dwg` 即可，输出同名 `_HH` 文件。
 
 ---
 
-## 4. 模板规范
+## 3. 跑案例（验证工具好不好用）
 
-- **命名**：`HH_FRAME_<尺寸>.dwg`，尺寸 ∈ {A0, A1, A2, A3, A3_WIDE, A4}
-- **尺寸表**（毫米，用于按外框比例选模板 + 等比缩放）：
+仓库自带 **12 套案例**（10 套带前后对比渲染 + 2 套逻辑 / 负样本验证），覆盖真实机械图纸、电气系统图、储能图纸、装配体、设计院标准图、合成异常样本、多图框逐框替换、真实图纸拼接的多图框端到端验证，以及真实住宅楼电气设计方案（11 张 DWG）和给煤机控制原理图。
 
-  | 名称 | 宽×高 | 比例 | 备注 |
-  |---|---|---|---|
-  | A0 | 1189×841 | 1.41 | |
-  | A1 | 841×594 | 1.41 | |
-  | A2 | 594×420 | 1.41 | |
-  | A3 | 420×297 | 1.41 | 标准 |
-  | A3_WIDE | 604×299 | 2.02 | 自定义加长横条 |
-  | A4 | 297×210 | 1.41 | |
+```bash
+# 装依赖后，直接跑各案例脚本
+python run_real.py        # 案例一：9 张 SW 零件图（策略一）
+python run_cng.py         # 案例二：CNG 电气系统图（策略一）
+python run_ess.py         # 案例三：储能 ESS（策略一）
+python run_asm.py         # 案例四：无图框装配体（策略二）
+python run_synth.py       # 案例六：合成异常样本
+python run_multiframe.py  # 案例七：多图框逐框替换
+python gen_real_mf.py && python run_real_mf.py   # 案例八：真实 4×A1 拼接多图框
 
-- **字段（ATTDEF tag）**：`TITLE`(图名) / `DWG_NO`(图号) / `STAGE`(阶段) / `MATERIAL`(材料/专业) / `SCALE`(比例) / `DATE`(日期) 等
-- **多比例外框 → 多模板匹配**：标准 A 系列覆盖不了自定义宽图框（如 A3_WIDE）。`run_skill.py` 自动加载 `HH_FRAME_*.dxf` 全部模板，按 region 比例匹配最合适者（差异超阈值 0.25 才切换备选）
-- **缩放原则**：`scale = min(W/tw, H/th)` 等比缩放，保持模板自身比例不变，不压扁标题栏；region 必须是**完整图框外框**，不能只用标题栏内框
+# 策略二（AutoCAD COM 直接输出 DWG）：案例五/九/十
+python run_skill.py --template templates/HH_FRAME_A3.dxf --dwg --fit max  cases/05_standard_dwg/inputs/*.dwg
+python run_skill.py --template templates/HH_FRAME_A4.dxf --dwg --fit max  cases/09_kuidian_electrical/inputs/*.dwg
+python run_residential.py   # 案例十：住宅楼电气 11 张 DWG（封装了上面的调用）
+
+# 通用入口也能直接处理多图框：auto 自动判断单/多框，multi 强制逐框替换
+python run_skill.py --template templates/HH_FRAME_A1.dxf --mode auto  cases/07_multiframe/inputs/*.dxf
+python run_skill.py --template templates/HH_FRAME_A1.dxf --mode multi  cases/08_real_mf/inputs/*.dxf
+```
+
+**看效果（浏览器打开）**：
+- `cases/report.html` —— 完整效果对比报告（链接图，含各案例前后对比 + 使用说明 + 修复记录）
+- `cases/showcase.html` —— 单文件离线版，图片全部内嵌（约 10 MB），可直接下载发微信 / 邮件
+- `cases/index.html` —— 案例导航首页
+- `gallery.html` —— 一次性看全部 12 案例、122 张渲染（原图 / 模板 / 换框后对照）；本地用 `python -m http.server` 起静态服务后浏览器打开，相对图片才能加载
 
 ---
 
-## 5. 故障排查表
+## 4. 公司图框"随时会变"怎么办
+
+**什么都不用改代码**，只要：
+1. 用新版公司图框覆盖 `templates/` 下的模板文件（块名、字段措辞、字段增减都行）；
+2. 重新跑一次 `run_skill.py`。
+
+模板学习是**全自动**的：块模板读 ATTDEF，打散模板读 `<图名>` 占位符；字段按"概念"对齐
+（图名↔TITLE、图号↔DWG_NO …），中英文 / 简写都能对上。新模板多出来的字段，旧图没有对应来源的会自动留空。
+
+---
+
+## 5. 输出与校验
+
+- 每个源图生成 `原名_HH.dxf`（或 `--dwg` 时 `原名_HH.dwg`），**原文件永不覆盖**。
+- `output/Execution_Log.csv`：逐张执行记录（检测数 / 删除实体 / 回填字段 / 状态）。
+- `output/run_report.json`：完整报告，含每张图的字段提取与映射明细，便于核对。
+- 案例十这类"打散真实图纸"额外用 `verify/verify_shallow.json`（ezdxf `bbox.extents` 统计 HH_FRAME 块数与框内残线）做浅层核验。
+
+---
+
+## 6. 已验证的测试效果（放弃 exe 后**全部仍在** ✅）
+
+> 这些效果都是**源码直接运行** `run_skill.py` / `run_real.py` 等入口产出的；exe 只是同一份源码的冻结副本。
+> 弃用 exe 后，以下产物在仓库里**一件没少**：
+
+| 产物 | 路径 | 内容 |
+|---|---|---|
+| 完整对比报告 | `cases/report.html` | 12 案例前后对比 + 修复记录 + 使用说明 |
+| 内嵌图单文件版 | `cases/showcase.html` | 图片全内嵌（约 10 MB），可直接发微信 / 邮件 |
+| 案例导航页 | `cases/index.html` | 12 案例入口 |
+| 全案例渲染图集 | `gallery.html` | 12 案例 / 122 张（原图·模板·换框后），本地静态服务查看 |
+| 源码实测报告 | `src_test_out/exe_test.html` | 源码 `run_skill.py` 实测 9 张 SolidWorks 图纸（命令 + 逐图指标 + 提取到的真实字段） |
+| 其他场景测试 | `test_other/test_other.html` | 其他场景 20 张前后对比（自动选模板 + 标题栏残线修复） |
+| 缩略图 | `assets/thumbnails/*.png`（64 张） | README / 报告里引用的前后对比缩略图 |
+| 案例成品 DWG | `cases/*/outputs/dwg/*_HH.dwg`（12 个） | 住宅楼电气 11 张 + 给煤机 1 张，可直接在 AutoCAD 打开 |
+
+**并行的修复保证了"好效果"不被破坏**——你之前看到的高质量结果，靠的是源码里的这几处加固（都在 `lib/` 里，弃用 exe 不影响）：
+- **`del_titleblock` / `delete_titleblock` 只删旧图框层残线 + 标题栏字段标签文本**，绝不碰真实墙 / 窗 / 轴线 / 管线 / 标注 / 块；住宅电气图内容铺满全图也能 100% 保留（`run_report.json` 的 `deleted_titleblock` 由 497 降到 0~22，仅剩应删项）。
+- **`del_frame_layer_inside`** 删"图框层 + 完全落在旧框内"的全部线类实体，新框不再压旧线（案例十浅层核验 11/11 残线 = 0）。
+- **`lib/sheet.py` + `lib/frame_gen.py`** 按检出旧框真实比例即时重定向模板（锚定拉伸），非 √2 / 竖版图也能严丝合缝，不再等比套不住。
+- 已沉淀为可复用 skill `cad-frame-del-titleblock`，逻辑稳定。
+
+---
+
+## 7. 已知约束 / 故障排查
 
 | 现象 | 原因 | 解决 |
 |---|---|---|
-| 打开生成文件是空白 `Drawing1`、报"解密数据时出错" | 原图含加密/代理实体，ezdxf 写回破坏 | 改用策略二（AutoCAD COM 直接处理原 DWG） |
-| AutoCAD COM 全部"拒绝接收呼叫" | SHX 字体弹窗阻塞 | 修 `acad.fmp` 字体映射（纯文件名+重启 AutoCAD） |
-| `doc.ModelSpace` 报"被呼叫方拒绝接收呼叫" | Open 后未等加载 | `Documents.Open` 后 `time.sleep(2)` |
-| `InsertBlock` 报"图形文件标题无效" | 用 DXF 作块源 | 改用 WBLOCK 生成的 `.dwg` 模板 |
-| `e.GeometricExtents` AttributeError | COM 实体无此属性 | 改用 `e.GetBoundingBox()` |
-| SaveAs 写出的是 DXF 不是 DWG | 本机 SaveAs format 失效 | 用 `doc.Save()` 保存在已打开副本上 |
-| 图框缩成一团/被压扁 | region 只取到标题栏内框 / 非等比缩放 | 检测完整外框；用 `min(W/tw,H/th)` 等比 |
-| 第 N 张图丢失 | 替换后 frame 被 strong 过滤误删 | frame 标记 `"frame"` 策略保留 |
-| 底部电路标注被删空 | 按百分比删"表格"误伤 | 仅删外框边界 + 精确标题栏区域，保留电路几何 |
+| AutoCAD 打开生成文件是空白 `Drawing1`、报"解密数据时出错" | 原图含加密 / 代理实体，ezdxf 写回破坏 | 改用策略二（`--dwg`，AutoCAD COM 直接处理原 DWG） |
+| AutoCAD COM 全部"拒绝接收呼叫" | SHX 字体弹窗阻塞 | 修 `acad.fmp` 字体映射（纯文件名 + 重启 AutoCAD） |
+| `doc.ModelSpace` 报"被呼叫方拒绝接收呼叫" | Open 后未等加载 | `Documents.Open` 后 `time.sleep(2)`（管线已处理） |
+| `InsertBlock` 报"图形文件标题无效" | 用 DXF 作块源 | 管线已先用 `SaveAs` 把 DXF 模板转 DWG 再插，无需手工处理 |
+| 图框缩成一团 / 被压扁 | region 只取到标题栏内框 / 非等比缩放 | 检测完整外框；用 `min(W/tw,H/th)` 等比 |
+| 第 N 张图丢失 | 替换后 frame 被过滤误删 | frame 标记策略保留 |
+| 多图框误检（把端子 / 符号 / 表格单元当图框） | 电气图里大量闭合矩形 | 面积占比下限(0.15) + 双线去重两级过滤；注意**不能**用"长宽比接近 √2"筛（加长图幅很常见，按标准比例会误杀真框） |
+| 边框 less / 全块化图纸识别不出框 | 当前检测器已知局限（负样本） | 案例十一（给煤机）正确判定"无有效图框、不改图"；案例十二（std_A3 分段边框、S7-1200 全块化）归档为已知局限，后续版本增强 |
 
-更完整的 30+ 条踩坑见 `../.workbuddy/skills/cad-frame-replace/SKILL.md` 的"本机关键踩坑"。
-
----
-
-## 6. 输出文件说明
-
-- `output_cng_acad/CNG_电气系统图_HH.dwg` —— 成品（可直接 AutoCAD 打开，magic=AC1032）
-- `output_cng_acad/plan.json` —— 图框检测 + 字段提取计划
-- `output_cng_acad/results.json` —— 每图框删除数 / 缩放 / 回填结果
-- `output_real/*_HH.dxf` —— 策略一产出的普通图纸换框结果
-- `cases/` —— 案例集（`01_SW_parts` 9 张零件图 / `02_CNG_electrical` 电气系统图 / `03_ESS_cad` 储能成果包 4 张 / `04_assembly` 无图框装配体 1 张 / `06_synth` 合成异常样本 4 类 / `07_multiframe` 多图框逐框替换 2 类），含 `index.html` 与 `report.html` 对比图
+其它要点：
+- **打散旧图框（无块）**：靠"关键词 + 附近表格线"吸附定位，复杂图纸建议先用 `--detect-only` 人工确认区域；块图框识别最稳。
+- **缩放策略**：默认 `min`（保比例、不拉伸变形、居中）。若觉得"图框偏小有留白"，用 `--fit max` 满填（约 2% 形变，可接受）。
+- **多图框图纸**：建议先 `--detect-only` 看一下识别出的框数是否符合预期。
+- 双线图框（外框 + 内框两条矩形）会被去重为外框，替换时一并清理内框残线。
 
 ---
 
-## 7. 文件索引
+## 8. 文件索引
 
 | 文件 | 作用 |
 |---|---|
-| `run_skill.py` | 策略一主入口（纯 ezdxf 离线） |
-| `run_cng_acad.py` | 策略二主入口（加密 DWG，CNG 特定 plan） |
-| `lib/acad_com.py` | 策略二核心：AutoCAD COM 通用函数库 |
-| `lib/acad.py` | DWG↔DXF 转换（ODA/LibreCAD） |
-| `lib/template_learn.py` | 模板自动学习（不硬编码） |
-| `lib/block_replace.py` | 语义概念映射 + bbox 删旧框 + INSERT 块 |
-| `lib/finder.py` | 多层图框识别（block/text/geometry，置信度评分） |
-| `lib/extract.py` | 属性提取（ATTRIB + TEXT/MTEXT 键值对） |
-| `make_tpl_dwgs_wblock.py` | 用 WBLOCK 把模板块写成二进制 DWG 模板 |
-| `run_ess.py` | 储能 ESS 成果包专用脚本（策略一：纯 ezdxf，A1 外框 + 右下角标题条 → HH_FRAME_A1） |
-| `run_asm.py` | 无图框装配体专用脚本（策略二：COM 转 DXF + 清标题栏占位 → HH_FRAME_A3） |
-| `gen_synth.py` | 程序化生成异常场景测试样本（06a 多图框 / 06b 嵌套块 / 06c 缺字体 / 06d 会签栏差异），输出到 `cases/06_synth/inputs/` |
-| `run_synth.py` | 对合成样本跑工具验证，输出 before/after 对比 + `results.json` 行为结论到 `cases/06_synth/outputs/` |
-| `gen_mf_samples.py` | 程序化生成多图框逐框替换测试样本（07a 平铺含整图纸框 / 07b 并排无整图纸框），输出到 `cases/07_multiframe/inputs/` |
-| `run_multiframe.py` | 多图框逐框替换 runner：检测帧层级 → 逐框选模板 → 抽字段 → 删旧框线+标题栏 → 插公司图框(fit=max) → 回填，输出 before/模板/after + `results.json` 到 `cases/07_multiframe/outputs/` |
-| `MANUAL.md` | 本使用手册 |
-| `cases/report.html` | 案例对比报告（生成前/模板/生成后） |
+| `run_skill.py` | **通用主入口**：`--template` + 旧图纸 → 新图纸（`--dwg` 切换 AutoCAD COM 策略二） |
+| `run_real.py` | 案例一：SolidWorks 导出零件图批量置换（策略一） |
+| `run_cng.py` | 案例二：CNG 电气系统图（策略一） |
+| `run_ess.py` | 案例三：储能 ESS 图纸（策略一） |
+| `run_asm.py` | 案例四：无图框装配体（策略二） |
+| `run_synth.py` | 案例六：合成异常样本验证 |
+| `run_multiframe.py` | 案例七：多图框逐框替换 |
+| `run_real_mf.py` | 案例八：真实多图框（4×A1 拼接）端到端验证 |
+| `run_residential.py` | 案例十：住宅楼电气 11 张 DWG（封装 `run_skill --dwg`） |
+| `gui_app.py` | 图文界面主程序（复用 `run_skill.main`，需系统 Python 3.14） |
+| `lib/finder.py` | 旧版图框检测（块式 / 线框 / 多图框层级）+ `extract_frame_fields`（真实图名提取） |
+| `lib/sheet.py` | 幅面推断：图形尺寸 → 出图比例 → 标准 / 自定义幅面 |
+| `lib/frame_gen.py` | 模板重定向：按旧框真实比例即时生成任意幅面模板 |
+| `lib/block_replace.py` / `lib/raw_replace.py` | 策略一：删旧框 + 插入新框 + 回填字段 |
+| `lib/acad_com.py` / `lib/acad_pipeline.py` | 策略二：AutoCAD COM 助手 / 通用 COM 流水线（plan→删框/插框/回填/SaveAs .dwg） |
+| `lib/del_titleblock` 相关 | 只删旧图框层残线 + 标题栏字段标签文本，保留真实图元 |
+| `templates/` | HH 公司图框模板 A0-A4 + A4V（DXF，COM 时即时转 DWG） |
+| `cases/` | 12 套案例（输入 / 输出 / 对比图 / 报告 / verify） |
+| `tests/` | 64 个用例（62 passed / 2 skipped），纯函数、内存构造最小 DXF，秒级跑完 |
+| `MANUAL.md` | 本使用说明书 |
+| `SKILL.md` | 可作为 WorkBuddy Skill 装载的说明 |
 
 ---
 
-## 8. 异常场景 · 无图框 / 无标题栏图纸
-
-部分图纸（如某些装配体、白模导出图）**没有旧图框矩形、也没有 TEXT 标题栏**——只有零散零件几何 + 右下角零散标注。这类图不能直接"删旧框"，否则无物可删；直接插公司图框又会和右下角标注重叠。
-
-**处理方式（以 `run_asm.py` 为例）：**
-1. 用 AutoCAD COM `SaveAs(fmt=1)` 把二进制 DWG 转成 ezdxf 可读的 ASCII DXF（本机 SaveAs format 参数生效，区别于设计院加密图）；
-2. 计算公司模板标题栏矩形（模板里面积最小的闭合 LWPOLYLINE，A3 下约 `x[235,415] y[6,62]`）；
-3. **清标题栏占位**：删除该矩形内所有原始实体（实测 63 个，均为 4×5~37×5 的小标注/尺寸文本，非零件主体）；
-4. 插入 `HH_FRAME_A3`（`fit="max"` 近 1:1），14 个字段全部建为**可编辑空占位**（见 `lib/block_replace.py` 改动：值缺失时写空串而非跳过，保证标题栏在 CAD 里可双击编辑）。
-
-> 注意：清理前务必确认该区域确为"应让位于标题栏"的零散标注，而非关键尺寸线。生产环境建议把清理矩形做成参数，并对被删实体做白名单/数量告警。
-
----
-
-## 9. 异常场景 · 合成样本测试包（案例六 `06_synth`）
-
-真实"多样化异常图"（不同设计院标题栏、多种加密、缺字体、嵌套块、多图框混排、会签栏差异）难以从公开网络批量获取，因此用 `gen_synth.py` **程序化生成可控、可复现**的异常 DXF，再用 `run_synth.py` 跑全流程验证工具行为。当前覆盖四类：
-
-| 样本 | 异常点 | 工具实际行为 | 结论 |
-|---|---|---|---|
-| `06a` 多图框混排 | 一张 A1 内含 A3/A4/A1 三张小图框 | 检测到 4 个闭合矩形；当前按**整图幅**插 1 张公司图框 | ⚠ 历史局限（**已在案例七解决**）：现已支持逐图框替换 |
-| `06b` 嵌套块标题栏 | 标题栏=块，内部又 INSERT 含 ATTDEF 的子块 | `learn_template` 正确穿透到子块，识别 9 字段 | ✅ 支持嵌套块 |
-| `06c` 缺字体(SHX) | TEXT 引用不存在字体 `hzdx_ghost.shx` | 文字串照常抽取、渲染不崩溃（matplotlib 回退默认字体） | ✅ 缺字体不影响处理 |
-| `06d` 会签栏差异 | 标题栏多出"会签"列 | 图名/图号/比例/阶段 仍按标签正确抽取 | ✅ 会签栏差异不影响映射 |
-
-> 加密/代理实体 DWG 无法用 ezdxf 合成真实代理实体，该类异常由**案例二 CNG**（设计院含代理实体 DWG，策略二 COM 直接处理）覆盖。
-
-生成 / 验证命令：
-```bash
-python gen_synth.py     # 生成 06a~06d 到 cases/06_synth/inputs/
-python run_synth.py     # 跑验证，输出 before/after + results.json 到 cases/06_synth/outputs/
-
-
----
-
-## 10. 多图框逐框替换（案例七 `07_multiframe` · 开发项成果）
-
-一张图纸内含多个图框（平铺子图、并排多图）时，需要**逐框**插入公司图框并分别回填，而不是整图幅插一张。
-
-### 10.1 核心函数
-
-**`lib/finder.py` · `detect_frames_hierarchical(doc)`** → `(sheet_bbox_or_None, [target_frame_bbox, ...])`
-- 收集 modelspace 所有闭合矩形（轴对齐、side>80、area>5000）；
-- 若存在"整图纸框"（bbox 包含其它所有框且面积明显更大），判定为**纸边 sheet**，不作为替换目标；
-- 其余为**替换目标**；并排多框（互不包合）则**全部**为目标；
-- 只有 1 个框时退化为单框替换（兼容旧行为）。
-
-**`lib/finder.py` · `extract_frame_fields(doc, frame_bbox)`** → `{concept: value}`
-- 在单个图框的右下角标题区（右 45% × 底 60%）抽取 图名/图号/比例/阶段；
-- 支持两种写法：① 合并文本 `"图名：减速器"`（冒号后取值）；② 标签与值分两个 TEXT（按同行右侧配对）；
-- 未抽到图名时用标题区最长文本兜底。
-
-**`lib/block_replace.py` · `delete_frame_border(doc, frame_bbox)`** → 删除数
-- 只删除与该帧 bbox 重合的闭合矩形**旧边框**，不动图内几何（外科手术式）。
-
-**`lib/block_replace.py` · `delete_title_strip(doc, frame_bbox, strip_ratio=0.28)`** → 删除数
-- 只删除该帧右下角标题区（右 45% × 底 28%）内**完全落在该区**的实体（旧标题栏线+文本）；
-- 保留图内几何；已知局限：若图内尺寸线恰好落在右下角标题区也会被删，生产环境建议加白名单/数量告警。
-
-### 10.2 处理流程（`run_multiframe.py`）
-1. `detect_frames_hierarchical` 得到 sheet（可能 None）与 targets；
-2. 对每个 target：按宽高比 `pick_template(fb)` 选最近 A 幅面模板 → `learn_template` → `extract_frame_fields` 抽字段 → `mapper.map_fields` 对齐；
-3. `delete_frame_border` + `delete_title_strip` 清旧框线+旧标题栏；
-4. `insert_template(..., fit="max")` 插公司图框（填满该帧 bbox），14 字段回填（缺失写空占位）；
-5. 渲染 before/模板/after + 写 `results.json` 与 `index.html`。
-
-### 10.3 测试结果
-| 样本 | 场景 | 检测结果 | 结论 |
-|---|---|---|---|
-| `07a` | 平铺多框（含整图纸框） | sheet=(0,0)-(841,594)；3 个子框全部逐框替换，字段正确回填 | ✅ 纸边保留、子框各插公司图框 |
-| `07b` | 并排多框（无整图纸框） | sheet=None；4 个 A3 框全部为目标，逐框替换成功 | ✅ 覆盖 CNG 真实场景的"无整图纸框"分支 |
+## 9. 测试与持续集成（改代码前必跑）
 
 ```bash
-python gen_mf_samples.py   # 生成 07a/07b 到 cases/07_multiframe/inputs/
-python run_multiframe.py   # 逐框替换，输出 before/模板/after + results.json 到 cases/07_multiframe/outputs/
+pip install -r requirements.txt -i https://pypi.org/simple
+pytest -q        # 仓库根目录，pytest.ini 已配好
 ```
-```
+- 覆盖重点回归点：`delete_title_strip` 白名单（绝不误删尺寸线 / 几何 / 长格线）、`detect_frames_hierarchical` 多图框 + 全局占比护栏、`extract_frame_fields` 真实图名抽取路由、`lib/sheet.py` 幅面推断 + `lib/frame_gen.py` 模板重定向。
+- `.github/workflows/test.yml` 在 push / 开 PR 时自动跑 `pytest`，任何让测试变红的提交都会被立刻拦下。
 
+---
+
+## 10. 把这个仓库当作 WorkBuddy Skill 装载（给他人 / 其他智能体用）
+
+本仓库根目录已含 `SKILL.md`，克隆到本地后即可被 WorkBuddy 当作 skill 直接调用（对话里说"帮我换图框""图框置换"会自动触发）。
+> ⚠️ GitHub 仓库**不能**被 WorkBuddy 直接"装载"——它只是源码托管。必须先把仓库放到 WorkBuddy 的 skills 目录下，或使用"文件夹导入"。
+
+```bash
+git clone https://github.com/nomadpanda1/cad-frame-replacement.git
+# 个人全局（所有项目可用）：
+cp -r cad-frame-replacement ~/.workbuddy/skills/cad-frame-replacement
+# 或仅当前项目（团队协作）：
+cp -r cad-frame-replacement <你的项目>/.workbuddy/skills/cad-frame-replacement
+```
+装载后对话中输入"把这套旧图纸换成公司图框"等，WorkBuddy 会读取 `SKILL.md` 并调用 `run_skill.py` 处理。公司图框模板变化时，只需替换 `templates/` 下文件并重跑，skill 逻辑零改动。

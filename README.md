@@ -24,13 +24,13 @@
 - 📦 **[cases/showcase.html](cases/showcase.html)** —— 单文件离线版，图片全部内嵌（约 10 MB），可直接下载发微信 / 邮件
 - 🏠 **[cases/index.html](cases/index.html)** —— 案例导航首页
 - 🖼️ **[gallery.html](gallery.html)** —— 一次性看全部 12 案例、122 张渲染（原图 / 模板 / 换框后 对照，按文件名后缀自动分组）；本地用 `python -m http.server` 起静态服务后浏览器打开，相对图片才能加载
-- 🧪 **[exe_test_out/exe_test.html](exe_test_out/exe_test.html)** —— 源码 `run_skill.py` 实测 9 张 SolidWorks 图纸前后对比（实测命令 + 逐图指标 + 提取到的真实字段）
+- 🧪 **[src_test_out/exe_test.html](src_test_out/exe_test.html)** —— 源码 `run_skill.py` 实测 9 张 SolidWorks 图纸前后对比（实测命令 + 逐图指标 + 提取到的真实字段）
 - 🧪 **[test_other/test_other.html](test_other/test_other.html)** —— 其他场景 20 张前后对比（自动按幅面选模板 + 标题栏残线修复，case 01/03/06/07/08）
 
 ### 前后对比缩略图（源码实测 + 其他场景测试）
 
 > 以下缩略图均来自最新一轮真实运行渲染（深色底为 ezdxf 默认 CAD 背景），无旧图框残留。
-> 点进 [源码实测报告](exe_test_out/exe_test.html) / [其他场景测试](test_other/test_other.html) 可看到 SVG 高清前后对比。
+> 点进 [源码实测报告](src_test_out/exe_test.html) / [其他场景测试](test_other/test_other.html) 可看到 SVG 高清前后对比。
 
 #### 一、源码实测（9 张 SolidWorks 图纸）
 
@@ -262,7 +262,7 @@
 - **结果**：9 / 9 成功（`status=ok`），共删除 **746** 个旧图框相关实体；旧图框属性（图名 / 材料 / 比例 / 图号 / 重量 …）回填至新标题栏。
 - **按幅面自动选模板**：A4 × 6 + 非标 C429X297 × 3（400×277 真漂移非标，不被误判成标准幅面）。
 - **提取到的真实字段示例**：`TITLE=从动轮法兰 / 前叉 / 圆柱齿轮`、`MATERIAL=PLA / ABS / 亚克力`、`SCALE=2:1 / 1:5`、`WEIGHT=0.681`。
-- 👉 [源码实测报告（exe_test_out/exe_test.html）](exe_test_out/exe_test.html)
+- 👉 [源码实测报告（src_test_out/exe_test.html）](src_test_out/exe_test.html)
 
 ### 二、其他场景测试（20 张，自动选模板 + 标题栏残线修复）
 
