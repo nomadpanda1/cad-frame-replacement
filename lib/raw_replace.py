@@ -72,13 +72,30 @@ def _spans_beyond(eb, tb, margin):
             eb[1] < tb[1] - margin or eb[3] > tb[3] + margin)
 
 
-def delete_titleblock(doc, tb, maxdim):
-    """删标题栏区域内实体：文本全删；完全落在标题栏内的线/多段线全删，
-    跨越边界的线按「长度 + 是否大幅越出标题栏」判定——
-    仅「长线 且 大幅越出」（真·尺寸线）保留，其余（旧图框标题栏残留）删除。"""
+# 标题栏字段标签词：旧标题栏的 图名/图号/比例/日期… 文本落在此区，应清掉；
+# 这些是明确的标题栏标签词，几乎不会出现在真实绘图内容里，正则命中即可安全删除。
+_TITLE_LABEL_RE = re.compile(
+    r"(图名|图号|比例|日期|设计|审核|制图|校对|图别|专业|负责人|审定|"
+    r"会签|页码|张次|密级|校核|批准|审查|描图|建设单位|制图日期|设计阶段|"
+    r"工程名称|项目名称|设计号|图幅|第.{1,3}张|共.{1,3}张)"
+)
+
+# 图框/标题栏图层（不含 0：layer 0 上多为真实绘图内容）
+_TITLE_LAYERS = {"tukuang", "图框", "pub_title", "图签", "tk", "title",
+                 "frame", "border", "borders", "边框", "titleblock", "图框线", "图框层"}
+
+
+def delete_titleblock(doc, tb, maxdim=None):
+    """删标题栏区域内「旧标题栏自身」实体，保留真实绘图内容。
+
+    住宅电气图等内容铺满全图的图纸，标题栏区域（右下约 14%）与绘图内容大面积重合，
+    旧逻辑按整块区域无差别删除会把墙/窗/线/标注/块一并删掉。
+
+    旧标题栏外框多在 TK/图框 等图框层，已由 delete_frame_lines 按坐标清除；
+    此处仅做安全网：删除区域内残存的图框层实体，以及明确是标题栏字段标签的文本
+    （图名/图号/比例/日期…）。墙/窗/线/标注/块/符号/尺寸线等真实绘图内容一律保留。
+    """
     msp = doc.modelspace()
-    thr = 0.30 * maxdim
-    margin = 0.15 * maxdim
     n = 0
     for e in list(msp):
         dt = e.dxftype()
@@ -93,16 +110,13 @@ def delete_titleblock(doc, tb, maxdim):
         eb = (b.extmin.x, b.extmin.y, b.extmax.x, b.extmax.y)
         if eb[2] < tb[0] or eb[0] > tb[2] or eb[3] < tb[1] or eb[1] > tb[3]:
             continue
-        if dt in ("LINE", "LWPOLYLINE", "POLYLINE"):
-            fully_inside = (eb[0] >= tb[0] and eb[2] <= tb[2] and
-                            eb[1] >= tb[1] and eb[3] <= tb[3])
-            if not fully_inside:
-                L = max(eb[2] - eb[0], eb[3] - eb[1])
-                # 长线但并未大幅越出标题栏 → 是旧图框标题栏格线，删；
-                # 只有「长且大幅越出」才是横穿图纸的真实尺寸线，保留。
-                if L > thr and _spans_beyond(eb, tb, margin):
-                    continue
-        msp.delete_entity(e); n += 1
+        layer = (e.dxf.layer or "").lower()
+        if layer in _TITLE_LAYERS or layer.startswith("tukuang"):
+            msp.delete_entity(e); n += 1; continue
+        if dt in ("TEXT", "MTEXT"):
+            txt = (e.text if dt == "MTEXT" else e.dxf.text) or ""
+            if _TITLE_LABEL_RE.search(txt):
+                msp.delete_entity(e); n += 1
     return n
 
 

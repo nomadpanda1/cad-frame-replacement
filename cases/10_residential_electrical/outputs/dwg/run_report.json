@@ -1,0 +1,296 @@
+{
+  "template": "templates/HH_FRAME_A4.dxf",
+  "template_kind": "block",
+  "fit": "min",
+  "files": [
+    {
+      "src": "弱电1.dwg",
+      "found": 1,
+      "mode": "raw-frame",
+      "status": "ok",
+      "out": "弱电1_HH.dwg",
+      "acad_results": [
+        {
+          "frame": [
+            193703.811,
+            -154986.9624332976,
+            253003.825,
+            -112986.9624332976
+          ],
+          "mode": "raw-frame",
+          "tpl_dwg": "C:\\Users\\86308\\WorkBuddy\\2026-08-06-10-55-23\\cad-frame-replacement-dist\\cad-frame-replacement\\tpl_dwgs\\_HH_FRAME_A2.dwg",
+          "tpl_size": [
+            594.0,
+            420.0
+          ],
+          "scale": [
+            99.83167340067344,
+            100.0
+          ],
+          "deleted_edges": 21,
+          "deleted_titleblock": 0,
+          "deleted_markers": 0,
+          "fields": {
+            "TITLE": "标准层弱电平面(1)"
+          }
+        }
+      ]
+    },
+    {
+      "src": "强电平面.dwg",
+      "found": 1,
+      "mode": "raw-frame",
+      "status": "ok",
+      "out": "强电平面_HH.dwg",
+      "acad_results": [
+        {
+          "frame": [
+            45734.702,
+            -75167.45768941038,
+            129834.693,
+            -15767.46362941038
+          ],
+          "mode": "raw-frame",
+          "tpl_dwg": "C:\\Users\\86308\\WorkBuddy\\2026-08-06-10-55-23\\cad-frame-replacement-dist\\cad-frame-replacement\\tpl_dwgs\\_HH_FRAME_A1.dwg",
+          "tpl_size": [
+            841.0,
+            594.0
+          ],
+          "scale": [
+            99.99998929845424,
+            99.99999
+          ],
+          "deleted_edges": 21,
+          "deleted_titleblock": 1,
+          "deleted_markers": 0,
+          "fields": {
+            "TITLE": "标准层照明配电平面",
+            "SCALE": "1:100"
+          }
+        }
+      ]
+    },
+    {
+      "src": "首二层商场平面.dwg",
+      "found": 1,
+      "mode": "raw-frame",
+      "status": "ok",
+      "out": "首二层商场平面_HH.dwg",
+      "acad_results": [
+        {
+          "frame": [
+            3475.757,
+            -94306.99297788442,
+            122275.771,
+            -10306.99297788444
+          ],
+          "mode": "raw-frame",
+          "tpl_dwg": "C:\\Users\\86308\\WorkBuddy\\2026-08-06-10-55-23\\cad-frame-replacement-dist\\cad-frame-replacement\\tpl_dwgs\\_HH_FRAME_A0.dwg",
+          "tpl_size": [
+            1189.0,
+            841.0
+          ],
+          "scale": [
+            99.91590748528175,
+            99.8810939357907
+          ],
+          "deleted_edges": 21,
+          "deleted_titleblock": 0,
+          "deleted_markers": 0,
+          "fields": {
+            "TITLE": "首,二层配电平面"
+          }
+        }
+      ]
+    },
+    {
+      "src": "裙楼消防平面.dwg",
+      "mode": "multi",
+      "found": 2,
+      "sheet": null,
+      "status": "ok",
+      "out": "裙楼消防平面_HH.dwg",
+      "acad_results": [
+        {
+          "frame": [
+            16022.743,
+            -139549.3887487903,
+            121122.743,
+            -80149.38874879025
+          ],
+          "mode": "multiframe",
+          "tpl_dwg": "C:\\Users\\86308\\WorkBuddy\\2026-08-06-10-55-23\\cad-frame-replacement-dist\\cad-frame-replacement\\tpl_dwgs\\_HH_FRAME_C1051X594.dwg",
+          "tpl_size": [
+            1051.0,
+            594.0000000000006
+          ],
+          "scale": [
+            100.0,
+            100.0
+          ],
+          "deleted_edges": 4,
+          "deleted_titleblock": 1,
+          "deleted_markers": 0,
+          "fields": {
+            "TITLE": "首层消防平面"
+          }
+        },
+        {
+          "frame": [
+            16022.743,
+            -70154.74024152957,
+            121122.743,
+            -10754.74024152956
+          ],
+          "mode": "multiframe",
+          "tpl_dwg": "C:\\Users\\86308\\WorkBuddy\\2026-08-06-10-55-23\\cad-frame-replacement-dist\\cad-frame-replacement\\tpl_dwgs\\_HH_FRAME_C1051X594.dwg",
+          "tpl_size": [
+            1051.0,
+            594.0000000000006
+          ],
+          "scale": [
+            100.0,
+            99.99999999999991
+          ],
+          "deleted_edges": 20,
+          "deleted_titleblock": 22,
+          "deleted_markers": 0,
+          "fields": {
+            "TITLE": "首层消防平面"
+          }
+        }
+      ]
+    },
+    {
+      "src": "首层配电干线平面图.dwg",
+      "found": 1,
+      "mode": "raw-frame",
+      "status": "ok",
+      "out": "首层配电干线平面图_HH.dwg",
+      "acad_results": [
+        {
+          "frame": [
+            2942.132,
+            -69387.03921482725,
+            121742.146,
+            14612.96078517275
+          ],
+          "mode": "raw-frame",
+          "tpl_dwg": "C:\\Users\\86308\\WorkBuddy\\2026-08-06-10-55-23\\cad-frame-replacement-dist\\cad-frame-replacement\\tpl_dwgs\\_HH_FRAME_A0.dwg",
+          "tpl_size": [
+            1189.0,
+            841.0
+          ],
+          "scale": [
+            99.91590748528175,
+            99.88109393579073
+          ],
+          "deleted_edges": 21,
+          "deleted_titleblock": 0,
+          "deleted_markers": 0,
+          "fields": {
+            "TITLE": "首层配电干线平面"
+          }
+        }
+      ]
+    }
+  ],
+  "sheet_decisions": [
+    {
+      "name": "A2",
+      "width": 594.0,
+      "height": 420.0,
+      "plot_scale": 100.0,
+      "exact": true,
+      "ratio": 1.4119,
+      "frame_size": [
+        59300.0,
+        42000.0
+      ],
+      "tpl_size": [
+        594.0,
+        420.0
+      ]
+    },
+    {
+      "name": "A1",
+      "width": 841.0,
+      "height": 594.0,
+      "plot_scale": 100.0,
+      "exact": true,
+      "ratio": 1.4158,
+      "frame_size": [
+        84100.0,
+        59400.0
+      ],
+      "tpl_size": [
+        841.0,
+        594.0
+      ]
+    },
+    {
+      "name": "A0",
+      "width": 1189.0,
+      "height": 841.0,
+      "plot_scale": 100.0,
+      "exact": true,
+      "ratio": 1.4143,
+      "frame_size": [
+        118800.0,
+        84000.0
+      ],
+      "tpl_size": [
+        1189.0,
+        841.0
+      ]
+    },
+    {
+      "name": "C1051X594",
+      "width": 1051.0,
+      "height": 594.0,
+      "plot_scale": 100.0,
+      "exact": false,
+      "ratio": 1.7694,
+      "frame_size": [
+        105100.0,
+        59400.0
+      ],
+      "tpl_size": [
+        1051.0,
+        594.0
+      ]
+    },
+    {
+      "name": "C1051X594",
+      "width": 1051.0,
+      "height": 594.0,
+      "plot_scale": 100.0,
+      "exact": false,
+      "ratio": 1.7694,
+      "frame_size": [
+        105100.0,
+        59400.0
+      ],
+      "tpl_size": [
+        1051.0,
+        594.0
+      ]
+    },
+    {
+      "name": "A0",
+      "width": 1189.0,
+      "height": 841.0,
+      "plot_scale": 100.0,
+      "exact": true,
+      "ratio": 1.4143,
+      "frame_size": [
+        118800.0,
+        84000.0
+      ],
+      "tpl_size": [
+        1189.0,
+        841.0
+      ]
+    }
+  ]
+}

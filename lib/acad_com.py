@@ -208,6 +208,19 @@ FRAME_LAYERS = {"tukuang", "图框", "0", "pub_title", "图签", "tk", "title", 
 # 仅这些实体类型按"框内残留"策略删除（避免误删图内文本/块/标注）
 _FRAME_LINE_TYPES = ("AcDbLine", "AcDbPolyline", "AcDb2dPolyline",
                      "AcDbLWPolyline", "AcDbArc")
+# 框内整框清除时排除默认层 0：大量建筑/电气图把局部详图、符号、标注放在 layer 0，
+# 若按图框层整框删除会把这些主内容误删。外框边线仍可由 del_frame_edges（带几何约束）处理。
+_FRAME_INTERIOR_LAYERS = FRAME_LAYERS - {"0"}
+
+# 标题栏字段标签词：旧标题栏的 图名/图号/比例/日期… 文本落在此区，应清掉；
+# 这些是明确的标题栏标签词，几乎不会出现在真实绘图内容里，正则命中即可安全删除，
+# 不会误删房间名/回路号/引线标注等内容文本。
+import re
+_TITLE_LABEL_RE = re.compile(
+    r"(图名|图号|比例|日期|设计|审核|制图|校对|图别|专业|负责人|审定|"
+    r"会签|页码|张次|密级|校核|批准|审查|描图|建设单位|制图日期|设计阶段|"
+    r"工程名称|项目名称|设计号|图幅|第.{1,3}张|共.{1,3}张)"
+)
 
 
 def del_frame_layer_inside(ents, frame, margin=20.0):
@@ -229,7 +242,7 @@ def del_frame_layer_inside(ents, frame, margin=20.0):
         if et not in _FRAME_LINE_TYPES:
             continue
         ll = (layer or "").lower()
-        if ll not in FRAME_LAYERS and not ll.startswith("tukuang"):
+        if ll not in _FRAME_INTERIOR_LAYERS and not ll.startswith("tukuang"):
             continue
         if bb is None:
             continue
@@ -500,18 +513,22 @@ def del_frame_lines_acad(ents, frames, margin=1.0):
     return n
 
 
-def del_titleblock_acad(ents, tb, maxdim):
-    """删除标题栏区域内实体：文本全删；线/多段线完全落在标题栏内的全删，
-    仅对跨越标题栏边界的线保留"短线删、长线（可能是尺寸线）保留"策略。
+def del_titleblock_acad(ents, tb, maxdim=None):
+    """删除标题栏区域内「属于旧标题栏自身」的实体，保留真实绘图内容。
 
-    tb: (x0,y0,x1,y1)
-    返回删除数量。
+    住宅电气图等内容铺满全图的图纸，标题栏区域（右下约 14%）与绘图内容大面积重合，
+    旧逻辑按整块区域无差别删除，会把墙/窗/线/标注/块一并删掉（用户反馈“依旧缺失”）。
+
+    旧标题栏外框多在 TK/图框 等图框层，已由 del_frame_layer_inside 整框清除；
+    此处仅做安全网：删除区域内残存的图框层实体，以及明确是标题栏字段标签的文本
+    （图名/图号/比例/日期…）。墙/窗/线/标注/块/符号/尺寸线等真实绘图内容一律保留，
+    交由新插入的图框块（HH_FRAME_Ax）在原位覆盖/叠加。
     """
     x0, y0, x1, y1 = tb
-    thr = 0.30 * maxdim
+    TITLE_LAYERS = FRAME_LAYERS - {"0"}
     to_del = []
     for d in ents:
-        e, et, _layer, bb = d["e"], d["et"], d["layer"], d["bb"]
+        e, et, layer, bb = d["e"], d["et"], d["layer"], d["bb"]
         if et == "AcDbBlockReference":
             continue
         if bb is None:
@@ -519,14 +536,17 @@ def del_titleblock_acad(ents, tb, maxdim):
         ex0, ey0, ex1, ey1 = bb
         if ex1 < x0 or ex0 > x1 or ey1 < y0 or ey0 > y1:
             continue
-        if et in ("AcDbLine", "AcDbPolyline", "AcDb2dPolyline"):
-            fully_inside = (ex0 >= x0 and ex1 <= x1 and ey0 >= y0 and ey1 <= y1)
-            if not fully_inside:
-                L = max(ex1 - ex0, ey1 - ey0)
-                if L > thr:
-                    continue
-        to_del.append(e)
-
+        ll = (layer or "").lower()
+        if ll in TITLE_LAYERS or ll.startswith("tukuang"):
+            to_del.append(e)
+            continue
+        if et in ("AcDbText", "AcDbMText"):
+            try:
+                raw = _retry(lambda: e.TextString)
+            except Exception:
+                raw = ""
+            if raw and _TITLE_LABEL_RE.search(raw):
+                to_del.append(e)
     n = 0
     for e in to_del:
         try:
