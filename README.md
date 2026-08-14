@@ -23,6 +23,7 @@
 - 📊 **[cases/report.html](cases/report.html)** —— 完整效果对比报告（链接图，含各案例前后对比 + 使用说明 + 修复记录）
 - 📦 **[cases/showcase.html](cases/showcase.html)** —— 单文件离线版，图片全部内嵌（约 10 MB），可直接下载发微信 / 邮件
 - 🏠 **[cases/index.html](cases/index.html)** —— 案例导航首页
+- 🖼️ **[gallery.html](gallery.html)** —— 一次性看全部 12 案例、122 张渲染（原图 / 模板 / 换框后 对照，按文件名后缀自动分组）；本地用 `python -m http.server` 起静态服务后浏览器打开，相对图片才能加载
 - 🧪 **[exe_test_out/exe_test.html](exe_test_out/exe_test.html)** —— 打包 **exe 真实运行** 9 张 SolidWorks 图纸前后对比（实测命令 + 逐图指标 + 提取到的真实字段）
 - 🧪 **[test_other/test_other.html](test_other/test_other.html)** —— 其他场景 20 张前后对比（自动按幅面选模板 + 标题栏残线修复，case 01/03/06/07/08）
 
@@ -242,6 +243,8 @@
   - **① 字段错填（TITLE 抓成「注：…」注记 / 电缆型号 / 房间号）**——根因为 COM 打散路径误用旧版 `extract.extract_fields`（抓「最长文本」）。已统一改用 `finder.extract_frame_fields`（按图名字号最大 + 标题栏标签定位真实图名，排除注记 / 电缆 / 房间号干扰）。重跑 11/11，TITLE 全部回填为真实图名。
   - **② 旧框残线（首层配电干线 18 条、首二层商场 1 条 FRAME 层线）**——根因为旧删除逻辑只删「精确贴外边」或「面积 > 80%」的线，框内旧框线漏删。已新增 `del_frame_layer_inside`（删「图框层 + 完全落在旧框内」全部线类实体）接入 COM 管线。浅层核验 11/11 确认**残留 = 0**。
   - **③ 非 √2 旧框比例失真（裙楼 1.77 / 首层配电 0.95 / 首二层商场 1.19）**——由 `lib/sheet.py`（幅面推断）+ `lib/frame_gen.py`（模板重定向）解决，见下文「幅面推断与模板重定向」。
+  - **④ 标题栏区误删真实图元（2026-08-14 修复 ✅，最终根因）**——旧 `del_titleblock_acad` / `delete_titleblock` 把整个标题栏矩形区（占图框约 14.4% 的右下角）按面积 / 长度阈值**整片删线**，而住宅电气图内容铺满全图，该区内本有真实墙 / 窗 / 轴线 / 管线 / 标注 / 块。诊断证实旧标题栏外框线其实在 FRAME/TK 层（已被 `del_frame_layer_inside` 清掉），区内只剩真实几何 + 真实文本。
+    **修复**：两个函数改为**只删**①旧图框层残线（FRAME/TK/tukuang 等）+ ②标题栏字段标签文本（正则匹配 图名 / 图号 / 比例 / 日期 / 设计 / 审核 …），其余一切真实图元一律保留；新模板 `HH_FRAME_A3` 标题栏为线框无填充，旧内容保留 = 安全叠加。重跑案例十全部 11 张，真实图元保留率 **100%**（`run_report.json` 的 `deleted_titleblock` 由 497 降至 `0~22`，仅剩旧标题栏边框与字段文本，属应删项），并沉淀为可复用 user 级 skill `cad-frame-del-titleblock`。
 
 - **案例十一 · 边框 less 密集小方框误检（已修复 ✅）**
   `detect_frames_hierarchical` 新增**全局占比护栏**：候选框面积须 ≥ 整图范围的 `min_drawing_share`（默认 2%），否则视为元件 / 符号方框剔除；过滤后若全空判定为「无有效图框」（不回退 raw，避免误插）。回归测试 `test_no_false_positive_borderless_dense` 复刻 15 元件方框 → 期望 `targets == []`。
@@ -359,6 +362,7 @@ cad-frame-replacement/
 │   ├── report.html         # 完整对比报告（链接图）
 │   ├── showcase.html       # 单文件内嵌图片版（约 10 MB）
 │   ├── index.html          # 案例导航页
+│   ├── gallery.html        # 全部 12 案例渲染图集（原图/模板/换框后，本地静态服务查看）
 │   ├── 01_SW_parts/        # 真实机械零件图（9 张，策略一）
 │   ├── 02_CNG_electrical/  # CNG 电气系统图（策略二）
 │   ├── 03_ESS_cad/         # 储能 ESS 图纸（4 张，策略一）
@@ -469,7 +473,7 @@ python run_skill.py --template templates/公司图框.dxf --dry-run  samples/*.d
 - **核心**：`lib/`（图框检测、幅面推断、模板重定向、字段提取映射、替换、模板学习；策略一 ezdxf + 策略二 AutoCAD COM）
 - **模板**：`templates/`（HH 公司图框 A0-A4）
 - **12 套案例**：`cases/01_SW_parts` … `cases/12_detect_negative`，每套含输入图纸、输出成品、前后对比 PNG（11/12 为逻辑/负样本验证，无渲染图）
-- **报告**：`cases/report.html`（链接图）、`cases/showcase.html`（内嵌图单文件，约 10 MB）、`cases/index.html`
+- **报告**：`cases/report.html`（链接图）、`cases/showcase.html`（内嵌图单文件，约 10 MB）、`cases/index.html`、`gallery.html`（全案例渲染图集，本地静态服务查看）
 - **入口脚本**：全部 `run_*.py` / `gen_*.py` / `make_*.py` / `gui_app.py`
 - **其他**：`requirements.txt`、`pytest.ini`、`.gitignore`、`MANUAL.md`、`SKILL.md`
 

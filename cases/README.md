@@ -16,7 +16,7 @@
 | 07 | [07_multiframe](07_multiframe/) | 多图框逐框替换（2 子） | 策略一 | 纸边保留 / 无整图纸框分支均通过 ✅ |
 | 08 | [08_real_mf](08_real_mf/) | 真实多图框端到端 | 策略一 | 真实字段全对 + 修复越界泄漏 bug ✅ |
 | 09 | [09_kuidian_electrical](09_kuidian_electrical/) | 馈电电气原理图 | 策略二 | A4 竖版 BORDER 层双线图框兼容 ✅ |
-| 10 | [10_residential_electrical](10_residential_electrical/) | 住宅楼电气设计方案（11 张） | 策略二 COM | ⚠️ 换框 11/11 成功，深度核验发现 3 类未完工 |
+| 10 | [10_residential_electrical](10_residential_electrical/) | 住宅楼电气设计方案（11 张） | 策略二 COM | ✅ 换框 11/11 + 真实内容 100% 保留（del_titleblock 只删标题栏自身，④类误删已修复） |
 | 11 | [11_geimei_control](11_geimei_control/) | 给煤机控制原理图 | 策略二 | 正确判定无框可换(0 框) + 检测器加固 ✅ |
 | 12 | [12_detect_negative](12_detect_negative/) | 检测负样本 | — | 📌 已知局限：S7-1200 / std_A3 漏检 |
 
