@@ -16,240 +16,30 @@
 
 ## 🚀 案例与效果（先看这里）
 
-本仓库自带 **12 套案例**（10 套带前后对比渲染 + 2 套逻辑 / 负样本验证），覆盖真实机械图纸、电气系统图、
-储能图纸、装配体、设计院标准图、合成异常样本、多图框逐框替换、**真实图纸拼接的多图框端到端验证**，
-以及真实住宅楼电气设计方案（11 张 DWG）和给煤机控制原理图等：
+本仓库自带 **12 套案例**（10 套带前后对比渲染 + 2 套逻辑 / 负样本验证），覆盖真实机械图纸、电气系统图、储能图纸、装配体、设计院标准图、合成异常样本、多图框逐框替换、真实图纸拼接的多图框端到端验证，以及真实住宅楼电气设计方案（11 张 DWG）和给煤机控制原理图。
+
+因为 GitHub README 对大量高清图片的表格排版支持有限，**完整前后对比请直接打开下面几个自包含 HTML 报告**（浏览器直接看，含高清 PNG）：
 
 - 📊 **[cases/report.html](cases/report.html)** —— 完整效果对比报告（链接图，含各案例前后对比 + 使用说明 + 修复记录）
 - 📦 **[cases/showcase.html](cases/showcase.html)** —— 单文件离线版，图片全部内嵌（约 10 MB），可直接下载发微信 / 邮件
 - 🏠 **[cases/index.html](cases/index.html)** —— 案例导航首页
-- 🖼️ **[gallery.html](gallery.html)** —— 一次性看全部 12 案例、122 张渲染（原图 / 模板 / 换框后 对照，按文件名后缀自动分组）；本地用 `python -m http.server` 起静态服务后浏览器打开，相对图片才能加载
-- 🧪 **[src_test_out/exe_test.html](src_test_out/exe_test.html)** —— 源码 `run_skill.py` 实测 9 张 SolidWorks 图纸前后对比（实测命令 + 逐图指标 + 提取到的真实字段）
-- 🧪 **[test_other/test_other.html](test_other/test_other.html)** —— 其他场景 20 张前后对比（自动按幅面选模板 + 标题栏残线修复，case 01/03/06/07/08）
+- 🖼️ **[gallery.html](gallery.html)** —— 一次性看全部 12 案例、122 张渲染（原图 / 模板 / 换框后 对照）
+- 🧪 **[src_test_out/exe_test.html](src_test_out/exe_test.html)** —— 源码 `run_skill.py` 实测 9 张 SolidWorks 图纸前后对比
+- 🧪 **[test_other/test_other.html](test_other/test_other.html)** —— 其他场景 20 张前后对比
 
-### 前后对比缩略图（源码实测 + 其他场景测试）
+### 效果速览
 
-> 以下缩略图均来自最新一轮真实运行渲染（深色底为 ezdxf 默认 CAD 背景），无旧图框残留。
-> 点进 [源码实测报告](src_test_out/exe_test.html) / [其他场景测试](test_other/test_other.html) 可看到 SVG 高清前后对比。
+<p align="center"><b>住宅楼·天面（策略二 AutoCAD COM，真实 DWG）</b></p>
 
-#### 一、源码实测（9 张 SolidWorks 图纸）
+| 替换前 | 替换后 |
+|---|---|
+| <img src="assets/thumbnails/case10_01_天面_before.png" width="420" alt="before"> | <img src="assets/thumbnails/case10_01_天面_after.png" width="420" alt="after"> |
 
-<table>
-<tr><th align='center'>图纸</th><th>替换前</th><th>替换后</th></tr>
-<tr>
-<td align='center'><b>从法兰(2)</b></td>
-<td><img src='assets/thumbnails/exe_从法兰(2)_before.png' width='280' alt='before'></td>
-<td><img src='assets/thumbnails/exe_从法兰(2)_after.png' width='280' alt='after'></td>
-</tr>
-<tr>
-<td align='center'><b>前叉(1)</b></td>
-<td><img src='assets/thumbnails/exe_前叉(1)_before.png' width='280' alt='before'></td>
-<td><img src='assets/thumbnails/exe_前叉(1)_after.png' width='280' alt='after'></td>
-</tr>
-<tr>
-<td align='center'><b>圆柱齿轮13×1(2)</b></td>
-<td><img src='assets/thumbnails/exe_圆柱齿轮13×1(2)_before.png' width='280' alt='before'></td>
-<td><img src='assets/thumbnails/exe_圆柱齿轮13×1(2)_after.png' width='280' alt='after'></td>
-</tr>
-<tr>
-<td align='center'><b>圆柱齿轮65×1(1)</b></td>
-<td><img src='assets/thumbnails/exe_圆柱齿轮65×1(1)_before.png' width='280' alt='before'></td>
-<td><img src='assets/thumbnails/exe_圆柱齿轮65×1(1)_after.png' width='280' alt='after'></td>
-</tr>
-<tr>
-<td align='center'><b>法兰(2)</b></td>
-<td><img src='assets/thumbnails/exe_法兰(2)_before.png' width='280' alt='before'></td>
-<td><img src='assets/thumbnails/exe_法兰(2)_after.png' width='280' alt='after'></td>
-</tr>
-<tr>
-<td align='center'><b>等轴测图(1)</b></td>
-<td><img src='assets/thumbnails/exe_等轴测图(1)_before.png' width='280' alt='before'></td>
-<td><img src='assets/thumbnails/exe_等轴测图(1)_after.png' width='280' alt='after'></td>
-</tr>
-<tr>
-<td align='center'><b>装配体图纸(1)</b></td>
-<td><img src='assets/thumbnails/exe_装配体图纸(1)_before.png' width='280' alt='before'></td>
-<td><img src='assets/thumbnails/exe_装配体图纸(1)_after.png' width='280' alt='after'></td>
-</tr>
-<tr>
-<td align='center'><b>装配体爆炸图1(1)</b></td>
-<td><img src='assets/thumbnails/exe_装配体爆炸图1(1)_before.png' width='280' alt='before'></td>
-<td><img src='assets/thumbnails/exe_装配体爆炸图1(1)_after.png' width='280' alt='after'></td>
-</tr>
-<tr>
-<td align='center'><b>龙门架</b></td>
-<td><img src='assets/thumbnails/exe_龙门架_before.png' width='280' alt='before'></td>
-<td><img src='assets/thumbnails/exe_龙门架_after.png' width='280' alt='after'></td>
-</tr>
-</table>
+<p align="center"><b>SolidWorks 导出零件图（策略一 ezdxf 离线）</b></p>
 
-#### 二、其他场景测试（11 张，用源码核心 run_skill 重跑 case 03/06/07/08，与「源码实测」不重复）
-
-> 以下图纸**均经源码核心（`run_skill.py`，块式/线框双检测 + 自动按幅面选模板）实际处理**，与上方「源码实测」的 9 张 SolidWorks 图纸无重叠。
-
-<table>
-<tr><th align='center'>图纸</th><th>替换前</th><th>替换后</th></tr>
-<tr>
-<td align='center'><b>案例 03 · 16MW_32MWh_一次设备表</b></td>
-<td><img src='assets/thumbnails/exe_03__16MW_32MWh_一次设备表_before.png' width='280' alt='before'></td>
-<td><img src='assets/thumbnails/exe_03__16MW_32MWh_一次设备表_after.png' width='280' alt='after'></td>
-</tr>
-<tr>
-<td align='center'><b>案例 03 · 16MW_32MWh_二次系统信号表</b></td>
-<td><img src='assets/thumbnails/exe_03__16MW_32MWh_二次系统信号表_before.png' width='280' alt='before'></td>
-<td><img src='assets/thumbnails/exe_03__16MW_32MWh_二次系统信号表_after.png' width='280' alt='after'></td>
-</tr>
-<tr>
-<td align='center'><b>案例 03 · 16MW_32MWh_二次系统柜体表</b></td>
-<td><img src='assets/thumbnails/exe_03__16MW_32MWh_二次系统柜体表_before.png' width='280' alt='before'></td>
-<td><img src='assets/thumbnails/exe_03__16MW_32MWh_二次系统柜体表_after.png' width='280' alt='after'></td>
-</tr>
-<tr>
-<td align='center'><b>案例 03 · 16MW_32MWh_储能系统简化主接线图</b></td>
-<td><img src='assets/thumbnails/exe_03__16MW_32MWh_储能系统简化主接线图_before.png' width='280' alt='before'></td>
-<td><img src='assets/thumbnails/exe_03__16MW_32MWh_储能系统简化主接线图_after.png' width='280' alt='after'></td>
-</tr>
-<tr>
-<td align='center'><b>案例 06 · 06a_multiframe</b></td>
-<td><img src='assets/thumbnails/exe_06__06a_multiframe_before.png' width='280' alt='before'></td>
-<td><img src='assets/thumbnails/exe_06__06a_multiframe_after.png' width='280' alt='after'></td>
-</tr>
-<tr>
-<td align='center'><b>案例 06 · 06b_nested_title</b></td>
-<td><img src='assets/thumbnails/exe_06__06b_nested_title_before.png' width='280' alt='before'></td>
-<td><img src='assets/thumbnails/exe_06__06b_nested_title_after.png' width='280' alt='after'></td>
-</tr>
-<tr>
-<td align='center'><b>案例 06 · 06c_missing_font</b></td>
-<td><img src='assets/thumbnails/exe_06__06c_missing_font_before.png' width='280' alt='before'></td>
-<td><img src='assets/thumbnails/exe_06__06c_missing_font_after.png' width='280' alt='after'></td>
-</tr>
-<tr>
-<td align='center'><b>案例 06 · 06d_countersign</b></td>
-<td><img src='assets/thumbnails/exe_06__06d_countersign_before.png' width='280' alt='before'></td>
-<td><img src='assets/thumbnails/exe_06__06d_countersign_after.png' width='280' alt='after'></td>
-</tr>
-<tr>
-<td align='center'><b>案例 07 · 07a_tiled</b></td>
-<td><img src='assets/thumbnails/exe_07__07a_tiled_before.png' width='280' alt='before'></td>
-<td><img src='assets/thumbnails/exe_07__07a_tiled_after.png' width='280' alt='after'></td>
-</tr>
-<tr>
-<td align='center'><b>案例 07 · 07b_side_by_side</b></td>
-<td><img src='assets/thumbnails/exe_07__07b_side_by_side_before.png' width='280' alt='before'></td>
-<td><img src='assets/thumbnails/exe_07__07b_side_by_side_after.png' width='280' alt='after'></td>
-</tr>
-<tr>
-<td align='center'><b>案例 08 · 08_real_multiframe</b></td>
-<td><img src='assets/thumbnails/exe_08__08_real_multiframe_before.png' width='280' alt='before'></td>
-<td><img src='assets/thumbnails/exe_08__08_real_multiframe_after.png' width='280' alt='after'></td>
-</tr>
-</table>
-
-#### 三、真实下载图纸测试（住宅楼电气 11 张 + CNG 电气 1 张）
-
-> 以下图纸为从爱给网下载的**真实 CAD 图纸（.dwg）**，经源码核心 `run_skill.py --dwg`（AutoCAD COM 直接处理，策略二）实际置换：住宅楼 11 张全部成功（含首层配电干线平面图等 A0 大图幅），CNG 1 张含 4 个图框（A1 大图框 + 3×A3 宽幅）。
-
-<table>
-<tr><th align='center'>图纸</th><th>替换前</th><th>替换后</th></tr>
-<tr>
-<td align='center'><b>住宅楼·天面</b></td>
-<td><img src='assets/thumbnails/case10_01_天面_before.png' width='280' alt='before'></td>
-<td><img src='assets/thumbnails/case10_01_天面_after.png' width='280' alt='after'></td>
-</tr>
-<tr>
-<td align='center'><b>住宅楼·弱电1</b></td>
-<td><img src='assets/thumbnails/case10_02_弱电1_before.png' width='280' alt='before'></td>
-<td><img src='assets/thumbnails/case10_02_弱电1_after.png' width='280' alt='after'></td>
-</tr>
-<tr>
-<td align='center'><b>住宅楼·强电平面</b></td>
-<td><img src='assets/thumbnails/case10_03_强电平面_before.png' width='280' alt='before'></td>
-<td><img src='assets/thumbnails/case10_03_强电平面_after.png' width='280' alt='after'></td>
-</tr>
-<tr>
-<td align='center'><b>住宅楼·消防弱电2</b></td>
-<td><img src='assets/thumbnails/case10_04_消防弱电2_before.png' width='280' alt='before'></td>
-<td><img src='assets/thumbnails/case10_04_消防弱电2_after.png' width='280' alt='after'></td>
-</tr>
-<tr>
-<td align='center'><b>住宅楼·消防系统图</b></td>
-<td><img src='assets/thumbnails/case10_05_消防系统图_before.png' width='280' alt='before'></td>
-<td><img src='assets/thumbnails/case10_05_消防系统图_after.png' width='280' alt='after'></td>
-</tr>
-<tr>
-<td align='center'><b>住宅楼·系统</b></td>
-<td><img src='assets/thumbnails/case10_06_系统_before.png' width='280' alt='before'></td>
-<td><img src='assets/thumbnails/case10_06_系统_after.png' width='280' alt='after'></td>
-</tr>
-<tr>
-<td align='center'><b>住宅楼·裙楼消防平面</b></td>
-<td><img src='assets/thumbnails/case10_07_裙楼消防平面_before.png' width='280' alt='before'></td>
-<td><img src='assets/thumbnails/case10_07_裙楼消防平面_after.png' width='280' alt='after'></td>
-</tr>
-<tr>
-<td align='center'><b>住宅楼·首二层商场平面</b></td>
-<td><img src='assets/thumbnails/case10_08_首二层商场平面_before.png' width='280' alt='before'></td>
-<td><img src='assets/thumbnails/case10_08_首二层商场平面_after.png' width='280' alt='after'></td>
-</tr>
-<tr>
-<td align='center'><b>住宅楼·首二层系统图</b></td>
-<td><img src='assets/thumbnails/case10_09_首二层系统图_before.png' width='280' alt='before'></td>
-<td><img src='assets/thumbnails/case10_09_首二层系统图_after.png' width='280' alt='after'></td>
-</tr>
-<tr>
-<td align='center'><b>住宅楼·首层配电干线平面图</b></td>
-<td><img src='assets/thumbnails/case10_10_首层配电干线平面图_before.png' width='280' alt='before'></td>
-<td><img src='assets/thumbnails/case10_10_首层配电干线平面图_after.png' width='280' alt='after'></td>
-</tr>
-<tr>
-<td align='center'><b>住宅楼·高低压系统</b></td>
-<td><img src='assets/thumbnails/case10_11_高低压系统_before.png' width='280' alt='before'></td>
-<td><img src='assets/thumbnails/case10_11_高低压系统_after.png' width='280' alt='after'></td>
-</tr>
-<tr>
-<td align='center'><b>CNG·电气系统图（4 图框）</b></td>
-<td><img src='assets/thumbnails/case02_cng_before.png' width='280' alt='before'></td>
-<td><img src='assets/thumbnails/case02_cng_after.png' width='280' alt='after'></td>
-</tr>
-</table>
-
-- **案例十一 · 给煤机控制原理图**（`cases/11_geimei_control/`）：边框 less 长条图（长宽比 ≈ 5.49，无 A 幅面图框），
-  检测器正确判定「无有效图框、不改图」，并据此加固了 `detect_frames_hierarchical` 的全局占比护栏，杜绝把图内元件方框当图框误插。
-  属逻辑验证案例，**配「原图/检测过滤」对比示意图**，详见 `cases/11_geimei_control/summary.md` 与 `cases/report.html`。
-- **案例十二 · 检测负样本**（`cases/12_detect_negative/`）：记录当前检测器**漏检**的两类真实图纸
-  （`std_A3` 分段短直线边框、`S7-1200` 全块化无原始直线）作为回归负样本，明确「已知局限」，避免未来「假完成」误判。
-  属负样本归档，**配「漏检根因」示意对比图**，详见 `cases/12_detect_negative/summary.md` 与 `cases/report.html`。
-
-### 📌 案例修复记录（v0.3，反映当前逻辑）
-
-- **案例四 · 无图框装配体（已修复 ✅）**
-  旧版 `clear_title_block_zone` 用「相交即删」且无白名单，会把右下角 BOM 表 / 原标题栏一并清掉，导致 HH 框盖在残留元素上。
-  **修复**：清理逻辑改为白名单（只删文字 + 旧标题框闭合矩形，绝不碰线 / 几何 / 尺寸 / BOM）；并新增「标题区已有内容 → 只加外框、保留原标题栏」分支。实测装配体 4109 个实体零删除，原图完整保留。
-
-- **案例六 · 合成异常样本（已修复 ✅）**
-  - **06a 多图框混排**：旧版按「整图幅」插一张 A1 框，子图框没动。现已复用案例七的逐框替换逻辑，after 图含多个 HH_FRAME INSERT，真正逐框替换。
-  - **06b 嵌套块 / 06d 会签栏**：插入公司框前先清理旧标题栏（删除旧 TITLEBLOCK 块、白名单清旧标题条），消除新旧标题栏重叠。
-
-- **案例八 · 真实多图框字段串框（已修复 ✅）**
-  `extract_frame_fields` 的标题区判定原本是个无限延伸象限（只卡 x / y 两个方向），在多图框里会把**邻框标题文字吸进来**（第 1 框读成右边第 2 框的「二次系统信号表」）。
-  **修复**：标题区改为四边有界；并补 `test_extract_no_leak_from_neighbor_frame` 回归单测。修复后 4 个框的图名 / 图号全部正确回填，几何零丢失。
-
-- **案例九 · A4 竖版方向缺口（已闭环 ✅）**
-  本图为 A4 竖版 `210×297`。旧横版模板 `HH_FRAME_A4` 等比缩放后只填满竖版图幅下半部分。
-  **闭环**：已补 `templates/HH_FRAME_A4V.dxf` 竖版模板（由 `HH_FRAME_A4` 经 `lib/frame_gen.py` 重定向生成），`lib/sheet.py` 幅面推断判为竖版 `A4V`，`run_skill --dwg` 自动切换为 `HH_FRAME_A4V`，新框严丝合缝填满整张 A4 竖版。
-
-- **案例十 · 字段错填 + 旧框残线（2026-08-13 修复 ✅，核心回归点）**
-  - **① 字段错填（TITLE 抓成「注：…」注记 / 电缆型号 / 房间号）**——根因为 COM 打散路径误用旧版 `extract.extract_fields`（抓「最长文本」）。已统一改用 `finder.extract_frame_fields`（按图名字号最大 + 标题栏标签定位真实图名，排除注记 / 电缆 / 房间号干扰）。重跑 11/11，TITLE 全部回填为真实图名。
-  - **② 旧框残线（首层配电干线 18 条、首二层商场 1 条 FRAME 层线）**——根因为旧删除逻辑只删「精确贴外边」或「面积 > 80%」的线，框内旧框线漏删。已新增 `del_frame_layer_inside`（删「图框层 + 完全落在旧框内」全部线类实体）接入 COM 管线。浅层核验 11/11 确认**残留 = 0**。
-  - **③ 非 √2 旧框比例失真（裙楼 1.77 / 首层配电 0.95 / 首二层商场 1.19）**——由 `lib/sheet.py`（幅面推断）+ `lib/frame_gen.py`（模板重定向）解决，见下文「幅面推断与模板重定向」。
-  - **④ 标题栏区误删真实图元（2026-08-14 修复 ✅，最终根因）**——旧 `del_titleblock_acad` / `delete_titleblock` 把整个标题栏矩形区（占图框约 14.4% 的右下角）按面积 / 长度阈值**整片删线**，而住宅电气图内容铺满全图，该区内本有真实墙 / 窗 / 轴线 / 管线 / 标注 / 块。诊断证实旧标题栏外框线其实在 FRAME/TK 层（已被 `del_frame_layer_inside` 清掉），区内只剩真实几何 + 真实文本。
-    **修复**：两个函数改为**只删**①旧图框层残线（FRAME/TK/tukuang 等）+ ②标题栏字段标签文本（正则匹配 图名 / 图号 / 比例 / 日期 / 设计 / 审核 …），其余一切真实图元一律保留；新模板 `HH_FRAME_A3` 标题栏为线框无填充，旧内容保留 = 安全叠加。重跑案例十全部 11 张，真实图元保留率 **100%**（`run_report.json` 的 `deleted_titleblock` 由 497 降至 `0~22`，仅剩旧标题栏边框与字段文本，属应删项），并沉淀为可复用 user 级 skill `cad-frame-del-titleblock`。
-
-- **案例十一 · 边框 less 密集小方框误检（已修复 ✅）**
-  `detect_frames_hierarchical` 新增**全局占比护栏**：候选框面积须 ≥ 整图范围的 `min_drawing_share`（默认 2%），否则视为元件 / 符号方框剔除；过滤后若全空判定为「无有效图框」（不回退 raw，避免误插）。回归测试 `test_no_false_positive_borderless_dense` 复刻 15 元件方框 → 期望 `targets == []`。
-
----
+| 替换前 | 替换后 |
+|---|---|
+| <img src="assets/thumbnails/exe_从法兰(2)_before.png" width="420" alt="before"> | <img src="assets/thumbnails/exe_从法兰(2)_after.png" width="420" alt="after"> |
 
 ## 🧪 端到端实测报告（真实数据 · 点开看前后对比）
 
