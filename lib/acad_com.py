@@ -312,14 +312,15 @@ def _size_name_from_tpl(tpl_dwg):
 
 
 def insert_frame(msp, frame, tpl_dwg, fields, size_table=None):
-    """在 frame 左下角插入公司图框块（tpl_dwg 为 prepare_templates 生成的 *.dwg），等比缩放并回填属性。
+    """在 frame 左下角插入公司图框块（tpl_dwg 为 prepare_templates 生成的 *.dwg），缩放并回填属性。
 
     由于模板 dwg 内部是“块 HH_FRAME_Ax 内嵌于模型空间”，直接 InsertBlock 该 dwg 会得到一个
     “外壳块 + 嵌套 HH_FRAME_Ax”的结构，外层 GetAttributes 为空。为拿到可直接回填的 14 个属性，
     采用双插法：先 InsertBlock(dwg) 把 HH_FRAME_Ax 块定义导入目标图，再按名 InsertBlock("HH_FRAME_Ax")
     得到干净、带属性的块引用，最后删掉外壳块。
 
-    返回 (insert, scale)。缩放 = min(W/tw, H/th)（等比，保持模板自身比例）。
+    缩放采用非等比拉伸（xscale=W/tw, yscale=H/th），使新图框外框与旧框 bbox 完全重合，
+    根治非√2 幅面因等比缩放导致的留白/内容被裁。对标准√2 幅面，两个比例几乎相等，视觉上无失真。
     """
     if size_table is None:
         size_table = A_SIZES
@@ -327,19 +328,20 @@ def insert_frame(msp, frame, tpl_dwg, fields, size_table=None):
     W, H = x1 - x0, y1 - y0
     size_name = _size_name_from_tpl(tpl_dwg)
     tw, th = size_table.get(size_name, (W, H))
-    scale = min(W / tw, H / th) if tw and th else 1.0
+    xscale = W / tw if tw else 1.0
+    yscale = H / th if th else 1.0
 
     # 1) 插入外壳块（导入 HH_FRAME_Ax 块定义）
     wrapper = _retry(lambda: msp.InsertBlock(
         variant_point(x0, y0, 0.0),
         tpl_dwg,
-        scale, scale, scale, 0.0,
+        xscale, yscale, 1.0, 0.0,
     ), label="InsertBlock wrapper")
     # 2) 按名插入干净的带属性块
     insert = _retry(lambda: msp.InsertBlock(
         variant_point(x0, y0, 0.0),
         "HH_FRAME_" + size_name,
-        scale, scale, scale, 0.0,
+        xscale, yscale, 1.0, 0.0,
     ), label="InsertBlock frame")
     # 3) 删除外壳块，只保留按名插入的块
     try:
@@ -357,7 +359,7 @@ def insert_frame(msp, frame, tpl_dwg, fields, size_table=None):
     except Exception as e:
         print("    set attribs warn:", e)
 
-    return insert, scale
+    return insert, (xscale, yscale)
 
 
 def _is_dwg(path):

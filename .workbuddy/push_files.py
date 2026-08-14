@@ -8,6 +8,7 @@ import json
 import os
 import subprocess
 import sys
+import time
 import urllib.request
 import urllib.error
 
@@ -59,6 +60,8 @@ def main():
                    {"content": base64.b64encode(content).decode("ascii"), "encoding": "base64"}, token)
         tree_entries.append({"path": f, "mode": "100644", "type": "blob", "sha": blob["sha"]})
         print(f"  blob {f} -> {blob['sha']}")
+        # 礼貌节流：避免突发大量 blob 触发 GitHub 二级限流(429)
+        time.sleep(0.4)
 
     tree = api("POST", "/git/trees", {"base_tree": base_tree, "tree": tree_entries}, token)
     print(f"新 tree   : {tree['sha']}")
