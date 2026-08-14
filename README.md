@@ -24,15 +24,15 @@
 - 📦 **[cases/showcase.html](cases/showcase.html)** —— 单文件离线版，图片全部内嵌（约 10 MB），可直接下载发微信 / 邮件
 - 🏠 **[cases/index.html](cases/index.html)** —— 案例导航首页
 - 🖼️ **[gallery.html](gallery.html)** —— 一次性看全部 12 案例、122 张渲染（原图 / 模板 / 换框后 对照，按文件名后缀自动分组）；本地用 `python -m http.server` 起静态服务后浏览器打开，相对图片才能加载
-- 🧪 **[exe_test_out/exe_test.html](exe_test_out/exe_test.html)** —— 打包 **exe 真实运行** 9 张 SolidWorks 图纸前后对比（实测命令 + 逐图指标 + 提取到的真实字段）
+- 🧪 **[exe_test_out/exe_test.html](exe_test_out/exe_test.html)** —— 源码 `run_skill.py` 实测 9 张 SolidWorks 图纸前后对比（实测命令 + 逐图指标 + 提取到的真实字段）
 - 🧪 **[test_other/test_other.html](test_other/test_other.html)** —— 其他场景 20 张前后对比（自动按幅面选模板 + 标题栏残线修复，case 01/03/06/07/08）
 
-### 前后对比缩略图（最新 exe 真实测试 + 其他场景测试）
+### 前后对比缩略图（源码实测 + 其他场景测试）
 
 > 以下缩略图均来自最新一轮真实运行渲染（深色底为 ezdxf 默认 CAD 背景），无旧图框残留。
-> 点进 [exe_test.html](exe_test_out/exe_test.html) / [test_other.html](test_other/test_other.html) 可看到 SVG 高清前后对比。
+> 点进 [源码实测报告](exe_test_out/exe_test.html) / [其他场景测试](test_other/test_other.html) 可看到 SVG 高清前后对比。
 
-#### 一、exe 真实测试（9 张 SolidWorks 图纸）
+#### 一、源码实测（9 张 SolidWorks 图纸）
 
 <table>
 <tr><th align='center'>图纸</th><th>替换前</th><th>替换后</th></tr>
@@ -83,9 +83,9 @@
 </tr>
 </table>
 
-#### 二、其他场景测试（11 张，用 exe 核心 run_skill 重跑 case 03/06/07/08，与「exe 真实测试」不重复）
+#### 二、其他场景测试（11 张，用源码核心 run_skill 重跑 case 03/06/07/08，与「源码实测」不重复）
 
-> 以下图纸**均经 exe 核心（`run_skill.py`，块式/线框双检测 + 自动按幅面选模板）实际处理**，与上方「exe 真实测试」的 9 张 SolidWorks 图纸无重叠。
+> 以下图纸**均经源码核心（`run_skill.py`，块式/线框双检测 + 自动按幅面选模板）实际处理**，与上方「源码实测」的 9 张 SolidWorks 图纸无重叠。
 
 <table>
 <tr><th align='center'>图纸</th><th>替换前</th><th>替换后</th></tr>
@@ -148,7 +148,7 @@
 
 #### 三、真实下载图纸测试（住宅楼电气 11 张 + CNG 电气 1 张）
 
-> 以下图纸为从爱给网下载的**真实 CAD 图纸（.dwg）**，经 exe 核心 `run_skill.py --dwg`（AutoCAD COM 直接处理，策略二）实际置换：住宅楼 11 张全部成功（含首层配电干线平面图等 A0 大图幅），CNG 1 张含 4 个图框（A1 大图框 + 3×A3 宽幅）。
+> 以下图纸为从爱给网下载的**真实 CAD 图纸（.dwg）**，经源码核心 `run_skill.py --dwg`（AutoCAD COM 直接处理，策略二）实际置换：住宅楼 11 张全部成功（含首层配电干线平面图等 A0 大图幅），CNG 1 张含 4 个图框（A1 大图框 + 3×A3 宽幅）。
 
 <table>
 <tr><th align='center'>图纸</th><th>替换前</th><th>替换后</th></tr>
@@ -255,14 +255,14 @@
 
 两份自包含 HTML 报告，将**真实输入 / 输出 DXF** 用 ezdxf 渲染成 SVG 内联，浏览器直接看「替换前 → 替换后」；所有数字、字段均来自真实运行，未做任何虚构。
 
-### 一、exe 真实测试（9 张 SolidWorks「打散」图纸）
+### 一、源码实测（9 张 SolidWorks「打散」图纸）
 
-打包好的 `dist/cad-frame-cli.exe`（PyInstaller 单文件，系统 Python 3.14）真跑 9 张微信工程图，验证「从源码到成品」全链路：
+源码 `run_skill.py` 真跑 9 张微信工程图，验证「从源码到成品」全链路：
 
 - **结果**：9 / 9 成功（`status=ok`），共删除 **746** 个旧图框相关实体；旧图框属性（图名 / 材料 / 比例 / 图号 / 重量 …）回填至新标题栏。
 - **按幅面自动选模板**：A4 × 6 + 非标 C429X297 × 3（400×277 真漂移非标，不被误判成标准幅面）。
 - **提取到的真实字段示例**：`TITLE=从动轮法兰 / 前叉 / 圆柱齿轮`、`MATERIAL=PLA / ABS / 亚克力`、`SCALE=2:1 / 1:5`、`WEIGHT=0.681`。
-- 👉 [exe_test_out/exe_test.html](exe_test_out/exe_test.html)
+- 👉 [源码实测报告（exe_test_out/exe_test.html）](exe_test_out/exe_test.html)
 
 ### 二、其他场景测试（20 张，自动选模板 + 标题栏残线修复）
 
@@ -320,7 +320,7 @@ run_skill.py  (通用主入口，--dwg 控制是否走 AutoCAD COM)
   ```
   C:/Users/86308/.workbuddy/binaries/python/envs/default/Scripts/python.exe
   ```
-- **GUI / exe 打包**：必须用**系统 Python 3.14**（`C:\Python314\python.exe`）——managed 3.13 venv 编译时未带 tcl/tk，`import tkinter` 会失败。
+- **GUI 界面**：用**系统 Python 3.14** 运行 `python gui_app.py`（`C:\Python314\python.exe`）——managed 3.13 venv 未带 tcl/tk，`import tkinter` 会失败。
 - 依赖安装：`pip install -r requirements.txt`（装包请用官方源 `-i https://pypi.org/simple`，清华源个别包缺失）。
 
 ## 1. 目录结构
@@ -342,7 +342,6 @@ cad-frame-replacement/
 ├── gen_real_mf.py          # 案例八：把 4 张真实 A1 图纸拼成 2×2 多图框 DXF
 ├── make_tpl_dwgs*.py       # 生成 HH 公司图框模板 / WBLOCK 转 DWG
 ├── gui_app.py              # 图文界面主程序（复用 run_skill.main，核心逻辑零改动）
-├── build_exe.bat           # 重新打包 exe（Python 3.14）
 ├── lib/                    # 核心库（双策略管线）
 │   ├── concepts.py         # 中英文/简写字段名 → 统一“概念”中间层
 │   ├── template_learn.py   # 模板自动学习（块 ATTDEF / 打散 <图名> 占位符）
@@ -546,34 +545,13 @@ pytest -q
 
 ---
 
-## 10. 打包与分发（免装 Python 的同事用）
+## 10. 分发方式（源码运行，不提供 exe）
 
-给不会用命令行的同事，把工具打成 **单个 exe**，双击即用，无需装任何 Python 环境。
+本工具以**源码方式**分发：clone 仓库后直接用 Python 运行，无需打包成 exe。
 
-### 分发物
+- **命令行 / 批量**：`python run_skill.py --template templates/HH_FRAME_A3.dxf --dwg --fit max 你的图纸/*.dwg`
+- **图文界面**（需系统 Python 3.14，managed 3.13 venv 无 tcl/tk）：`python gui_app.py`
+- 依赖：`pip install ezdxf`（CLI / 离线核心）；GUI 另需 `tkinter`（系统 Python 3.14 自带）。
 
-- `dist/cad-frame-gui.exe` —— 图文界面主程序（**推荐**，双击出现窗口，选图纸 → 选模板 → 开始）。
-- `dist/cad-frame-cli.exe` —— 命令行版（会命令行的同事用，参数同 `run_skill.py`）。
-- `dist/templates/` —— 公司图框模板（HH_FRAME_A0~A4.dxf）。
-- `dist/使用说明.txt` —— 给同事的图文使用指南。
-
-> exe 已内嵌模板与 ezdxf，拷走 `cad-frame-gui.exe` 单独也能跑；附 `templates/` 只是为了便于换模板。
-> exe 体积较大，**不入库**（`.gitignore` 已忽略 `dist/`、`*.exe`、`*.spec`）。
-
-### 为什么打包要用系统 Python 3.14
-
-标准 managed venv（3.13）编译时未带 tcl/tk，`import tkinter` 会失败。本工具界面用 tkinter，
-故打包必须用**自带 tcl/tk 的 Python 3.14**（如 `C:\Python314\python.exe`），且已 `pip install ezdxf pyinstaller`。
-GUI 入口 `gui_app.py` 通过构造 `sys.argv` + 重定向 stdout **复用** 已验证的 `run_skill.main()`，核心逻辑零改动。
-
-### 重新打包
-
-代码改动后想重新生成 exe，双击仓库根目录的 `build_exe.bat`（先按里面注释改一下 `PY=` 为你的 Python 3.14 路径）。
-或直接：
-
-```bash
-C:\Python314\python.exe -m PyInstaller --noconfirm --onefile --windowed --name cad-frame-gui \
-  --collect-all ezdxf --collect-all lib --add-data "templates;templates" gui_app.py
-```
-
-生成的 `dist/cad-frame-gui.exe` 即为分发包。
+> 注：曾试过用 PyInstaller 打包成单文件 exe，但冻结后目标机生成的 DXF 打不开、CLI 也起不来，
+> 故弃用 exe 方案，统一走源码运行——代码零改动即可在任意装了 Python + ezdxf 的机器上跑。
