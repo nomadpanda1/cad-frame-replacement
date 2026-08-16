@@ -1,0 +1,6 @@
+﻿源文件,状态,检测数,删除实体,插入字段,输出,备注
+cases/10_residential_electrical/inputs/弱电1.dwg,ok,1,0,TITLE,cases/10_residential_electrical/outputs/dwg\弱电1_HH.dwg,AutoCAD COM 直接处理
+cases/10_residential_electrical/inputs/强电平面.dwg,ok,1,0,"TITLE,SCALE",cases/10_residential_electrical/outputs/dwg\强电平面_HH.dwg,AutoCAD COM 直接处理
+cases/10_residential_electrical/inputs/首二层商场平面.dwg,ok,1,0,TITLE,cases/10_residential_electrical/outputs/dwg\首二层商场平面_HH.dwg,AutoCAD COM 直接处理
+cases/10_residential_electrical/inputs/裙楼消防平面.dwg,ok,2,0,"TITLE,TITLE",cases/10_residential_electrical/outputs/dwg\裙楼消防平面_HH.dwg,AutoCAD COM 直接处理
+cases/10_residential_electrical/inputs/首层配电干线平面图.dwg,ok,1,0,TITLE,cases/10_residential_electrical/outputs/dwg\首层配电干线平面图_HH.dwg,AutoCAD COM 直接处理

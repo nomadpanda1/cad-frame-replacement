@@ -1,0 +1,69 @@
+{
+  "template": "templates/HH_FRAME_A4.dxf",
+  "template_kind": "block",
+  "fit": "max",
+  "files": [
+    {
+      "src": "装配体图纸(1).DWG",
+      "mode": "single",
+      "found": 1,
+      "written": [
+        "DWG_NO",
+        "SCALE"
+      ],
+      "deleted": 57,
+      "method": "raw-frame",
+      "mappings": [
+        {
+          "region": [
+            10.0,
+            10.0,
+            410.0,
+            287.0
+          ],
+          "extracted": {
+            "SCALE": "1:5",
+            "DWG_NO": "1-1"
+          },
+          "unmatched": [
+            "TITLE",
+            "STAGE",
+            "MATERIAL",
+            "WEIGHT",
+            "VERSION",
+            "DATE",
+            "SHEET",
+            "DESIGN",
+            "CHECKED",
+            "REVIEWED",
+            "APPROVED",
+            "COUNTERSIGN"
+          ],
+          "unused": []
+        }
+      ],
+      "entities_before": 4109,
+      "entities_after": 4053,
+      "status": "ok",
+      "out": "装配体图纸(1)_HH.dxf"
+    }
+  ],
+  "sheet_decisions": [
+    {
+      "name": "C429X297",
+      "width": 428.88,
+      "height": 297.0,
+      "plot_scale": 1.0,
+      "exact": false,
+      "ratio": 1.444,
+      "frame_size": [
+        400.0,
+        277.0
+      ],
+      "tpl_size": [
+        428.88,
+        297.0
+      ]
+    }
+  ]
+}

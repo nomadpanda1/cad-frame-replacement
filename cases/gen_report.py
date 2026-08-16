@@ -133,9 +133,11 @@ a { color:#4a9eff; text-decoration:none; } a:hover { text-decoration:underline; 
 def sw_section():
     rows = []
     for name, size, tpl, ext, fill in SW:
-        b = f"01_SW_parts/outputs/{name}_before.png"
-        t = f"01_SW_parts/outputs/{name}_template.png"
-        a = f"01_SW_parts/outputs/{name}_after.png"
+        # 优先使用 outputs_v2（run_skill 最新管线输出），回退到旧 outputs
+        outdir = "01_SW_parts/outputs_v2" if os.path.exists(os.path.join(HERE, "01_SW_parts", "outputs_v2", f"{name}_after.png")) else "01_SW_parts/outputs"
+        b = f"{outdir}/{name}_before.png"
+        t = f"{outdir}/{name}_template.png"
+        a = f"{outdir}/{name}_after.png"
         # 跳过不存在的图片
         if not (os.path.exists(os.path.join(HERE, b)) and
                 os.path.exists(os.path.join(HERE, t)) and

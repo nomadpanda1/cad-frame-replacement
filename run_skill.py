@@ -525,6 +525,14 @@ def main():
                         else:
                             n_edge = raw_replace.delete_frame_lines(doc, frames)
                             n_tb = raw_replace.delete_titleblock(doc, tb, maxdim)
+                            # #7：清旧「打散」图框层残留（标题栏网格+字段标签）——这些常落在
+                            #     tb 之外（左栏 x<111、页中分隔线 y=105/155），delete_titleblock
+                            #     按 tb 区域删会漏，导致替换后残留横线。图框层只承载旧框几何，
+                            #     新 HH_FRAME 在 HH_TITLE/0 层，整层清残留安全；INSERT/HATCH 保留。
+                            n_grid = raw_replace.delete_old_frame_grid(doc)
+                            # #8：清掉旧标题栏字段值（如 layer 0 上的“法兰”“PLA”），它们已
+                            #     被提取回填到新模板 ATTRIB，不删会与新标题栏文字重叠。
+                            n_txt = raw_replace.delete_titleblock_text(doc, tb)
                             n_mark = raw_replace.delete_edge_markers(doc, outer, strip=10.0)
                             region = {"bbox": outer, "confidence": 1.0, "method": "frame",
                                       "source": "sheet", "entity": None}
@@ -532,7 +540,7 @@ def main():
                             _, written = block_replace.insert_template(
                                 doc, tpl, region, values, fit=args.fit or "max")
                             rec["written"] = list(dict.fromkeys(written))
-                            rec["deleted"] = n_edge + n_tb + n_mark
+                            rec["deleted"] = n_edge + n_tb + n_grid + n_txt + n_mark
                         rec["found"] = 1
                         rec["method"] = "raw-frame"
                         rec["mappings"] = [{"region": [round(x, 1) for x in outer],

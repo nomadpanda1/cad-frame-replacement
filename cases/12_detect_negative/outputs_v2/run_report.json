@@ -1,0 +1,211 @@
+{
+  "template": "templates/HH_FRAME_A4.dxf",
+  "template_kind": "block",
+  "fit": "max",
+  "files": [
+    {
+      "src": "std_A3.dwg",
+      "mode": "multi",
+      "found": 4,
+      "sheet": null,
+      "mappings": [
+        {
+          "region": [
+            4510.4,
+            2412.7,
+            4930.4,
+            2709.7
+          ],
+          "extracted": {
+            "SCALE": "1：1",
+            "TITLE": "{\\fSimSun|b0|i0|c134|p2;图样名称}"
+          },
+          "unmatched": [
+            "DWG_NO",
+            "STAGE",
+            "MATERIAL",
+            "WEIGHT",
+            "VERSION",
+            "DATE",
+            "SHEET",
+            "DESIGN",
+            "CHECKED",
+            "REVIEWED",
+            "APPROVED",
+            "COUNTERSIGN"
+          ],
+          "unused": [],
+          "written": [
+            "TITLE",
+            "SCALE"
+          ]
+        },
+        {
+          "region": [
+            4510.4,
+            1746.1,
+            4930.4,
+            2043.1
+          ],
+          "extracted": {
+            "TITLE": "{\\fSimSun|b0|i0|c134|p2;图样名称}"
+          },
+          "unmatched": [
+            "DWG_NO",
+            "SCALE",
+            "STAGE",
+            "MATERIAL",
+            "WEIGHT",
+            "VERSION",
+            "DATE",
+            "SHEET",
+            "DESIGN",
+            "CHECKED",
+            "REVIEWED",
+            "APPROVED",
+            "COUNTERSIGN"
+          ],
+          "unused": [],
+          "written": [
+            "TITLE"
+          ]
+        },
+        {
+          "region": [
+            5084.8,
+            2323.7,
+            5381.8,
+            2743.7
+          ],
+          "extracted": {
+            "TITLE": "{\\fSimSun|b0|i0|c134|p2;图样名称}"
+          },
+          "unmatched": [
+            "DWG_NO",
+            "SCALE",
+            "STAGE",
+            "MATERIAL",
+            "WEIGHT",
+            "VERSION",
+            "DATE",
+            "SHEET",
+            "DESIGN",
+            "CHECKED",
+            "REVIEWED",
+            "APPROVED",
+            "COUNTERSIGN"
+          ],
+          "unused": [],
+          "written": [
+            "TITLE"
+          ]
+        },
+        {
+          "region": [
+            5084.8,
+            1657.1,
+            5381.8,
+            2077.1
+          ],
+          "extracted": {
+            "TITLE": "{\\fSimSun|b0|i0|c134|p2;图样名称}"
+          },
+          "unmatched": [
+            "DWG_NO",
+            "SCALE",
+            "STAGE",
+            "MATERIAL",
+            "WEIGHT",
+            "VERSION",
+            "DATE",
+            "SHEET",
+            "DESIGN",
+            "CHECKED",
+            "REVIEWED",
+            "APPROVED",
+            "COUNTERSIGN"
+          ],
+          "unused": [],
+          "written": [
+            "TITLE"
+          ]
+        }
+      ],
+      "deleted": 209,
+      "written": [
+        "TITLE",
+        "SCALE"
+      ],
+      "entities_before": 372,
+      "entities_after": 167,
+      "status": "ok",
+      "out": "std_A3_HH.dxf"
+    }
+  ],
+  "sheet_decisions": [
+    {
+      "name": "A3",
+      "width": 420.0,
+      "height": 297.0,
+      "plot_scale": 1.0,
+      "exact": true,
+      "ratio": 1.4141,
+      "frame_size": [
+        420.0,
+        297.0
+      ],
+      "tpl_size": [
+        420.0,
+        297.0
+      ]
+    },
+    {
+      "name": "A3",
+      "width": 420.0,
+      "height": 297.0,
+      "plot_scale": 1.0,
+      "exact": true,
+      "ratio": 1.4141,
+      "frame_size": [
+        420.0,
+        297.0
+      ],
+      "tpl_size": [
+        420.0,
+        297.0
+      ]
+    },
+    {
+      "name": "A3V",
+      "width": 297.0,
+      "height": 420.0,
+      "plot_scale": 1.0,
+      "exact": true,
+      "ratio": 0.7071,
+      "frame_size": [
+        297.0,
+        420.0
+      ],
+      "tpl_size": [
+        297.0,
+        420.0
+      ]
+    },
+    {
+      "name": "A3V",
+      "width": 297.0,
+      "height": 420.0,
+      "plot_scale": 1.0,
+      "exact": true,
+      "ratio": 0.7071,
+      "frame_size": [
+        297.0,
+        420.0
+      ],
+      "tpl_size": [
+        297.0,
+        420.0
+      ]
+    }
+  ]
+}

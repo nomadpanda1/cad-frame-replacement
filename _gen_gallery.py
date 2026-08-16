@@ -54,13 +54,20 @@ def main():
         cdir = os.path.join(CASES_DIR, c)
         if not os.path.isdir(cdir) or not re.match(r"^\d+_", c):
             continue
-        pngs = []
+        # 若同时存在 outputs 与 outputs_v2，优先用 outputs_v2（最新管线输出），避免重复
+        out_dirs = []
         for sub in sorted(os.listdir(cdir)):
             sd = os.path.join(cdir, sub)
             if os.path.isdir(sd) and re.match(r"^outputs", sub):
-                for fn in sorted(os.listdir(sd)):
-                    if fn.lower().endswith(".png"):
-                        pngs.append((sd, fn))
+                out_dirs.append(sd)
+        if not out_dirs:
+            continue
+        preferred = [d for d in out_dirs if os.path.basename(d) == "outputs_v2"]
+        chosen = preferred[0] if preferred else out_dirs[0]
+        pngs = []
+        for fn in sorted(os.listdir(chosen)):
+            if fn.lower().endswith(".png"):
+                pngs.append((chosen, fn))
         if not pngs:
             continue
         groups = {}

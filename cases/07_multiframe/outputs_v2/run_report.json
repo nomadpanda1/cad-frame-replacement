@@ -1,0 +1,126 @@
+{
+  "template": "templates/HH_FRAME_A4.dxf",
+  "template_kind": "block",
+  "fit": "max",
+  "files": [
+    {
+      "src": "07b_side_by_side.dxf",
+      "mode": "multi",
+      "found": 2,
+      "sheet": null,
+      "mappings": [
+        {
+          "region": [
+            20.0,
+            20.0,
+            420.0,
+            620.0
+          ],
+          "extracted": {
+            "DWG_NO": "CNG-0501/03",
+            "SCALE": "NTS",
+            "STAGE": "施工图",
+            "TITLE": "基础平面图-区一"
+          },
+          "unmatched": [
+            "MATERIAL",
+            "WEIGHT",
+            "VERSION",
+            "DATE",
+            "SHEET",
+            "DESIGN",
+            "CHECKED",
+            "REVIEWED",
+            "APPROVED",
+            "COUNTERSIGN"
+          ],
+          "unused": [],
+          "written": [
+            "TITLE",
+            "DWG_NO",
+            "SCALE",
+            "STAGE"
+          ]
+        },
+        {
+          "region": [
+            440.0,
+            20.0,
+            840.0,
+            620.0
+          ],
+          "extracted": {
+            "DWG_NO": "CNG-0501/04",
+            "SCALE": "1:100",
+            "STAGE": "建筑室",
+            "TITLE": "基础平面图-区二"
+          },
+          "unmatched": [
+            "MATERIAL",
+            "WEIGHT",
+            "VERSION",
+            "DATE",
+            "SHEET",
+            "DESIGN",
+            "CHECKED",
+            "REVIEWED",
+            "APPROVED",
+            "COUNTERSIGN"
+          ],
+          "unused": [],
+          "written": [
+            "TITLE",
+            "DWG_NO",
+            "SCALE",
+            "STAGE"
+          ]
+        }
+      ],
+      "deleted": 24,
+      "written": [
+        "TITLE",
+        "DWG_NO",
+        "SCALE",
+        "STAGE"
+      ],
+      "entities_before": 56,
+      "entities_after": 34,
+      "status": "ok",
+      "out": "07b_side_by_side_HH.dxf"
+    }
+  ],
+  "sheet_decisions": [
+    {
+      "name": "A2V",
+      "width": 420.0,
+      "height": 594.0,
+      "plot_scale": 1.0,
+      "exact": true,
+      "ratio": 0.6667,
+      "frame_size": [
+        400.0,
+        600.0
+      ],
+      "tpl_size": [
+        420.0,
+        594.0
+      ]
+    },
+    {
+      "name": "A2V",
+      "width": 420.0,
+      "height": 594.0,
+      "plot_scale": 1.0,
+      "exact": true,
+      "ratio": 0.6667,
+      "frame_size": [
+        400.0,
+        600.0
+      ],
+      "tpl_size": [
+        420.0,
+        594.0
+      ]
+    }
+  ]
+}

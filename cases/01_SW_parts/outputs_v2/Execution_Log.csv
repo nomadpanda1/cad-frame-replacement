@@ -1,0 +1,10 @@
+﻿源文件,状态,检测数,删除实体,插入字段,输出,备注
+cases/01_SW_parts/inputs/从法兰(2).dxf,ok,1,116,"TITLE,SCALE,MATERIAL",cases/01_SW_parts/outputs_v2\从法兰(2)_HH.dxf,
+cases/01_SW_parts/inputs/前叉(1).dxf,ok,1,99,"TITLE,MATERIAL",cases/01_SW_parts/outputs_v2\前叉(1)_HH.dxf,
+cases/01_SW_parts/inputs/圆柱齿轮13×1(2).dxf,ok,1,115,"TITLE,SCALE,MATERIAL",cases/01_SW_parts/outputs_v2\圆柱齿轮13×1(2)_HH.dxf,
+cases/01_SW_parts/inputs/圆柱齿轮65×1(1).dxf,ok,1,111,"TITLE,SCALE,MATERIAL",cases/01_SW_parts/outputs_v2\圆柱齿轮65×1(1)_HH.dxf,
+cases/01_SW_parts/inputs/法兰(2).dxf,ok,1,114,"TITLE,SCALE,MATERIAL,VERSION",cases/01_SW_parts/outputs_v2\法兰(2)_HH.dxf,
+cases/01_SW_parts/inputs/等轴测图(1).dxf,ok,1,58,"SCALE,WEIGHT",cases/01_SW_parts/outputs_v2\等轴测图(1)_HH.dxf,
+cases/01_SW_parts/inputs/装配体图纸(1).dxf,ok,1,57,"DWG_NO,SCALE",cases/01_SW_parts/outputs_v2\装配体图纸(1)_HH.dxf,
+cases/01_SW_parts/inputs/装配体爆炸图1(1).dxf,ok,1,58,"TITLE,DWG_NO,SCALE,WEIGHT",cases/01_SW_parts/outputs_v2\装配体爆炸图1(1)_HH.dxf,
+cases/01_SW_parts/inputs/龙门架.dxf,ok,1,97,"TITLE,MATERIAL",cases/01_SW_parts/outputs_v2\龙门架_HH.dxf,

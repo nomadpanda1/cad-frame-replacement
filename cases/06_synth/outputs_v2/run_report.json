@@ -1,0 +1,71 @@
+{
+  "template": "templates/HH_FRAME_A4.dxf",
+  "template_kind": "block",
+  "fit": "max",
+  "files": [
+    {
+      "src": "06d_countersign.dxf",
+      "mode": "single",
+      "found": 1,
+      "written": [
+        "TITLE",
+        "DWG_NO",
+        "SCALE",
+        "STAGE"
+      ],
+      "deleted": 19,
+      "method": "raw-frame",
+      "mappings": [
+        {
+          "region": [
+            0.0,
+            0.0,
+            420.0,
+            297.0
+          ],
+          "extracted": {
+            "TITLE": "赵六",
+            "DWG_NO": "钱七",
+            "SCALE": "王五",
+            "STAGE": "李四"
+          },
+          "unmatched": [
+            "MATERIAL",
+            "WEIGHT",
+            "VERSION",
+            "DATE",
+            "SHEET",
+            "DESIGN",
+            "CHECKED",
+            "REVIEWED",
+            "APPROVED",
+            "COUNTERSIGN"
+          ],
+          "unused": []
+        }
+      ],
+      "entities_before": 20,
+      "entities_after": 2,
+      "status": "ok",
+      "out": "06d_countersign_HH.dxf"
+    }
+  ],
+  "sheet_decisions": [
+    {
+      "name": "A3",
+      "width": 420.0,
+      "height": 297.0,
+      "plot_scale": 1.0,
+      "exact": true,
+      "ratio": 1.4141,
+      "frame_size": [
+        420.0,
+        297.0
+      ],
+      "tpl_size": [
+        420.0,
+        297.0
+      ]
+    }
+  ]
+}

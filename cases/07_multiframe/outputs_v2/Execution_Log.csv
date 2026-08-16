@@ -1,0 +1,2 @@
+﻿源文件,状态,检测数,删除实体,插入字段,输出,备注
+cases/07_multiframe\inputs\07b_side_by_side.dxf,ok,2,24,"TITLE,DWG_NO,SCALE,STAGE",cases/07_multiframe\outputs_v2\07b_side_by_side_HH.dxf,

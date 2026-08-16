@@ -1,0 +1,216 @@
+{
+  "template": "templates/HH_FRAME_A4.dxf",
+  "template_kind": "block",
+  "fit": "max",
+  "files": [
+    {
+      "src": "CNG_电气系统图.dxf",
+      "mode": "multi",
+      "found": 4,
+      "sheet": null,
+      "mappings": [
+        {
+          "region": [
+            699709.0,
+            -199481.6,
+            783809.0,
+            -140081.6
+          ],
+          "extracted": {
+            "DWG_NO": "单位",
+            "STAGE": "档案号:",
+            "TITLE": "型  号  规  格"
+          },
+          "unmatched": [
+            "SCALE",
+            "MATERIAL",
+            "WEIGHT",
+            "VERSION",
+            "DATE",
+            "SHEET",
+            "DESIGN",
+            "CHECKED",
+            "REVIEWED",
+            "APPROVED",
+            "COUNTERSIGN"
+          ],
+          "unused": [],
+          "written": [
+            "TITLE",
+            "DWG_NO",
+            "STAGE"
+          ]
+        },
+        {
+          "region": [
+            594599.6,
+            -252404.8,
+            678699.6,
+            -210404.8
+          ],
+          "extracted": {
+            "STAGE": "档案号:",
+            "TITLE": "低压配电系统图二"
+          },
+          "unmatched": [
+            "DWG_NO",
+            "SCALE",
+            "MATERIAL",
+            "WEIGHT",
+            "VERSION",
+            "DATE",
+            "SHEET",
+            "DESIGN",
+            "CHECKED",
+            "REVIEWED",
+            "APPROVED",
+            "COUNTERSIGN"
+          ],
+          "unused": [],
+          "written": [
+            "TITLE",
+            "STAGE"
+          ]
+        },
+        {
+          "region": [
+            594599.6,
+            -206706.2,
+            678699.6,
+            -164706.2
+          ],
+          "extracted": {
+            "STAGE": "档案号:",
+            "TITLE": "低压配电系统图一"
+          },
+          "unmatched": [
+            "DWG_NO",
+            "SCALE",
+            "MATERIAL",
+            "WEIGHT",
+            "VERSION",
+            "DATE",
+            "SHEET",
+            "DESIGN",
+            "CHECKED",
+            "REVIEWED",
+            "APPROVED",
+            "COUNTERSIGN"
+          ],
+          "unused": [],
+          "written": [
+            "TITLE",
+            "STAGE"
+          ]
+        },
+        {
+          "region": [
+            594599.6,
+            -159186.8,
+            678699.6,
+            -117186.8
+          ],
+          "extracted": {
+            "STAGE": "档案号:",
+            "TITLE": "10kV主接线图"
+          },
+          "unmatched": [
+            "DWG_NO",
+            "SCALE",
+            "MATERIAL",
+            "WEIGHT",
+            "VERSION",
+            "DATE",
+            "SHEET",
+            "DESIGN",
+            "CHECKED",
+            "REVIEWED",
+            "APPROVED",
+            "COUNTERSIGN"
+          ],
+          "unused": [],
+          "written": [
+            "TITLE",
+            "STAGE"
+          ]
+        }
+      ],
+      "deleted": 241,
+      "written": [
+        "TITLE",
+        "DWG_NO",
+        "STAGE"
+      ],
+      "entities_before": 2471,
+      "entities_after": 2234,
+      "status": "ok",
+      "out": "CNG_电气系统图_HH.dxf"
+    }
+  ],
+  "sheet_decisions": [
+    {
+      "name": "A1",
+      "width": 841.0,
+      "height": 594.0,
+      "plot_scale": 100.0,
+      "exact": true,
+      "ratio": 1.4158,
+      "frame_size": [
+        84100.0,
+        59400.0
+      ],
+      "tpl_size": [
+        841.0,
+        594.0
+      ]
+    },
+    {
+      "name": "A3X3",
+      "width": 891.0,
+      "height": 420.0,
+      "plot_scale": 100.0,
+      "exact": true,
+      "ratio": 2.0024,
+      "frame_size": [
+        84100.0,
+        42000.0
+      ],
+      "tpl_size": [
+        891.0,
+        420.0
+      ]
+    },
+    {
+      "name": "A3X3",
+      "width": 891.0,
+      "height": 420.0,
+      "plot_scale": 100.0,
+      "exact": true,
+      "ratio": 2.0024,
+      "frame_size": [
+        84100.0,
+        42000.0
+      ],
+      "tpl_size": [
+        891.0,
+        420.0
+      ]
+    },
+    {
+      "name": "A3X3",
+      "width": 891.0,
+      "height": 420.0,
+      "plot_scale": 100.0,
+      "exact": true,
+      "ratio": 2.0024,
+      "frame_size": [
+        84100.0,
+        42000.0
+      ],
+      "tpl_size": [
+        891.0,
+        420.0
+      ]
+    }
+  ]
+}

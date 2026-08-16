@@ -158,7 +158,7 @@ def delete_bottom_strip(doc, outer, strip=62.0):
 
 
 def render_one(path_or_doc, png, landscape):
-    dpi = 130
+    dpi = 150
     size = (11.7, 8.3) if landscape else (8.3, 11.7)
     doc = ezdxf.readfile(path_or_doc) if isinstance(path_or_doc, str) else path_or_doc
     qsave(doc.modelspace(), png, dpi=dpi, size_inches=size)
@@ -230,6 +230,9 @@ def main():
     results = []
     for fn in FILES:
         src = os.path.join(ESS_DIR, fn)
+        if not os.path.exists(src):
+            # 微信源目录不可用时，回退到已拷贝的 inputs/
+            src = os.path.join(inp_dir, fn)
         if not os.path.exists(src):
             print("MISSING", src)
             continue

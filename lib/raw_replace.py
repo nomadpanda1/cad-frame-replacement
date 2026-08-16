@@ -120,6 +120,57 @@ def delete_titleblock(doc, tb, maxdim=None):
     return n
 
 
+def delete_old_frame_grid(doc):
+    """raw-frame 回退专用：清掉旧「打散」图框层残留的标题栏网格与字段标签。
+
+    适用场景：SolidWorks 导出的图框打散成线段落在专门的图框层（图框/tukuang…），
+    该层只承载旧图框/标题栏几何，真实绘图内容在 0/粗实线层。
+    新公司图框（HH_FRAME_*）插入在 HH_TITLE/0 层，与本层无交集，故可整层清残留。
+
+    删除：图框层上的 LINE/LWPOLYLINE/POLYLINE（框线/标题栏网格）+ TEXT/MTEXT（旧字段标签）。
+    保留：INSERT（SW 中心标记等符号块）与 HATCH（剖面线）等真实标注，绝不误删。
+    """
+    msp = doc.modelspace()
+    n = 0
+    for e in list(msp):
+        dt = e.dxftype()
+        layer = (e.dxf.layer or "").lower()
+        on_title = layer in _TITLE_LAYERS or layer.startswith("tukuang")
+        if not on_title:
+            continue
+        if dt in ("LINE", "LWPOLYLINE", "POLYLINE", "TEXT", "MTEXT"):
+            msp.delete_entity(e); n += 1
+        # INSERT / HATCH / DIMENSION 等真实标注一律保留
+    return n
+
+
+def delete_titleblock_text(doc, tb):
+    """raw-frame 回退专用：删标题栏矩形区内所有独立 TEXT/MTEXT。
+
+    SolidWorks 导出的旧标题栏中，字段值（如零件名、材料、比例）有时落在 layer 0
+    而非图框层。这些值已被提取并回填到新 HH_FRAME 的 ATTRIB 中，若不清理会与新
+    标题栏重叠。新模板以 INSERT 块形式插入，其字段是块内 ATTRIB，不在 msp 顶层，
+    因此删除顶层 TEXT/MTEXT 不会误伤新模板。
+    """
+    msp = doc.modelspace()
+    n = 0
+    for e in list(msp):
+        dt = e.dxftype()
+        if dt not in ("TEXT", "MTEXT"):
+            continue
+        try:
+            b = bbox_mod.extents([e])
+        except Exception:
+            continue
+        if not b or not b.has_data:
+            continue
+        eb = (b.extmin.x, b.extmin.y, b.extmax.x, b.extmax.y)
+        if eb[2] < tb[0] or eb[0] > tb[2] or eb[3] < tb[1] or eb[1] > tb[3]:
+            continue
+        msp.delete_entity(e); n += 1
+    return n
+
+
 def delete_edge_markers(doc, outer, strip=10.0):
     """删沿外框边缘的区号字母/数字（如 A/B/C 与 4/5/6），这些是 SW 图框系统的一部分。"""
     x0, y0, x1, y1 = outer

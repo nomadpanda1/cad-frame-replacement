@@ -177,7 +177,7 @@ def _bbox_overlap(a, b, tol=0.0):
 
 
 def detect_frame_groups(doc, min_area_share=0.35, dedup_ratio=0.8,
-                        split_cover=0.6, min_drawing_share=0.02):
+                        split_cover=0.5, min_drawing_share=0.02):
     """线框图纸（打散图框，无 INSERT 块）的图框检测。
 
     返回 (sheet_bbox_or_None, groups)，groups = [{"outer": rect, "inner": [rect...]}]，

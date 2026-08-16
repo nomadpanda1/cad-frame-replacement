@@ -1,0 +1,75 @@
+{
+  "template": "templates/HH_FRAME_A4.dxf",
+  "template_kind": "block",
+  "fit": "max",
+  "files": [
+    {
+      "src": "给煤机原理图.dwg",
+      "mode": "single",
+      "found": 1,
+      "written": [
+        "TITLE",
+        "DWG_NO",
+        "SCALE",
+        "STAGE",
+        "DATE",
+        "DESIGN",
+        "CHECKED",
+        "REVIEWED"
+      ],
+      "deleted": 279,
+      "method": "raw-frame",
+      "mappings": [
+        {
+          "region": [
+            1437.5,
+            -5.0,
+            2597.5,
+            1635.0
+          ],
+          "extracted": {
+            "STAGE": "型 号 规 格",
+            "CHECK": "施 工",
+            "SCALE": "控制箱箱面布置",
+            "DESIGN": "职 责",
+            "DATE": "符 号",
+            "DWG_NO": "3SB2",
+            "REVIEW": "输煤廊",
+            "TITLE": "3SB1"
+          },
+          "unmatched": [
+            "MATERIAL",
+            "WEIGHT",
+            "VERSION",
+            "SHEET",
+            "APPROVED",
+            "COUNTERSIGN"
+          ],
+          "unused": []
+        }
+      ],
+      "entities_before": 9356,
+      "entities_after": 9078,
+      "status": "ok",
+      "out": "给煤机原理图_HH.dxf"
+    }
+  ],
+  "sheet_decisions": [
+    {
+      "name": "A0X2V",
+      "width": 1189.0,
+      "height": 1682.0,
+      "plot_scale": 1.0,
+      "exact": true,
+      "ratio": 0.7073,
+      "frame_size": [
+        1160.0,
+        1640.0
+      ],
+      "tpl_size": [
+        1189.0,
+        1682.0
+      ]
+    }
+  ]
+}
