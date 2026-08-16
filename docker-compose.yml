@@ -1,0 +1,19 @@
+services:
+  cadframe:
+    build:
+      context: .
+      dockerfile: web/Dockerfile
+    image: cadframe:latest
+    container_name: cadframe
+    ports:
+      - "8000:8000"
+    environment:
+      - PORT=8000
+      - CAD_PY=python3
+    volumes:
+      # 持久化任务产物（预览图 / 下载文件），容器重启不丢
+      - cadframe_jobs:/tmp/cadframe_jobs
+    restart: unless-stopped
+
+volumes:
+  cadframe_jobs:
