@@ -162,8 +162,29 @@ def dwg_to_dxf(src_dwg, dst_dxf=None):
     )
 
 
+def _patch_codepage(dxf_path, codepage):
+    """把 DXF header 的 $DWGCODEPAGE 改成指定值（文件须已用对应编码保存）。"""
+    try:
+        with open(dxf_path, "r", encoding="cp936") as f:
+            lines = f.readlines()
+        for i, line in enumerate(lines):
+            if line.strip().upper() == "$DWGCODEPAGE" and i + 2 < len(lines):
+                if lines[i + 1].strip() == "3":
+                    lines[i + 2] = "%s\n" % codepage
+                    break
+        with open(dxf_path, "w", encoding="cp936") as f:
+            f.writelines(lines)
+    except Exception as e:
+        print("[converter-warn] patch $DWGCODEPAGE 失败:", e)
+
+
 def dxf_to_dwg(src_dxf, dst_dwg=None):
-    """把 DXF 转回 DWG（用户要求导出 DWG 时）。"""
+    """把 DXF 转回 DWG（用户要求导出 DWG 时）。
+
+    LibreDWG 的 dxf2dwg 只支持输出 r12/r14/r2000/r2004，且对 R2007+/UTF-8/ANSI_1200
+    输入支持很差（会生成损坏或代码页错乱的 DWG）。因此这里先把 DXF 降级到 R2000，
+    用中文代码页 cp936/ANSI_936 保存，再交给 dxf2dwg，确保中文 AutoCAD 能正常打开。
+    """
     if not src_dxf.lower().endswith(".dxf"):
         raise ValueError("dxf_to_dwg 需要 .dxf 输入: %s" % src_dxf)
     if dst_dwg is None:
@@ -171,16 +192,37 @@ def dxf_to_dwg(src_dxf, dst_dwg=None):
     dst_dwg = os.path.abspath(dst_dwg)
 
     if _which("dxf2dwg"):
+        # 1) 读入并降级到 R2004 + cp936/ANSI_936，适配 dxf2dwg。
+        #    dxf2dwg 默认 r2000 在真实图纸上会 SIGSEGV；r2004 输入/输出一致时稳定。
+        doc = ezdxf.readfile(src_dxf)
+        if hasattr(doc, "dxfversion") and doc.dxfversion != "AC1018":
+            try:
+                doc.dxfversion = "AC1018"
+            except Exception as e:
+                print("[converter-warn] 降级到 AC1018 失败:", e)
+
         work = os.path.dirname(dst_dwg)
         base = os.path.splitext(os.path.basename(src_dxf))[0]
-        produced = os.path.join(work, base + ".dwg")
+        tmp_dxf = os.path.join(work, ".__tmp_%s.dxf" % base)
+        doc.saveas(tmp_dxf, encoding="cp936")
+        _patch_codepage(tmp_dxf, "ANSI_936")
+
+        # 2) dxf2dwg。默认 r2000 在真实图纸上会 SIGSEGV，r2004 更稳定。
+        produced = os.path.join(work, ".__tmp_%s.dwg" % base)
         subprocess.run(
-            ["dxf2dwg", "-y", os.path.basename(src_dxf)],
+            ["dxf2dwg", "-y", "--as", "r2004", "-o", produced, os.path.basename(tmp_dxf)],
             cwd=work, check=True,
             stdout=subprocess.PIPE, stderr=subprocess.PIPE,
         )
-        if produced != dst_dwg and os.path.exists(produced):
+        if os.path.exists(produced):
             os.replace(produced, dst_dwg)
+        # 清理中间 DXF；DWG 已替换到目标
+        try:
+            os.remove(tmp_dxf)
+        except Exception:
+            pass
+        if not os.path.exists(dst_dwg):
+            raise RuntimeError("dxf2dwg 未生成预期文件: %s" % dst_dwg)
         return dst_dwg
 
     if _which("ODAFileConverter"):
