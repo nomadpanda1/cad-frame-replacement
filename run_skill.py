@@ -53,22 +53,26 @@ def _patch_codepage_utf8(path):
 def _atomic_save_doc(doc, out_path):
     """保存 DXF：先写临时文件，再 os.replace 原子替换到目标；目标被锁则退化为带时间戳的备用名。返回最终路径。
 
-    对 R2007(AC1021) 及以上版本强制用 UTF-8 + $DWGCODEPAGE=ANSI_1200，避免 AutoCAD 把 R2018+DXF 当 GBK 拒绝打开。
+    AutoCAD 2007 起 DXF 官方使用 UTF-8，并以 $DWGCODEPAGE=ANSI_1200 标记。
+    为确保中文标题栏在任何 AutoCAD 环境里都能打开，这里把 R2007 以下版本（
+    例如 LibreDWG dwg2dxf 默认输出的 R2000/AC1015）升级到 R2007/AC1021，
+    再用 UTF-8 写盘并把 codepage 改为 ANSI_1200。
     """
     out_dir = os.path.dirname(os.path.abspath(out_path))
     base_name = os.path.basename(out_path)
     stem, ext = os.path.splitext(base_name)
-    # AutoCAD 2007 起 DXF 官方使用 UTF-8；低版本保留原编码避免破坏
-    force_utf8 = hasattr(doc, "dxfversion") and doc.dxfversion >= "AC1021"
+    # R2007 以下升级到 R2007，统一走 UTF-8/ANSI_1200
+    if hasattr(doc, "dxfversion") and doc.dxfversion < "AC1021":
+        try:
+            doc.dxfversion = "AC1021"
+        except Exception as e:
+            print("   [WARN] 升级 DXF 版本到 AC1021 失败:", e)
     tmp = None
     try:
         fd, tmp = tempfile.mkstemp(suffix=".tmp", prefix="._out_", dir=out_dir)
         os.close(fd)
-        if force_utf8:
-            doc.saveas(tmp, encoding="utf-8")
-            _patch_codepage_utf8(tmp)
-        else:
-            doc.saveas(tmp)
+        doc.saveas(tmp, encoding="utf-8")
+        _patch_codepage_utf8(tmp)
         try:
             os.replace(tmp, out_path)
             tmp = None

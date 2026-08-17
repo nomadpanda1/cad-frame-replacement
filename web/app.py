@@ -39,12 +39,21 @@ import matplotlib.pyplot as plt
 # 这里在进程启动时把 TTC 注册进 ezdxf 字体缓存，并把回退字体与常见中文字体
 # 族名（宋体/黑体/仿宋/楷体…）指向它，确保预览里的汉字可正确绘制。
 # ---------------------------------------------------------------------------
+# 注册成功后保存 TTC 文件名（不含路径），供 _render_png 强制套用到所有文字样式。
+_CJK_FONT_FILE = None
+
+
 def _register_cjk_font():
+    global _CJK_FONT_FILE
     try:
         import ezdxf.fonts.fonts as _ezfonts
-        from ezdxf.fonts import font_manager as _fm
+        from ezdxf.fonts import font_manager as _fmmod
         from pathlib import Path as _Path
         import matplotlib.font_manager as _mfm
+
+        # ezdxf 1.4.x：FontManager 单例在 ezdxf.fonts.fonts.font_manager；
+        # get_ttf_font_face 则在模块 ezdxf.fonts.font_manager 上。二者易混，注意区分。
+        _fmgr = _ezfonts.font_manager
 
         cjk_file = None
         # 优先从 matplotlib 已知字体里挑 Noto CJK（名字稳定为 "Noto Sans CJK SC"）
@@ -67,12 +76,14 @@ def _register_cjk_font():
             return
 
         # 把 TTC/OTF 注册进 ezdxf 字体缓存（键 = 小写文件名）
-        _ff = _ezfonts.get_ttf_font_face(cjk_file)
-        _fm._font_cache.add_entry(cjk_file, _ff)
+        _ff = _fmmod.get_ttf_font_face(cjk_file)
+        _fmgr._font_cache.add_entry(cjk_file, _ff)
         # 回退字体必须 = 缓存键（小写文件名），否则 has_font 永远 False
-        _fm._fallback_font_name = cjk_file.name.lower()
-        # 常见中文字体族名 -> 该 TTC 条目
-        _fm.add_synonyms({
+        _fmgr._fallback_font_name = cjk_file.name.lower()
+        # 常见中文字体族名 / 文件名 -> 该 TTC 条目
+        # （add_synonyms 内部 reverse 会把键翻转为族名；同时把 simhei.ttf、
+        #  txt/txt.shx 等真实用到的字体名也直接指向 CJK，确保万无一失）
+        _fmgr.add_synonyms({
             "宋体": cjk_file.name,
             "SimSun": cjk_file.name,
             "黑体": cjk_file.name,
@@ -83,12 +94,17 @@ def _register_cjk_font():
             "KaiTi": cjk_file.name,
             "微软雅黑": cjk_file.name,
             "Microsoft YaHei": cjk_file.name,
+            "simhei.ttf": cjk_file.name,
+            "simsun.ttf": cjk_file.name,
+            "txt": cjk_file.name,
+            "txt.shx": cjk_file.name,
         })
         # matplotlib 侧：把 TTC 加入其字体列表，避免它自己回退到缺 CJK 的默认字体
         try:
             _mfm.fontManager.addfont(str(cjk_file))
         except Exception as _e:
             print("[font-warn] matplotlib addfont 失败:", _e)
+        _CJK_FONT_FILE = cjk_file.name
         print("[font-ok] 已注册 CJK 字体:", cjk_file.name)
     except Exception as _e:
         print("[font-warn] CJK 字体注册异常:", _e)
@@ -124,6 +140,17 @@ def _render_png(dxf_path, png_path, dpi=130):
     """把 DXF 渲染成比例正确的 PNG；失败返回 False（不影响主流程）。"""
     try:
         doc = ezdxf.readfile(dxf_path)
+        # 预览专用：强制所有文字样式改用已注册的 CJK 字体，确保中文标题栏不出现方块。
+        # 不改用户数据（仅渲染时套用），导出 DXF 保持原字体。
+        if _CJK_FONT_FILE:
+            try:
+                for _st in doc.styles:
+                    try:
+                        _st.dxf.font = _CJK_FONT_FILE
+                    except Exception:
+                        pass
+            except Exception:
+                pass
         msp = doc.modelspace()
         try:
             ext = ezdxf.bbox.extents(msp)
