@@ -26,12 +26,10 @@ from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 from fastapi.responses import FileResponse, HTMLResponse
 
 import ezdxf
-from ezdxf.addons.drawing import RenderContext, Frontend
-from ezdxf.addons.drawing.matplotlib import MatplotlibBackend
+from ezdxf.addons.drawing.matplotlib import qsave
 import matplotlib
 
 matplotlib.use("Agg")
-import matplotlib.pyplot as plt
 
 # ---------------------------------------------------------------------------
 # CJK 字体注册：容器无头环境只有 Noto Sans CJK（TTC），但 ezdxf 的 FontManager
@@ -143,7 +141,7 @@ def _safe_name(name):
     return name or "input"
 
 
-def _render_png(dxf_path, png_path, dpi=130):
+def _render_png(dxf_path, png_path, dpi=200):
     """把 DXF 渲染成比例正确的 PNG；失败返回 False（不影响主流程）。"""
     try:
         doc = ezdxf.readfile(dxf_path)
@@ -159,26 +157,15 @@ def _render_png(dxf_path, png_path, dpi=130):
             except Exception:
                 pass
         msp = doc.modelspace()
-        try:
-            ext = ezdxf.bbox.extents(msp)
-            if ext.has_data:
-                w, h = ext.size.x, ext.size.y
-            else:
-                w, h = 420.0, 297.0
-        except Exception:
-            w, h = 420.0, 297.0
-        longest = max(w, h) or 1.0
-        scale = 12.0 / longest
-        figsize = (max(w * scale, 0.5), max(h * scale, 0.5))
-        bg = "#1a2029"  # color 7 (white) lines visible on dark background
-        fig = plt.figure(figsize=figsize, facecolor=bg)
-        ax = fig.add_axes([0, 0, 1, 1], facecolor=bg)
-        ctx = RenderContext(doc)
-        ctx.set_current_layout(msp)
-        Frontend(ctx, MatplotlibBackend(ax)).draw_layout(msp, finalize=True)
-        ax.set_axis_off()
-        fig.savefig(png_path, dpi=dpi, facecolor=bg, edgecolor="none")
-        plt.close(fig)
+        # 采用 qsave 固定 A3 幅面 + 高 DPI：与 run_asm.py/run_ess.py 一致，
+        # 线条/文字比动态 figsize（scale=12/longest @ dpi=130）更清晰。
+        qsave(
+            msp,
+            png_path,
+            dpi=dpi,
+            size_inches=(11.7, 8.27),
+            bg="#1a2029",  # 深色底，color 7（白线）可见
+        )
         return True
     except Exception as e:  # 预览非关键
         print("[render-warn]", e)
