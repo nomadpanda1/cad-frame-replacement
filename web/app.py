@@ -26,10 +26,10 @@ from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 from fastapi.responses import FileResponse, HTMLResponse
 
 import ezdxf
-from ezdxf.addons.drawing.matplotlib import qsave
-import matplotlib
-
-matplotlib.use("Agg")
+from ezdxf.addons.drawing import Frontend
+from ezdxf.addons.drawing.svg import SVGBackend
+from ezdxf.addons.drawing.properties import RenderContext
+from ezdxf.addons.drawing import layout as layout_mod
 
 # ---------------------------------------------------------------------------
 # CJK 字体注册：容器无头环境只有 Noto Sans CJK（TTC），但 ezdxf 的 FontManager
@@ -37,7 +37,7 @@ matplotlib.use("Agg")
 # 这里在进程启动时把 TTC 注册进 ezdxf 字体缓存，并把回退字体与常见中文字体
 # 族名（宋体/黑体/仿宋/楷体…）指向它，确保预览里的汉字可正确绘制。
 # ---------------------------------------------------------------------------
-# 注册成功后保存 TTC 文件名（不含路径），供 _render_png 强制套用到所有文字样式。
+# 注册成功后保存 TTC 文件名（不含路径），供 _render_svg 强制套用到所有文字样式。
 _CJK_FONT_FILE = None
 
 
@@ -141,12 +141,17 @@ def _safe_name(name):
     return name or "input"
 
 
-def _render_png(dxf_path, png_path, dpi=200):
-    """把 DXF 渲染成比例正确的 PNG；失败返回 False（不影响主流程）。"""
+def _render_svg(dxf_path, svg_path):
+    """把 DXF 渲染成矢量 SVG（文字转 path，中文不依赖浏览器字体）。
+
+    与 render_exe_test.py 同一口径：SVGBackend 默认把文字描成填充路径，
+    浏览器端无需安装任何中文字体即可正确显示标题栏；矢量线条也比 PNG 更清晰，
+    与 test_other.html / exe_test.html 的「之前」预览观感一致。
+    """
     try:
         doc = ezdxf.readfile(dxf_path)
-        # 预览专用：强制所有文字样式改用已注册的 CJK 字体，确保中文标题栏不出现方块。
-        # 不改用户数据（仅渲染时套用），导出 DXF 保持原字体。
+        # 预览专用：强制所有文字样式改用已注册的 CJK 字体，确保中文标题栏的
+        # 字形能被正确取轮廓（文字→path）。不改用户数据，导出 DXF 保持原字体。
         if _CJK_FONT_FILE:
             try:
                 for _st in doc.styles:
@@ -156,16 +161,33 @@ def _render_png(dxf_path, png_path, dpi=200):
                         pass
             except Exception:
                 pass
-        msp = doc.modelspace()
-        # 采用 qsave 固定 A3 幅面 + 高 DPI：与 run_asm.py/run_ess.py 一致，
-        # 线条/文字比动态 figsize（scale=12/longest @ dpi=130）更清晰。
-        qsave(
-            msp,
-            png_path,
-            dpi=dpi,
-            size_inches=(11.7, 8.27),
-            bg="#1a2029",  # 深色底，color 7（白线）可见
-        )
+        layout = doc.modelspace()
+        backend = SVGBackend()
+        ctx = RenderContext(doc)
+        Frontend(ctx, backend).draw_layout(layout)
+        # 页面尺寸：用模型空间自身页面设置，缺失（0）时自动适配内容包围盒
+        try:
+            page = layout_mod.Page.from_dxf_layout(layout)
+        except Exception:
+            page = layout_mod.Page(0, 0, layout_mod.Units.mm)
+        svg = backend.get_string(page)
+        # 去掉根 <svg> 的 width/height（单位可能是 mm），保留 viewBox，
+        # 让前端 <img> 按 viewBox 纯 CSS 缩放，避免 mm 单位导致尺寸异常。
+        m = re.search(r"<svg[^>]*>", svg)
+        if m:
+            tag = re.sub(r'\s+(width|height)="[^"]*"', "", m.group(0))
+            svg = svg[:m.start()] + tag + svg[m.end():]
+        # 统一注入深色背景矩形：插入到 <svg> 开标签之后（避免破坏 XML 结构）。
+        # 判定是否有背景：以本渲染器专用的深色标记 fill="#212830" 为准。
+        if 'fill="#212830"' not in svg[:5000]:
+            m = re.search(r"<svg[^>]*>", svg)
+            if m:
+                pos = m.end()
+                svg = svg[:pos] + '\n<rect x="0" y="0" width="100%" height="100%" fill="#212830"/>' + svg[pos:]
+            else:
+                svg = svg.replace(">", '>\n<rect x="0" y="0" width="100%" height="100%" fill="#212830"/>', 1)
+        with open(svg_path, "w", encoding="utf-8") as f:
+            f.write(svg)
         return True
     except Exception as e:  # 预览非关键
         print("[render-warn]", e)
@@ -267,11 +289,11 @@ def process(
                 pass
             raise HTTPException(500, "未生成置换结果(_HH.dxf)")
 
-        # 4) 预览
-        before_png = os.path.join(job_dir, base + "_before.png")
-        after_png = os.path.join(job_dir, base + "_after.png")
-        _render_png(dxf_in, before_png)
-        _render_png(hh, after_png)
+        # 4) 预览：矢量 SVG（文字转 path，中文不依赖浏览器字体，线条更清晰）
+        before_svg = os.path.join(job_dir, base + "_before.svg")
+        after_svg = os.path.join(job_dir, base + "_after.svg")
+        _render_svg(dxf_in, before_svg)
+        _render_svg(hh, after_svg)
 
         # 5) DWG 导出：LibreDWG 写出的 DWG 在部分 AutoCAD 版本上无法打开/崩溃，
         #    已临时禁用，统一返回可靠、AutoCAD 原生可读的 DXF（UTF-8/ANSI_1200）。
@@ -290,10 +312,10 @@ def process(
         if dwg_out:
             files["dwg"] = "/api/download/%s/%s" % (job_id, os.path.basename(dwg_out))
         preview = {}
-        if os.path.exists(before_png):
-            preview["before"] = "/api/download/%s/%s" % (job_id, os.path.basename(before_png))
-        if os.path.exists(after_png):
-            preview["after"] = "/api/download/%s/%s" % (job_id, os.path.basename(after_png))
+        if os.path.exists(before_svg):
+            preview["before"] = "/api/download/%s/%s" % (job_id, os.path.basename(before_svg))
+        if os.path.exists(after_svg):
+            preview["after"] = "/api/download/%s/%s" % (job_id, os.path.basename(after_svg))
 
         return {
             "ok": True,
