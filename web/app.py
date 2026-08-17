@@ -33,6 +33,69 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
+# ---------------------------------------------------------------------------
+# CJK 字体注册：容器无头环境只有 Noto Sans CJK（TTC），但 ezdxf 的 FontManager
+# 缓存是在镜像构建时生成的，TTC 未被收录，导致中文标题栏渲染为 □□□□。
+# 这里在进程启动时把 TTC 注册进 ezdxf 字体缓存，并把回退字体与常见中文字体
+# 族名（宋体/黑体/仿宋/楷体…）指向它，确保预览里的汉字可正确绘制。
+# ---------------------------------------------------------------------------
+def _register_cjk_font():
+    try:
+        import ezdxf.fonts.fonts as _ezfonts
+        from ezdxf.fonts import font_manager as _fm
+        from pathlib import Path as _Path
+        import matplotlib.font_manager as _mfm
+
+        cjk_file = None
+        # 优先从 matplotlib 已知字体里挑 Noto CJK（名字稳定为 "Noto Sans CJK SC"）
+        for _fp in _mfm.fontManager.ttflist:
+            if _fp.name == "Noto Sans CJK SC" and "CJK" in _fp.fname:
+                cjk_file = _Path(_fp.fname)
+                break
+        # 兜底：直接在字体目录里找
+        if cjk_file is None:
+            for _cand in (
+                "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
+                "/usr/share/fonts/truetype/noto/NotoSansCJK-Regular.ttc",
+                "/usr/share/fonts/opentype/noto/NotoSansCJKsc-Regular.otf",
+            ):
+                if os.path.exists(_cand):
+                    cjk_file = _Path(_cand)
+                    break
+        if cjk_file is None:
+            print("[font-warn] 未找到 Noto CJK 字体文件，中文预览可能缺字")
+            return
+
+        # 把 TTC/OTF 注册进 ezdxf 字体缓存（键 = 小写文件名）
+        _ff = _ezfonts.get_ttf_font_face(cjk_file)
+        _fm._font_cache.add_entry(cjk_file, _ff)
+        # 回退字体必须 = 缓存键（小写文件名），否则 has_font 永远 False
+        _fm._fallback_font_name = cjk_file.name.lower()
+        # 常见中文字体族名 -> 该 TTC 条目
+        _fm.add_synonyms({
+            "宋体": cjk_file.name,
+            "SimSun": cjk_file.name,
+            "黑体": cjk_file.name,
+            "SimHei": cjk_file.name,
+            "仿宋": cjk_file.name,
+            "FangSong": cjk_file.name,
+            "楷体": cjk_file.name,
+            "KaiTi": cjk_file.name,
+            "微软雅黑": cjk_file.name,
+            "Microsoft YaHei": cjk_file.name,
+        })
+        # matplotlib 侧：把 TTC 加入其字体列表，避免它自己回退到缺 CJK 的默认字体
+        try:
+            _mfm.fontManager.addfont(str(cjk_file))
+        except Exception as _e:
+            print("[font-warn] matplotlib addfont 失败:", _e)
+        print("[font-ok] 已注册 CJK 字体:", cjk_file.name)
+    except Exception as _e:
+        print("[font-warn] CJK 字体注册异常:", _e)
+
+
+_register_cjk_font()
+
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO_ROOT = os.path.dirname(HERE)  # cad-frame-replacement/
 TEMPLATES_DIR = os.path.join(REPO_ROOT, "templates")

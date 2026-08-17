@@ -34,16 +34,41 @@ def _count_entities(doc):
     return n
 
 
+def _patch_codepage_utf8(path):
+    """把 DXF header 的 $DWGCODEPAGE 改成 ANSI_1200，让 AutoCAD R2007+ 按 UTF-8 解析文件。"""
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            lines = f.readlines()
+        for i, line in enumerate(lines):
+            if line.strip().upper() == "$DWGCODEPAGE" and i + 2 < len(lines):
+                if lines[i + 1].strip() == "3":
+                    lines[i + 2] = "ANSI_1200\n"
+                    break
+        with open(path, "w", encoding="utf-8") as f:
+            f.writelines(lines)
+    except Exception as e:
+        print("   [WARN] 修正 $DWGCODEPAGE 失败:", e)
+
+
 def _atomic_save_doc(doc, out_path):
-    """保存 DXF：先写临时文件，再 os.replace 原子替换到目标；目标被锁则退化为带时间戳的备用名。返回最终路径。"""
+    """保存 DXF：先写临时文件，再 os.replace 原子替换到目标；目标被锁则退化为带时间戳的备用名。返回最终路径。
+
+    对 R2007(AC1021) 及以上版本强制用 UTF-8 + $DWGCODEPAGE=ANSI_1200，避免 AutoCAD 把 R2018+DXF 当 GBK 拒绝打开。
+    """
     out_dir = os.path.dirname(os.path.abspath(out_path))
     base_name = os.path.basename(out_path)
     stem, ext = os.path.splitext(base_name)
+    # AutoCAD 2007 起 DXF 官方使用 UTF-8；低版本保留原编码避免破坏
+    force_utf8 = hasattr(doc, "dxfversion") and doc.dxfversion >= "AC1021"
     tmp = None
     try:
         fd, tmp = tempfile.mkstemp(suffix=".tmp", prefix="._out_", dir=out_dir)
         os.close(fd)
-        doc.saveas(tmp)
+        if force_utf8:
+            doc.saveas(tmp, encoding="utf-8")
+            _patch_codepage_utf8(tmp)
+        else:
+            doc.saveas(tmp)
         try:
             os.replace(tmp, out_path)
             tmp = None
