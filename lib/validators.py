@@ -1,0 +1,79 @@
+# -*- coding: utf-8 -*-
+"""按字段类型校验提取出的属性值，过滤明显错误（位置错位 / 标签当值 / 占位文本）。
+
+设计：先用 weak+strong 融合尽量多提（高召回），再按字段类型校验（高精确）。
+把 SCALE='圆柱齿轮'、WEIGHT='图名文本'、DESIGN='标准化'、TITLE='图号: BESS-LST-001'
+这类垃圾值拒掉，避免写入新标题栏污染数据；校验不过则留空（记 unmatched）。
+"""
+import re
+from .concepts import CONCEPT_ALIASES, SW_TITLE_VOCAB
+
+_RATIO_RE = re.compile(r"^\d+\s*[:：xX×]\s*\d+$")
+_WEIGHT_RE = re.compile(r"^\d+(\.\d+)?\s*(kg|g|t|千克|克|吨)?$", re.I)
+_DATE_RE = re.compile(r"^\d{4}\s*[-/.年]\s*\d{1,2}\s*[-/.月]\s*\d{1,2}")
+_SHEET_RE = re.compile(r"^(第?.?\s*[一二三四五六七八九十\d]+\s*[张页]?\s*[共全]?\s*\d*|^\d+)$")
+
+# 标题栏「字段名标签」归一集合（仅来自 CONCEPT_ALIASES 的别名词）。
+# 注意：不能并入 SW_TITLE_VOCAB —— 后者还含「装配图/零件图」等图样类型词，
+# 它们在 SW 里常就是真实图名，若用于拒值会把合法 TITLE 误删。
+_LABEL_NORMS = set()
+for _aliases in CONCEPT_ALIASES.values():
+    for _a in _aliases:
+        if _a:
+            _LABEL_NORMS.add(_a.replace(" ", "").lower())
+for _v in SW_TITLE_VOCAB:
+    _LABEL_NORMS.add(_v.replace(" ", "").lower())
+
+# 仅字段名别名（不含 SW_TITLE_VOCAB 的图样类型词），用于 TITLE 拒值判定
+_TITLE_LABELS = set()
+for _a in CONCEPT_ALIASES["TITLE"]:
+    if _a:
+        _TITLE_LABELS.add(_a.replace(" ", "").lower())
+
+# 环绕引号（中英/弯直）归一时去掉，避免 "图样名称" 因带弯引号而漏判标签
+_QUOTE_RE = re.compile(r'^[「『"\'“”‘’]+|[「『"\'“”‘’]+$')
+
+_SCALE_OK = {"nts", "无", "不限", "按实", "比例见", "asshown", "scale1:1", "不注"}
+
+# TITLE 常见「标签前缀」，值若以这些开头基本是标签单元格本身而非图名
+_TITLE_PREFIX = ("图号", "图名", "名称", "材料", "比例", "重量", "阶段", "版本",
+                "日期", "设计", "校对", "审核", "批准", "会签", "页码", "总页数")
+
+
+def _norm(s):
+    return _QUOTE_RE.sub("", re.sub(r"\s+", "", str(s)).lower())
+
+
+def _is_label(v):
+    """值本身是否就是标题栏字段标签（如 标准化 / 阶段标记 / 图样名称）。"""
+    return _norm(v) in _LABEL_NORMS
+
+
+def validate(concept, value):
+    """返回该值是否可作为 concept 字段的有效值。"""
+    if not value or not str(value).strip():
+        return False
+    v = str(value).strip()
+    nv = _norm(v)
+    if concept == "SCALE":
+        return bool(_RATIO_RE.match(v)) or nv in _SCALE_OK
+    if concept == "WEIGHT":
+        return bool(_WEIGHT_RE.match(v))
+    if concept == "DATE":
+        return bool(_DATE_RE.search(v)) or bool(re.search(r"\d{4}", v))
+    if concept == "SHEET":
+        return bool(_SHEET_RE.match(v)) or bool(re.fullmatch(r"\d+", v))
+    if concept == "TITLE":
+        # 仅用字段名别名拒值（图名/名称/零件名称/图样名称/件名…），
+        # 不用 SW_TITLE_VOCAB（含 装配图/零件图 等合法图名）
+        if nv in _TITLE_LABELS:
+            return False
+        # 形如「图号：BESS-LST-001」被误当图名
+        if re.match(r"^(图号|图名|名称|材料|比例|重量|阶段|版本|日期|设计|校对|"
+                    r"审核|批准|会签)\s*[:：]", v):
+            return False
+        return True
+    # 其余字段：拒绝纯标签占位文本（DESIGN='标准化' / STAGE='阶段标记' 等）
+    if _is_label(v):
+        return False
+    return True

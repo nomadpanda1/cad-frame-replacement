@@ -24,7 +24,7 @@ import shutil
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
-from lib import template_learn, finder, extract, mapper, block_replace, acad, logbook, raw_replace, acad_pipeline, acad_com, sheet, frame_gen  # noqa
+from lib import template_learn, finder, extract, mapper, block_replace, acad, logbook, raw_replace, acad_pipeline, acad_com, sheet, frame_gen, validators  # noqa
 
 
 def _count_entities(doc):
@@ -517,7 +517,21 @@ def main():
                         tpl, spec = tplctx.template_for(list(outer))
                         if spec is not None:
                             tplctx.note(list(outer), spec, (spec.width, spec.height))
+                        # 弱提取（extract：SW 单元式标题栏友好，正确抓 材料/比例/图名）
                         old = extract.extract_fields(doc, {"bbox": tb, "method": "keyword", "entity": None})
+                        # 强提取（finder：冒号式标题栏友好，补 DWG_NO/STAGE/DATE/DESIGN）
+                        # —— 高召回融合：弱为基础，强仅在弱未覆盖的概念上补充，避免强覆盖弱的正确值
+                        try:
+                            strong = finder.extract_frame_fields(doc, outer)
+                            for k, v in strong.items():
+                                if v and (k not in old or not old[k]):
+                                    old[k] = v
+                        except Exception:
+                            pass
+                        # 字段类型校验（高精确）：拒掉明显错位/标签当值/占位文本
+                        # （如 WEIGHT='圆柱齿轮'、SCALE='图名文本'、DESIGN='标准化'），
+                        # 校验不过则留空（记 unmatched），不写入新标题栏污染数据
+                        old = {k: v for k, v in old.items() if validators.validate(k, v)}
                         values, unmatched, unused = mapper.map_fields(tpl["fields"], old, override)
                         if args.dry_run:
                             rec["written"] = [f["tag"] for f, v in zip(tpl["fields"], values) if v]
