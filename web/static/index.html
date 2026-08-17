@@ -35,7 +35,8 @@
   @media(max-width:640px){ .grid{grid-template-columns:1fr;} }
   .pv { background:#000; border:1px solid var(--line); border-radius:10px; overflow:hidden; }
   .pv .cap { font-size:12px; color:var(--sub); padding:8px 10px; border-bottom:1px solid var(--line); }
-  .pv img { width:100%; display:block; background:#000; }
+  .svgbox { background:#000; }
+  .svgbox svg { width:100%; height:auto; display:block; }
   .dl { margin-top:14px; display:flex; gap:12px; flex-wrap:wrap; }
   .dl a { color:var(--acc); text-decoration:none; font-size:14px; border:1px solid var(--line);
           padding:8px 14px; border-radius:8px; }
@@ -71,8 +72,8 @@
 
   <div class="card hidden" id="result">
     <div class="grid">
-      <div class="pv"><div class="cap">替换前</div><img id="imgBefore" alt="before"/></div>
-      <div class="pv"><div class="cap">替换后</div><img id="imgAfter" alt="after"/></div>
+      <div class="pv"><div class="cap">替换前</div><div id="svgBefore" class="svgbox"></div></div>
+      <div class="pv"><div class="cap">替换后</div><div id="svgAfter" class="svgbox"></div></div>
     </div>
     <div class="dl" id="dl"></div>
     <div class="diag" id="diag"></div>
@@ -114,8 +115,10 @@ go.onclick = async ()=>{
     const d=await r.json();
     if(!r.ok){ throw new Error(d.detail||'处理失败'); }
     status.textContent='完成 ✓'; status.className='status';
-    $('#imgBefore').src=d.preview.before||'';
-    $('#imgAfter').src=d.preview.after||'';
+    // 内联 SVG：与 test_other.html 同一呈现方式，避免 <img> 加载/缩放问题
+    const loadSvg = async (url) => { try { const r=await fetch(url); return await r.text(); } catch(e){ return ''; } };
+    $('#svgBefore').innerHTML = d.preview.before ? await loadSvg(d.preview.before) : '';
+    $('#svgAfter').innerHTML  = d.preview.after  ? await loadSvg(d.preview.after)  : '';
     const dl=$('#dl'); dl.innerHTML='';
     for(const [k,v] of Object.entries(d.files)){
       const a=document.createElement('a'); a.href=v; a.textContent='下载 '+k.toUpperCase(); a.download=''; dl.appendChild(a);
