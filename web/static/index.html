@@ -26,6 +26,8 @@
   .btn { background:var(--acc); border-color:var(--acc); cursor:pointer; font-weight:600; }
   .btn:disabled { opacity:.5; cursor:not-allowed; }
   .chk { display:flex; align-items:center; gap:6px; color:var(--sub); font-size:13px; }
+  .note { color:var(--sub); font-size:12px; margin-top:8px; background:#0f1419;
+          border:1px solid var(--line); border-radius:8px; padding:8px 10px; }
   .status { margin-top:14px; font-size:13px; }
   .status.err { color:var(--err); }
   .status.run { color:var(--acc); }
@@ -61,7 +63,7 @@
       <div><label>适配</label><br/>
         <select id="fit"><option value="max">max（整图幅）</option><option value="tight">tight</option></select>
       </div>
-      <label class="chk"><input type="checkbox" id="dwg" /> 导出 DWG</label>
+      <div class="note">DWG 导出临时不可用（LibreDWG 写出的 DWG 在部分 AutoCAD 版本上无法打开/崩溃），已禁用；请下载 DXF（AutoCAD 原生可读、可靠）。DWG 文件作为输入仍可正常处理。</div>
       <button class="btn" id="go" disabled>开始置换</button>
     </div>
     <div class="status" id="status"></div>
@@ -107,7 +109,6 @@ go.onclick = async ()=>{
   fd.append('file', chosen);
   fd.append('template', $('#tpl').value);
   fd.append('fit', $('#fit').value);
-  fd.append('export_dwg', $('#dwg').checked);
   try{
     const r=await fetch('/api/process',{method:'POST',body:fd});
     const d=await r.json();

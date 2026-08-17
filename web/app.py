@@ -56,12 +56,19 @@ def _register_cjk_font():
         _fmgr = _ezfonts.font_manager
 
         cjk_file = None
-        # 优先从 matplotlib 已知字体里挑 Noto CJK（名字稳定为 "Noto Sans CJK SC"）
+        # 优先从 matplotlib 已知字体里挑 Noto CJK Regular（避开 Bold：
+        # 之前误注册 NotoSansCJK-Bold.ttc 导致预览中文偏粗、观感明显变差）
         for _fp in _mfm.fontManager.ttflist:
-            if _fp.name == "Noto Sans CJK SC" and "CJK" in _fp.fname:
+            if _fp.name == "Noto Sans CJK SC" and "CJK" in _fp.fname and "Bold" not in _fp.fname:
                 cjk_file = _Path(_fp.fname)
                 break
-        # 兜底：直接在字体目录里找
+        # 兜底：只在没找到 Regular 时退而求其次用任意 Noto CJK SC
+        if cjk_file is None:
+            for _fp in _mfm.fontManager.ttflist:
+                if _fp.name == "Noto Sans CJK SC" and "CJK" in _fp.fname:
+                    cjk_file = _Path(_fp.fname)
+                    break
+        # 兜底：直接在字体目录里找 Regular 文件
         if cjk_file is None:
             for _cand in (
                 "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
@@ -256,10 +263,21 @@ def process(
                "--out", job_dir, "--mode", "auto", "--fit", fit, dxf_in]
         res = subprocess.run(cmd, cwd=REPO_ROOT, capture_output=True, text=True, timeout=240)
         if res.returncode != 0:
+            # 仅失败时保留 run_skill 输出，便于排查（成功任务不落盘多余日志）
+            try:
+                with open(os.path.join(job_dir, "run_skill.err.log"), "w", encoding="utf-8") as _lf:
+                    _lf.write((res.stderr or res.stdout or "")[-4000:])
+            except Exception:
+                pass
             raise HTTPException(500, "置换失败:\n" + (res.stderr or res.stdout)[-2000:])
 
         hh = _hh_output(job_dir, base)
         if not hh:
+            try:
+                with open(os.path.join(job_dir, "run_skill.err.log"), "w", encoding="utf-8") as _lf:
+                    _lf.write("STDOUT:\n" + (res.stdout or "") + "\nSTDERR:\n" + (res.stderr or ""))
+            except Exception:
+                pass
             raise HTTPException(500, "未生成置换结果(_HH.dxf)")
 
         # 4) 预览
@@ -268,11 +286,9 @@ def process(
         _render_png(dxf_in, before_png)
         _render_png(hh, after_png)
 
-        # 5) 可选导出 DWG
+        # 5) DWG 导出：LibreDWG 写出的 DWG 在部分 AutoCAD 版本上无法打开/崩溃，
+        #    已临时禁用，统一返回可靠、AutoCAD 原生可读的 DXF（UTF-8/ANSI_1200）。
         dwg_out = None
-        if export_dwg:
-            from converter import dxf_to_dwg
-            dwg_out = dxf_to_dwg(hh, os.path.splitext(hh)[0] + ".dwg")
 
         # 6) 诊断
         try:
@@ -281,6 +297,7 @@ def process(
         except Exception:
             diag = {}
         diag["residual_lines_图框层"] = _residual_lines(hh)
+        diag["dwg_export"] = "disabled: 请下载 DXF（AutoCAD 原生可读，已禁用不稳定的 DWG 导出）"
 
         files = {"dxf": "/api/download/%s/%s" % (job_id, os.path.basename(hh))}
         if dwg_out:

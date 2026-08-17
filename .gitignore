@@ -75,3 +75,7 @@ cases/12_detect_negative/inputs/std_A3.dwg
 
 cases/12_detect_negative/_conv/
 templates/auto/
+
+# Local tooling / personal memory / work logs (never push)
+.workbuddy/
+今日工作总结*.md
