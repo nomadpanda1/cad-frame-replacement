@@ -19,6 +19,7 @@ import re
 import shutil
 import subprocess
 import tempfile
+import traceback
 import uuid
 
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException
@@ -210,6 +211,8 @@ def process(
     except HTTPException:
         raise
     except Exception as e:
+        # 容器日志保留完整堆栈，便于排查
+        traceback.print_exc()
         raise HTTPException(500, "处理异常: %s" % e)
 
 

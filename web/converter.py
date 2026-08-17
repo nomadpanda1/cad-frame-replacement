@@ -12,9 +12,83 @@ import shutil
 import subprocess
 import tempfile
 
+import ezdxf
+
 
 def _which(name):
     return shutil.which(name)
+
+
+def _repair_materials(doc):
+    """修复 LibreDWG dwg2dxf 输出的 DXF 中材料字典指向不存在句柄的问题。
+
+    dwg2dxf 生成的 DXF 常把 ACAD_MATERIAL 字典的值写成不存在的句柄字符串，
+    ezdxf 读入后无法解析为实体；一旦 doc.saveas() 更新头变量就会抛
+    AttributeError: 'str' object has no attribute 'dxf'。
+    这里把坏条目替换成真实 MATERIAL 对象。
+    """
+    try:
+        mat_dict = doc.rootdict.get_required_dict("ACAD_MATERIAL")
+    except Exception:
+        return
+    for key in list(mat_dict.keys()):
+        value = mat_dict.get(key)
+        if isinstance(value, str):
+            new_mat = doc.objects.new_entity("MATERIAL", dxfattribs={"name": key})
+            mat_dict.take_ownership(key, new_mat)
+
+
+def _open_knot_vector(n, p):
+    """构造 open(clamped) B 样条节点向量，长度严格 = n + p + 1。
+
+    LibreDWG 的 dwg2dxf 偶发把 HATCH 样条边的节点向量写成错误长度
+    （例如 deg=3、4 个控制点却写了 12 个节点），ezdxf 在 bbox 计算 /
+    绘图反汇编时会抛 ValueError('8 knot values required, got 12')，
+    导致整图帧检测(bbox.extents)与预览渲染双双崩溃。这里用标准 clamped
+    uniform 节点向量重写，既不改几何拓扑又能消除崩溃。
+    """
+    if n <= p:
+        return [0.0] * (p + 1) + [1.0] * (p + 1)
+    interior = n - p - 1
+    inner = [i / (interior + 1) for i in range(1, interior + 1)]
+    return [0.0] * (p + 1) + inner + [1.0] * (p + 1)
+
+
+def _repair_hatch_splines(doc):
+    """修复 dwg2dxf 输出 DXF 中节点向量长度错误的 HATCH 样条边。
+
+    仅重写节点向量（及有理样条权重数量），不改动控制点，几何外形基本不变。
+    """
+    for hatch in doc.modelspace().query("HATCH"):
+        for path in hatch.paths.paths:
+            for e in getattr(path, "edges", []):
+                if getattr(e, "EDGE_TYPE", None) != "SplineEdge":
+                    continue
+                cp = list(e.control_points)
+                n = len(cp)
+                if n <= 0:
+                    continue
+                deg = int(e.degree)
+                if deg > n - 1:
+                    deg = n - 1
+                kv = list(e.knot_values)
+                need = n + deg + 1
+                if len(kv) == need:
+                    continue
+                try:
+                    e.knot_values = _open_knot_vector(n, deg)
+                except Exception:
+                    continue
+                if getattr(e, "rational", False):
+                    w = list(getattr(e, "weights", []) or [])
+                    if len(w) != n:
+                        e.weights = [1.0] * n
+
+
+def _postprocess_dxf(doc):
+    """DWG 转换产物兜底修复：材料字典坏句柄 + HATCH 样条坏节点向量。"""
+    _repair_materials(doc)
+    _repair_hatch_splines(doc)
 
 
 def _find_converter():
@@ -45,7 +119,7 @@ def dwg_to_dxf(src_dwg, dst_dxf=None):
         base = os.path.splitext(os.path.basename(src_dwg))[0]
         produced = os.path.join(work, base + ".dxf")
         subprocess.run(
-            ["dwg2dxf", os.path.basename(src_dwg)],
+            ["dwg2dxf", "-y", os.path.basename(src_dwg)],
             cwd=work, check=True,
             stdout=subprocess.PIPE, stderr=subprocess.PIPE,
         )
@@ -53,6 +127,11 @@ def dwg_to_dxf(src_dwg, dst_dxf=None):
             os.replace(produced, dst_dxf)
         if not os.path.exists(dst_dxf):
             raise RuntimeError("dwg2dxf 未生成预期文件: %s" % dst_dxf)
+        # 修复 dwg2dxf 常见的材料字典坏句柄与 HATCH 样条坏节点向量，
+        # 否则后续 ezdxf.saveas / bbox 计算 / 预览渲染会崩溃
+        doc = ezdxf.readfile(dst_dxf)
+        _postprocess_dxf(doc)
+        doc.saveas(dst_dxf)
         return dst_dxf
 
     if kind == "oda":
@@ -72,6 +151,9 @@ def dwg_to_dxf(src_dwg, dst_dxf=None):
         if not produced:
             raise RuntimeError("ODAFileConverter 未生成 DXF")
         shutil.move(produced, dst_dxf)
+        doc = ezdxf.readfile(dst_dxf)
+        _postprocess_dxf(doc)
+        doc.saveas(dst_dxf)
         return dst_dxf
 
     raise RuntimeError(
@@ -93,7 +175,7 @@ def dxf_to_dwg(src_dxf, dst_dwg=None):
         base = os.path.splitext(os.path.basename(src_dxf))[0]
         produced = os.path.join(work, base + ".dwg")
         subprocess.run(
-            ["dxf2dwg", os.path.basename(src_dxf)],
+            ["dxf2dwg", "-y", os.path.basename(src_dxf)],
             cwd=work, check=True,
             stdout=subprocess.PIPE, stderr=subprocess.PIPE,
         )
