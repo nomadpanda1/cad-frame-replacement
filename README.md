@@ -41,6 +41,30 @@
 |---|---|
 | <img src="assets/thumbnails/exe_从法兰(2)_before.png" width="420" alt="before"> | <img src="assets/thumbnails/exe_从法兰(2)_after.png" width="420" alt="after"> |
 
+### 精选案例（真实 DWG · 策略二 AutoCAD COM 端到端核验）
+
+从真实 DWG 端到端置换核验中精选 3 例——主标题、图框水印与主图内容清晰可读，旧图框残线全部清零。
+
+<p align="center"><b>标准设计院 · 消火栓泵（92DZ1，2×2 多图框逐框替换）</b></p>
+
+| 替换前 | 替换后 |
+|---|---|
+| <img src="assets/thumbnails/showcase_92DZ1_消火栓泵_before.png" width="420" alt="before"> | <img src="assets/thumbnails/showcase_92DZ1_消火栓泵_after.png" width="420" alt="after"> |
+
+<p align="center"><b>住宅楼 · 强电平面（标准层照明配电）</b></p>
+
+| 替换前 | 替换后 |
+|---|---|
+| <img src="assets/thumbnails/showcase_强电平面_before.png" width="420" alt="before"> | <img src="assets/thumbnails/showcase_强电平面_after.png" width="420" alt="after"> |
+
+<p align="center"><b>住宅楼 · 弱电平面（标准层）</b></p>
+
+| 替换前 | 替换后 |
+|---|---|
+| <img src="assets/thumbnails/showcase_弱电1_before.png" width="420" alt="before"> | <img src="assets/thumbnails/showcase_弱电1_after.png" width="420" alt="after"> |
+
+> 完整住宅楼 11 张前后对比见 `assets/thumbnails/case10_*.png`；多图框与标准设计院 92DZ1 详见 `cases/05_standard_dwg/`。
+
 ## 🧪 端到端实测报告（真实数据 · 点开看前后对比）
 
 两份自包含 HTML 报告，将**真实输入 / 输出 DXF** 用 ezdxf 渲染成 SVG 内联，浏览器直接看「替换前 → 替换后」；所有数字、字段均来自真实运行，未做任何虚构。
