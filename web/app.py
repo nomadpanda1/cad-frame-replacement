@@ -26,96 +26,12 @@ from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 from fastapi.responses import FileResponse, HTMLResponse
 
 import ezdxf
-from ezdxf.addons.drawing import Frontend
-from ezdxf.addons.drawing.svg import SVGBackend
-from ezdxf.addons.drawing.properties import RenderContext
-from ezdxf.addons.drawing import layout as layout_mod
+from ezdxf.addons.drawing import RenderContext, Frontend
+from ezdxf.addons.drawing.matplotlib import MatplotlibBackend
+import matplotlib
 
-# ---------------------------------------------------------------------------
-# CJK 字体注册：容器无头环境只有 Noto Sans CJK（TTC），但 ezdxf 的 FontManager
-# 缓存是在镜像构建时生成的，TTC 未被收录，导致中文标题栏渲染为 □□□□。
-# 这里在进程启动时把 TTC 注册进 ezdxf 字体缓存，并把回退字体与常见中文字体
-# 族名（宋体/黑体/仿宋/楷体…）指向它，确保预览里的汉字可正确绘制。
-# ---------------------------------------------------------------------------
-# 注册成功后保存 TTC 文件名（不含路径），供 _render_svg 强制套用到所有文字样式。
-_CJK_FONT_FILE = None
-
-
-def _register_cjk_font():
-    global _CJK_FONT_FILE
-    try:
-        import ezdxf.fonts.fonts as _ezfonts
-        from ezdxf.fonts import font_manager as _fmmod
-        from pathlib import Path as _Path
-        import matplotlib.font_manager as _mfm
-
-        # ezdxf 1.4.x：FontManager 单例在 ezdxf.fonts.fonts.font_manager；
-        # get_ttf_font_face 则在模块 ezdxf.fonts.font_manager 上。二者易混，注意区分。
-        _fmgr = _ezfonts.font_manager
-
-        cjk_file = None
-        # 优先从 matplotlib 已知字体里挑 Noto CJK Regular（避开 Bold：
-        # 之前误注册 NotoSansCJK-Bold.ttc 导致预览中文偏粗、观感明显变差）
-        for _fp in _mfm.fontManager.ttflist:
-            if _fp.name == "Noto Sans CJK SC" and "CJK" in _fp.fname and "Bold" not in _fp.fname:
-                cjk_file = _Path(_fp.fname)
-                break
-        # 兜底：只在没找到 Regular 时退而求其次用任意 Noto CJK SC
-        if cjk_file is None:
-            for _fp in _mfm.fontManager.ttflist:
-                if _fp.name == "Noto Sans CJK SC" and "CJK" in _fp.fname:
-                    cjk_file = _Path(_fp.fname)
-                    break
-        # 兜底：直接在字体目录里找 Regular 文件
-        if cjk_file is None:
-            for _cand in (
-                "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
-                "/usr/share/fonts/truetype/noto/NotoSansCJK-Regular.ttc",
-                "/usr/share/fonts/opentype/noto/NotoSansCJKsc-Regular.otf",
-            ):
-                if os.path.exists(_cand):
-                    cjk_file = _Path(_cand)
-                    break
-        if cjk_file is None:
-            print("[font-warn] 未找到 Noto CJK 字体文件，中文预览可能缺字")
-            return
-
-        # 把 TTC/OTF 注册进 ezdxf 字体缓存（键 = 小写文件名）
-        _ff = _fmmod.get_ttf_font_face(cjk_file)
-        _fmgr._font_cache.add_entry(cjk_file, _ff)
-        # 回退字体必须 = 缓存键（小写文件名），否则 has_font 永远 False
-        _fmgr._fallback_font_name = cjk_file.name.lower()
-        # 常见中文字体族名 / 文件名 -> 该 TTC 条目
-        # （add_synonyms 内部 reverse 会把键翻转为族名；同时把 simhei.ttf、
-        #  txt/txt.shx 等真实用到的字体名也直接指向 CJK，确保万无一失）
-        _fmgr.add_synonyms({
-            "宋体": cjk_file.name,
-            "SimSun": cjk_file.name,
-            "黑体": cjk_file.name,
-            "SimHei": cjk_file.name,
-            "仿宋": cjk_file.name,
-            "FangSong": cjk_file.name,
-            "楷体": cjk_file.name,
-            "KaiTi": cjk_file.name,
-            "微软雅黑": cjk_file.name,
-            "Microsoft YaHei": cjk_file.name,
-            "simhei.ttf": cjk_file.name,
-            "simsun.ttf": cjk_file.name,
-            "txt": cjk_file.name,
-            "txt.shx": cjk_file.name,
-        })
-        # matplotlib 侧：把 TTC 加入其字体列表，避免它自己回退到缺 CJK 的默认字体
-        try:
-            _mfm.fontManager.addfont(str(cjk_file))
-        except Exception as _e:
-            print("[font-warn] matplotlib addfont 失败:", _e)
-        _CJK_FONT_FILE = cjk_file.name
-        print("[font-ok] 已注册 CJK 字体:", cjk_file.name)
-    except Exception as _e:
-        print("[font-warn] CJK 字体注册异常:", _e)
-
-
-_register_cjk_font()
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO_ROOT = os.path.dirname(HERE)  # cad-frame-replacement/
@@ -141,53 +57,31 @@ def _safe_name(name):
     return name or "input"
 
 
-def _render_svg(dxf_path, svg_path):
-    """把 DXF 渲染成矢量 SVG（文字转 path，中文不依赖浏览器字体）。
-
-    与 render_exe_test.py 同一口径：SVGBackend 默认把文字描成填充路径，
-    浏览器端无需安装任何中文字体即可正确显示标题栏；矢量线条也比 PNG 更清晰，
-    与 test_other.html / exe_test.html 的「之前」预览观感一致。
-    """
+def _render_png(dxf_path, png_path, dpi=130):
+    """把 DXF 渲染成比例正确的 PNG；失败返回 False（不影响主流程）。"""
     try:
         doc = ezdxf.readfile(dxf_path)
-        # 预览专用：强制所有文字样式改用已注册的 CJK 字体，确保中文标题栏的
-        # 字形能被正确取轮廓（文字→path）。不改用户数据，导出 DXF 保持原字体。
-        if _CJK_FONT_FILE:
-            try:
-                for _st in doc.styles:
-                    try:
-                        _st.dxf.font = _CJK_FONT_FILE
-                    except Exception:
-                        pass
-            except Exception:
-                pass
-        layout = doc.modelspace()
-        backend = SVGBackend()
-        ctx = RenderContext(doc)
-        Frontend(ctx, backend).draw_layout(layout)
-        # 页面尺寸：用模型空间自身页面设置，缺失（0）时自动适配内容包围盒
+        msp = doc.modelspace()
         try:
-            page = layout_mod.Page.from_dxf_layout(layout)
-        except Exception:
-            page = layout_mod.Page(0, 0, layout_mod.Units.mm)
-        svg = backend.get_string(page)
-        # 去掉根 <svg> 的 width/height（单位可能是 mm），保留 viewBox，
-        # 让前端 <img> 按 viewBox 纯 CSS 缩放，避免 mm 单位导致尺寸异常。
-        m = re.search(r"<svg[^>]*>", svg)
-        if m:
-            tag = re.sub(r'\s+(width|height)="[^"]*"', "", m.group(0))
-            svg = svg[:m.start()] + tag + svg[m.end():]
-        # 统一注入深色背景矩形：插入到 <svg> 开标签之后（避免破坏 XML 结构）。
-        # 判定是否有背景：以本渲染器专用的深色标记 fill="#212830" 为准。
-        if 'fill="#212830"' not in svg[:5000]:
-            m = re.search(r"<svg[^>]*>", svg)
-            if m:
-                pos = m.end()
-                svg = svg[:pos] + '\n<rect x="0" y="0" width="100%" height="100%" fill="#212830"/>' + svg[pos:]
+            ext = ezdxf.bbox.extents(msp)
+            if ext.has_data:
+                w, h = ext.size.x, ext.size.y
             else:
-                svg = svg.replace(">", '>\n<rect x="0" y="0" width="100%" height="100%" fill="#212830"/>', 1)
-        with open(svg_path, "w", encoding="utf-8") as f:
-            f.write(svg)
+                w, h = 420.0, 297.0
+        except Exception:
+            w, h = 420.0, 297.0
+        longest = max(w, h) or 1.0
+        scale = 12.0 / longest
+        figsize = (max(w * scale, 0.5), max(h * scale, 0.5))
+        bg = "#1a2029"  # color 7 (white) lines visible on dark background
+        fig = plt.figure(figsize=figsize, facecolor=bg)
+        ax = fig.add_axes([0, 0, 1, 1], facecolor=bg)
+        ctx = RenderContext(doc)
+        ctx.set_current_layout(msp)
+        Frontend(ctx, MatplotlibBackend(ax)).draw_layout(msp, finalize=True)
+        ax.set_axis_off()
+        fig.savefig(png_path, dpi=dpi, facecolor=bg, edgecolor="none")
+        plt.close(fig)
         return True
     except Exception as e:  # 预览非关键
         print("[render-warn]", e)
@@ -272,32 +166,30 @@ def process(
                "--out", job_dir, "--mode", "auto", "--fit", fit, dxf_in]
         res = subprocess.run(cmd, cwd=REPO_ROOT, capture_output=True, text=True, timeout=240)
         if res.returncode != 0:
-            # 仅失败时保留 run_skill 输出，便于排查（成功任务不落盘多余日志）
-            try:
-                with open(os.path.join(job_dir, "run_skill.err.log"), "w", encoding="utf-8") as _lf:
-                    _lf.write((res.stderr or res.stdout or "")[-4000:])
-            except Exception:
-                pass
             raise HTTPException(500, "置换失败:\n" + (res.stderr or res.stdout)[-2000:])
 
         hh = _hh_output(job_dir, base)
         if not hh:
-            try:
-                with open(os.path.join(job_dir, "run_skill.err.log"), "w", encoding="utf-8") as _lf:
-                    _lf.write("STDOUT:\n" + (res.stdout or "") + "\nSTDERR:\n" + (res.stderr or ""))
-            except Exception:
-                pass
             raise HTTPException(500, "未生成置换结果(_HH.dxf)")
 
-        # 4) 预览：矢量 SVG（文字转 path，中文不依赖浏览器字体，线条更清晰）
-        before_svg = os.path.join(job_dir, base + "_before.svg")
-        after_svg = os.path.join(job_dir, base + "_after.svg")
-        _render_svg(dxf_in, before_svg)
-        _render_svg(hh, after_svg)
+        # 4) 预览
+        before_png = os.path.join(job_dir, base + "_before.png")
+        after_png = os.path.join(job_dir, base + "_after.png")
+        _render_png(dxf_in, before_png)
+        _render_png(hh, after_png)
 
-        # 5) DWG 导出：LibreDWG 写出的 DWG 在部分 AutoCAD 版本上无法打开/崩溃，
-        #    已临时禁用，统一返回可靠、AutoCAD 原生可读的 DXF（UTF-8/ANSI_1200）。
+        # 5) 可选导出 DWG（仅 ODA 可用时才放行，避免 LibreDWG 吐损坏文件）
         dwg_out = None
+        if export_dwg:
+            from converter import dxf_to_dwg, dwg_export_available
+            if not dwg_export_available():
+                raise HTTPException(
+                    400,
+                    "当前服务器未启用 DWG 导出：检测到仅有 LibreDWG，其对 UTF-8/R2007+ 输入会生成损坏的 DWG。"
+                    "请下载 DXF 产物（已正确编码 ANSI_1200，AutoCAD 可正常打开），"
+                    "或在服务器安装 ODA File Converter 后重试。",
+                )
+            dwg_out = dxf_to_dwg(hh, os.path.splitext(hh)[0] + ".dwg")
 
         # 6) 诊断
         try:
@@ -306,16 +198,15 @@ def process(
         except Exception:
             diag = {}
         diag["residual_lines_图框层"] = _residual_lines(hh)
-        diag["dwg_export"] = "disabled: 请下载 DXF（AutoCAD 原生可读，已禁用不稳定的 DWG 导出）"
 
         files = {"dxf": "/api/download/%s/%s" % (job_id, os.path.basename(hh))}
         if dwg_out:
             files["dwg"] = "/api/download/%s/%s" % (job_id, os.path.basename(dwg_out))
         preview = {}
-        if os.path.exists(before_svg):
-            preview["before"] = "/api/download/%s/%s" % (job_id, os.path.basename(before_svg))
-        if os.path.exists(after_svg):
-            preview["after"] = "/api/download/%s/%s" % (job_id, os.path.basename(after_svg))
+        if os.path.exists(before_png):
+            preview["before"] = "/api/download/%s/%s" % (job_id, os.path.basename(before_png))
+        if os.path.exists(after_png):
+            preview["after"] = "/api/download/%s/%s" % (job_id, os.path.basename(after_png))
 
         return {
             "ok": True,

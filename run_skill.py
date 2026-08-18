@@ -34,8 +34,30 @@ def _count_entities(doc):
     return n
 
 
+def _sanitize_blocks(doc):
+    """删除无名(空名)块：源图里中文命名的匿名块（HATCH / 标注边界等）被 ezdxf 按
+    UTF-8 误读（源图实为 GBK 等其他编码）后，块名可能变成空串，写出
+    AcDbBlockBegin 无名块 → AutoCAD 打开报『解密数据时出错』（错误码 53）。
+    这种空名块通常 0 实体、无引用，保存前删掉即可让 DXF 正常打开。"""
+    for b in list(doc.blocks):
+        if not b.name:
+            try:
+                doc.blocks.delete_block(b.name, safe=False)
+            except Exception:
+                pass
+
+
 def _atomic_save_doc(doc, out_path):
-    """保存 DXF：先写临时文件，再 os.replace 原子替换到目标；目标被锁则退化为带时间戳的备用名。返回最终路径。"""
+    """保存 DXF：先清理无名块，写临时文件再 os.replace 原子替换到目标；目标被锁
+    则退化为带时间戳的备用名。返回最终路径。
+
+    编码处理：ezdxf 写出 UTF-8 字节流，而本机 AutoCAD 对中文 DXF 按 ANSI 码页解读。
+    源图/本机中文多为 GBK(ANSI_936)，故落盘后把 UTF-8 字节转码为 GBK，并把
+    $DWGCODEPAGE 声明为 ANSI_936，AutoCAD 即可正确显示中文且能正常打开。
+    （ANSI_1200 实为 UTF-16，会与 UTF-8 字节冲突导致『解密数据时出错』；
+     UTF-8 BOM 在本机 AutoCAD 2026 亦被拒绝，故采用 GBK 转码方案。）
+    全程二进制操作，避免文本解码损坏结构。"""
+    _sanitize_blocks(doc)
     out_dir = os.path.dirname(os.path.abspath(out_path))
     base_name = os.path.basename(out_path)
     stem, ext = os.path.splitext(base_name)
@@ -44,15 +66,18 @@ def _atomic_save_doc(doc, out_path):
         fd, tmp = tempfile.mkstemp(suffix=".tmp", prefix="._out_", dir=out_dir)
         os.close(fd)
         doc.saveas(tmp)
-        # ezdxf 1.4.4 写 DXF 实际是 UTF-8 字节流，却总把 $DWGCODEPAGE 写成
-        # ANSI_1252；AutoCAD 会按单字节码页解读中文多字节序列而显示乱码。
-        # 这里在落盘后把代码页声明改成 ANSI_1200（UTF-8），让 AutoCAD 正确识别。
+        # 编码修正：ezdxf 写出 UTF-8 字节，但 AutoCAD 需按 ANSI 码页解读中文。
+        # 源图/本机中文多为 GBK(ANSI_936)，故把 UTF-8 字节转码为 GBK，并把
+        # $DWGCODEPAGE 声明为 ANSI_936，AutoCAD 即可正确显示中文且能打开。
+        # （ANSI_1200 是 UTF-16，会与 UTF-8 字节冲突导致『解密数据时出错』；
+        #  UTF-8 BOM 在本机 AutoCAD 2026 亦被拒，故采用 GBK 转码方案。）
         try:
             import re as _re
-            with open(tmp, "r", encoding="utf-8", errors="replace") as _f:
+            with open(tmp, "rb") as _f:
                 _data = _f.read()
-            _data = _re.sub(r"(\$DWGCODEPAGE\n\s*3\n)[^\n]+", r"\1ANSI_1200", _data)
-            with open(tmp, "w", encoding="utf-8") as _f:
+            _data = _data.decode("utf-8").encode("gbk", errors="replace")
+            _data = _re.sub(rb"(\$DWGCODEPAGE\s+3\s+)[^\n]+", rb"\1ANSI_936", _data)
+            with open(tmp, "wb") as _f:
                 _f.write(_data)
         except Exception:
             pass

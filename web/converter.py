@@ -92,12 +92,22 @@ def _postprocess_dxf(doc):
 
 
 def _find_converter():
-    """返回 (kind, path)。kind in {'libredwg','oda'}。"""
-    if _which("dwg2dxf"):
-        return "libredwg", _which("dwg2dxf")
+    """返回 (kind, path)。kind in {'oda','libredwg'}。
+
+    优先 ODA File Converter：它对 R2007+/UTF-8 的 DWG↔DXF 保真度远高于 LibreDWG，
+    且 dxf2dwg 不会像 LibreDWG 那样生成损坏的 DWG（网站「导出 DWG」打不开的根因）。
+    LibreDWG 仅作为 DXF 输入转换的兜底保留。
+    """
     if _which("ODAFileConverter"):
         return "oda", _which("ODAFileConverter")
+    if _which("dwg2dxf"):
+        return "libredwg", _which("dwg2dxf")
     return None, None
+
+
+def dwg_export_available():
+    """DWG 导出是否可用：仅 ODA 能产出可打开的 DWG（LibreDWG dxf2dwg 损坏）。"""
+    return _which("ODAFileConverter") is not None
 
 
 def dwg_to_dxf(src_dwg, dst_dxf=None):
@@ -162,68 +172,18 @@ def dwg_to_dxf(src_dwg, dst_dxf=None):
     )
 
 
-def _patch_codepage(dxf_path, codepage):
-    """把 DXF header 的 $DWGCODEPAGE 改成指定值（文件须已用对应编码保存）。"""
-    try:
-        with open(dxf_path, "r", encoding="cp936") as f:
-            lines = f.readlines()
-        for i, line in enumerate(lines):
-            if line.strip().upper() == "$DWGCODEPAGE" and i + 2 < len(lines):
-                if lines[i + 1].strip() == "3":
-                    lines[i + 2] = "%s\n" % codepage
-                    break
-        with open(dxf_path, "w", encoding="cp936") as f:
-            f.writelines(lines)
-    except Exception as e:
-        print("[converter-warn] patch $DWGCODEPAGE 失败:", e)
-
-
 def dxf_to_dwg(src_dxf, dst_dwg=None):
     """把 DXF 转回 DWG（用户要求导出 DWG 时）。
 
-    LibreDWG 的 dxf2dwg 只支持输出 r12/r14/r2000/r2004，且对 R2007+/UTF-8/ANSI_1200
-    输入支持很差（会生成损坏或代码页错乱的 DWG）。因此这里先把 DXF 降级到 R2000，
-    用中文代码页 cp936/ANSI_936 保存，再交给 dxf2dwg，确保中文 AutoCAD 能正常打开。
+    注意：仅 ODA File Converter 能产出可打开的 DWG。LibreDWG 的 dxf2dwg 对
+    UTF-8/R2007+ 输入会生成损坏文件（AutoCAD 报 ErrorStatus=53 / 打不开），
+    因此这里不再走 LibreDWG，缺失 ODA 时直接抛清晰错误由调用方拦截。
     """
     if not src_dxf.lower().endswith(".dxf"):
         raise ValueError("dxf_to_dwg 需要 .dxf 输入: %s" % src_dxf)
     if dst_dwg is None:
         dst_dwg = os.path.splitext(src_dxf)[0] + ".dwg"
     dst_dwg = os.path.abspath(dst_dwg)
-
-    if _which("dxf2dwg"):
-        # 1) 读入并降级到 R2004 + cp936/ANSI_936，适配 dxf2dwg。
-        #    dxf2dwg 默认 r2000 在真实图纸上会 SIGSEGV；r2004 输入/输出一致时稳定。
-        doc = ezdxf.readfile(src_dxf)
-        if hasattr(doc, "dxfversion") and doc.dxfversion != "AC1018":
-            try:
-                doc.dxfversion = "AC1018"
-            except Exception as e:
-                print("[converter-warn] 降级到 AC1018 失败:", e)
-
-        work = os.path.dirname(dst_dwg)
-        base = os.path.splitext(os.path.basename(src_dxf))[0]
-        tmp_dxf = os.path.join(work, ".__tmp_%s.dxf" % base)
-        doc.saveas(tmp_dxf, encoding="cp936")
-        _patch_codepage(tmp_dxf, "ANSI_936")
-
-        # 2) dxf2dwg。默认 r2000 在真实图纸上会 SIGSEGV，r2004 更稳定。
-        produced = os.path.join(work, ".__tmp_%s.dwg" % base)
-        subprocess.run(
-            ["dxf2dwg", "-y", "--as", "r2004", "-o", produced, os.path.basename(tmp_dxf)],
-            cwd=work, check=True,
-            stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-        )
-        if os.path.exists(produced):
-            os.replace(produced, dst_dwg)
-        # 清理中间 DXF；DWG 已替换到目标
-        try:
-            os.remove(tmp_dxf)
-        except Exception:
-            pass
-        if not os.path.exists(dst_dwg):
-            raise RuntimeError("dxf2dwg 未生成预期文件: %s" % dst_dwg)
-        return dst_dwg
 
     if _which("ODAFileConverter"):
         ind = tempfile.mkdtemp(prefix="dxf_in_")
@@ -244,8 +204,8 @@ def dxf_to_dwg(src_dxf, dst_dwg=None):
         return dst_dwg
 
     raise RuntimeError(
-        "未找到 DWG 写出器（dxf2dwg / ODAFileConverter）。"
-        "Docker 镜像已含 libredwg-tools（提供 dxf2dwg）。"
+        "DWG 导出需要 ODA File Converter：LibreDWG dxf2dwg 对 UTF-8/R2007+ 会生成损坏文件。"
+        "请在服务器安装 ODA File Converter（Linux 二进制，放到 PATH）后重试，或直接下载 DXF 产物。"
     )
 
 

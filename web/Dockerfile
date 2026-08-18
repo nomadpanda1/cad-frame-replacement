@@ -36,6 +36,14 @@ COPY lib /app/lib
 COPY templates /app/templates
 COPY web /app/web
 
+# 可选增强：ODA File Converter（DWG 导出 + 更高保真度）。因授权页需登录，Docker 构建无法自动下载。
+# 在服务器/宿主机上手动放置后自动启用（无需重建镜像）：
+#   curl -fsSL <ODA官网 Linux tarball> | tar xz -C /opt/oda
+#   chmod +x /opt/oda/ODAFileConverter
+# 或将含 ODAFileConverter 的目录挂载到容器 /opt/oda。converter.py 运行时会优先检测并使用它；
+# 缺失时 DWG 导出由 app.py 直接拒绝（不再用 LibreDWG dxf2dwg 吐损坏文件）。
+RUN if [ -x /opt/oda/ODAFileConverter ]; then ln -sf /opt/oda/ODAFileConverter /usr/local/bin/ODAFileConverter; fi
+
 RUN pip install --no-cache-dir -r web/requirements.txt
 
 # 预建 ezdxf 字体缓存：否则无头容器里 ezdxf 的 FontManager 在 import 时读不到
