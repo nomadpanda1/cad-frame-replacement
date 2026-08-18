@@ -84,6 +84,11 @@ _TITLE_LABEL_RE = re.compile(
 _TITLE_LAYERS = {"tukuang", "图框", "pub_title", "图签", "tk", "title",
                  "frame", "border", "borders", "边框", "titleblock", "图框线", "图框层"}
 
+# 内容层白名单：标题栏 bbox 内的 LINE/LWPOLYLINE 若落在这些层，必须保留（可能是真实
+# 绘图内容在标题栏区域的延伸，例如 SW 装配体爆炸图的 3D 装配线横穿标题栏）。
+# 典型 = layer 0（真实绘图内容层）。SW 旧标题栏常落在 layer 10/11/任意数字层，不在此处。
+_CONTENT_LAYERS_IN_TB = {"0"}
+
 
 def delete_titleblock(doc, tb, maxdim=None):
     """删标题栏区域内「旧标题栏自身」实体，保留真实绘图内容。
@@ -113,6 +118,14 @@ def delete_titleblock(doc, tb, maxdim=None):
         layer = (e.dxf.layer or "").lower()
         if layer in _TITLE_LAYERS or layer.startswith("tukuang"):
             msp.delete_entity(e); n += 1; continue
+        # 线框回退场景：标题栏 bbox 内的 LINE/LWPOLYLINE/POLYLINE，若不在内容层白名单
+        # （典型为 layer 0），视为旧标题栏网格残余。SW 导出常把标题栏打散到 layer 10/11
+        # 或任意数字层，不在 _TITLE_LAYERS 白名单里，按几何清才能覆盖（案例：装配体图纸(1)
+        # layer 10 23 条 LINE、爆炸图/等轴测图同样的 layer 10 模式）。layer 0 上的真实
+        # 绘图内容（爆炸图横穿标题栏的 3D 装配线）通过白名单保留。
+        if dt in ("LINE", "LWPOLYLINE", "POLYLINE"):
+            if layer not in _CONTENT_LAYERS_IN_TB:
+                msp.delete_entity(e); n += 1; continue
         if dt in ("TEXT", "MTEXT"):
             txt = (e.text if dt == "MTEXT" else e.dxf.text) or ""
             if _TITLE_LABEL_RE.search(txt):

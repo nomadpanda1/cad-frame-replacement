@@ -56,7 +56,7 @@ def read_one(target):
 def enumerate_github():
     pcount = wt.DWORD(0)
     pparr = ctypes.POINTER(ctypes.POINTER(CREDENTIAL))()
-    ok = advapi32.CredEnumerateW(None, 0, ctypes.byref(pcount), ctypes.byref(parr))
+    ok = advapi32.CredEnumerateW(None, 0, ctypes.byref(pcount), ctypes.byref(pparr))
     if not ok:
         return None
     try:
