@@ -34,45 +34,28 @@ def _count_entities(doc):
     return n
 
 
-def _patch_codepage_utf8(path):
-    """把 DXF header 的 $DWGCODEPAGE 改成 ANSI_1200，让 AutoCAD R2007+ 按 UTF-8 解析文件。"""
-    try:
-        with open(path, "r", encoding="utf-8") as f:
-            lines = f.readlines()
-        for i, line in enumerate(lines):
-            if line.strip().upper() == "$DWGCODEPAGE" and i + 2 < len(lines):
-                if lines[i + 1].strip() == "3":
-                    lines[i + 2] = "ANSI_1200\n"
-                    break
-        with open(path, "w", encoding="utf-8") as f:
-            f.writelines(lines)
-    except Exception as e:
-        print("   [WARN] 修正 $DWGCODEPAGE 失败:", e)
-
-
 def _atomic_save_doc(doc, out_path):
-    """保存 DXF：先写临时文件，再 os.replace 原子替换到目标；目标被锁则退化为带时间戳的备用名。返回最终路径。
-
-    AutoCAD 2007 起 DXF 官方使用 UTF-8，并以 $DWGCODEPAGE=ANSI_1200 标记。
-    为确保中文标题栏在任何 AutoCAD 环境里都能打开，这里把 R2007 以下版本（
-    例如 LibreDWG dwg2dxf 默认输出的 R2000/AC1015）升级到 R2007/AC1021，
-    再用 UTF-8 写盘并把 codepage 改为 ANSI_1200。
-    """
+    """保存 DXF：先写临时文件，再 os.replace 原子替换到目标；目标被锁则退化为带时间戳的备用名。返回最终路径。"""
     out_dir = os.path.dirname(os.path.abspath(out_path))
     base_name = os.path.basename(out_path)
     stem, ext = os.path.splitext(base_name)
-    # R2007 以下升级到 R2007，统一走 UTF-8/ANSI_1200
-    if hasattr(doc, "dxfversion") and doc.dxfversion < "AC1021":
-        try:
-            doc.dxfversion = "AC1021"
-        except Exception as e:
-            print("   [WARN] 升级 DXF 版本到 AC1021 失败:", e)
     tmp = None
     try:
         fd, tmp = tempfile.mkstemp(suffix=".tmp", prefix="._out_", dir=out_dir)
         os.close(fd)
-        doc.saveas(tmp, encoding="utf-8")
-        _patch_codepage_utf8(tmp)
+        doc.saveas(tmp)
+        # ezdxf 1.4.4 写 DXF 实际是 UTF-8 字节流，却总把 $DWGCODEPAGE 写成
+        # ANSI_1252；AutoCAD 会按单字节码页解读中文多字节序列而显示乱码。
+        # 这里在落盘后把代码页声明改成 ANSI_1200（UTF-8），让 AutoCAD 正确识别。
+        try:
+            import re as _re
+            with open(tmp, "r", encoding="utf-8", errors="replace") as _f:
+                _data = _f.read()
+            _data = _re.sub(r"(\$DWGCODEPAGE\n\s*3\n)[^\n]+", r"\1ANSI_1200", _data)
+            with open(tmp, "w", encoding="utf-8") as _f:
+                _f.write(_data)
+        except Exception:
+            pass
         try:
             os.replace(tmp, out_path)
             tmp = None
@@ -324,6 +307,7 @@ def _process_one_acad(app, src, doc, args, template, override, tplctx):
             fb = t["outer"]
             inner = t.get("inner") or []
             fields = finder.extract_frame_fields(doc, fb)
+            fields = {k: v for k, v in fields.items() if validators.validate(k, v)}
             values, unmatched, unused = mapper.map_fields(
                 template["fields"], fields, override)
             fb_f = [float(v) for v in fb]
@@ -386,6 +370,8 @@ def _process_one_acad(app, src, doc, args, template, override, tplctx):
             # 房间号等干扰（此前错用 extract.extract_fields 抓"最长文本"，把注记/电缆当图名）。
             # extract_frame_fields 内部会自行 detect_titleblock，这里 tb 仅用于 plan 删除区。
             old = finder.extract_frame_fields(doc, outer)
+            # 与 DXF 路径一致：用 validators 过滤明显错位的标签当值（如 DESIGN='标准化'）
+            old = {k: v for k, v in old.items() if validators.validate(k, v)}
             values, unmatched, unused = mapper.map_fields(
                 template["fields"], old, override)
             outer_f = [float(v) for v in outer]

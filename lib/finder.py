@@ -692,11 +692,81 @@ def _longest_in_region(doc, fx0, fy0, fx1, fy1):
         cy = (b.extmin.y + b.extmax.y) / 2
         if fx0 + 0.45 * W <= cx <= fx1 and fy0 <= cy <= fy0 + 0.60 * H:
             t = raw.strip()
-            if len(t) >= 2 and not _is_note(t):
+            if len(t) >= 2 and not _is_note(t) and not _is_pure_label(t):
                 cand.append(t)
     if cand:
         cand.sort(key=lambda t: -len(t))
         return cand[0]
+    return None
+
+
+# 标题栏「字段名标签」归一集合：概念别名 + SW 标题栏词表。
+# 用于抽取时禁止把列标题本身（标准化 / 阶段标记 / 比例…）当作字段值。
+_LABEL_NORM_SET = set()
+for _al in CONCEPT_ALIASES.values():
+    for _a in _al:
+        if _a:
+            _LABEL_NORM_SET.add(_norm(_a))
+for _v in SW_TITLE_VOCAB:
+    _LABEL_NORM_SET.add(_norm(_v))
+
+
+def _is_pure_label(raw):
+    """文本本身是否就是标题栏字段标签（列头），不应作为字段值。"""
+    return _norm(raw) in _LABEL_NORM_SET
+
+
+_QUOTE_CHARS = ['"', "'", "“", "”", "‘", "’", "「", "」", "『", "』"]
+
+
+def _strip_surrounding_quotes(s):
+    """去掉文本首尾成对的中文/英文引号（SW 常把零件名用弯引号括住）。"""
+    s = (s or "").strip()
+    if len(s) >= 2 and s[0] in _QUOTE_CHARS and s[-1] in _QUOTE_CHARS:
+        return s[1:-1].strip()
+    return s
+
+
+def _nearest_ratio_to_label(items, label_norm):
+    """在标题栏文本里找最靠近指定标签的比例文本（如 1:100 / 2:1）。
+
+    SolidWorks 图框的「比例」标签与其值常不在同一单元格、且可能隔行，
+    用「标签附近的比例文本」定位比「同行右侧最近文本」可靠得多——
+    否则会误把紧邻的图名/其它文本抓成比例（案例：比例标签抓到“从动轮法兰”）。
+    """
+    lab = None
+    for cx, cy, raw, h in items:
+        n = _norm(raw)
+        if n == label_norm or (label_norm in n and len(n) <= len(label_norm) + 3):
+            lab = (cx, cy)
+            break
+    if lab is None:
+        return None
+    best = None
+    best_d = 1e18
+    for cx, cy, raw, h in items:
+        if _RATIO_RE.match(raw.strip()):
+            d = (cx - lab[0]) ** 2 + (cy - lab[1]) ** 2
+            if d < best_d:
+                best_d = d
+                best = raw.strip()
+    return best
+
+
+def _quoted_title(items):
+    """标题栏里被引号包裹的单段文本（如 "从动轮法兰" / “法兰盘”）通常是图名。
+
+    SW 图框常把零件名用弯引号括起来放在标题单元格，且没有独立的「图名」标签，
+    这种带引号文本是可靠的图名信号；其内侧若仍是标签则放弃。
+    """
+    for cx, cy, raw, h in items:
+        s = (raw or "").strip()
+        if not s:
+            continue
+        if s[0] in _QUOTE_CHARS and s[-1] in _QUOTE_CHARS:
+            inner = s[1:-1].strip()
+            if inner and not _is_pure_label(inner):
+                return s
     return None
 
 
@@ -718,10 +788,21 @@ def extract_frame_fields(doc, frame_bbox, concepts=("TITLE", "DWG_NO", "SCALE", 
     H = max(1e-6, fy1 - fy0)
     tb = detect_titleblock(doc, frame_bbox)
     items_tb = _collect_items(doc, tb)
+    # 值单元格与标签的水平间距上限（相对标题栏宽）：SW 网格里标签与值常分属不同单元格，
+    # 必须限制“同行右邻”只在相邻格子内生效，否则会跨列抓到远处文本（如 设计→图名/比例）。
+    tbw = max(1e-6, tb[2] - tb[0])
+    max_gap = max(20.0, 0.4 * tbw)
     fields = {}
-    # 1) 标签+值概念（DWG_NO/STAGE/DATE/DESIGN/SCALE）
+    # 0) SCALE 优先按「比例」标签附近的比例文本（1:100 / 2:1），最可靠，
+    #    避免把紧邻的图名/其它文本误当比例（案例：比例标签抓到“从动轮法兰”）。
+    ratio = _nearest_ratio_to_label(items_tb, "比例")
+    if ratio:
+        fields["SCALE"] = ratio
+    # 1) 标签+值概念（DWG_NO/STAGE/DATE/DESIGN/SCALE 兜底）
     for concept in concepts:
         if concept == "TITLE":
+            continue
+        if concept == "SCALE" and "SCALE" in fields:
             continue
         aliases = CONCEPT_ALIASES.get(concept, [concept.lower()])
         found = None
@@ -731,7 +812,7 @@ def extract_frame_fields(doc, frame_bbox, concepts=("TITLE", "DWG_NO", "SCALE", 
             for cx, cy, raw, h in items_tb:
                 if al in _norm(raw) and (":" in raw or "：" in raw):
                     val = re.split(r"[:：]", raw, maxsplit=1)[-1].strip()
-                    if val:
+                    if val and not _is_pure_label(val):
                         found = val
                         break
             if found:
@@ -743,8 +824,16 @@ def extract_frame_fields(doc, frame_bbox, concepts=("TITLE", "DWG_NO", "SCALE", 
                     for cx2, cy2, raw2, h2 in items_tb:
                         if raw2 == raw:
                             continue
+                        if _is_pure_label(raw2):   # 跳过列标题/标签本身，绝不把“标准化”之类当值
+                            continue
+                        # 比例文本（如 2:1）只属于 SCALE，其它字段（设计/图号/日期…）
+                        # 绝不该把它当值——SW 网格里比例值常与标签同行右邻而被误抓
+                        if concept != "SCALE" and _RATIO_RE.match(raw2.strip()):
+                            continue
                         if abs(cy2 - cy) < 6 and cx2 > cx:
                             dx = cx2 - cx
+                            if dx > max_gap:   # 跨列太远（如 设计→149单位外的图名），不当值
+                                continue
                             if dx < best_dx:
                                 best_dx = dx
                                 best_val = raw2
@@ -755,13 +844,15 @@ def extract_frame_fields(doc, frame_bbox, concepts=("TITLE", "DWG_NO", "SCALE", 
                 break
         if found:
             fields[concept] = found
-    # 2) SCALE 裸比例文本兜底（标签未命中时）
+    # 2) SCALE 裸比例文本兜底（标签/比例附近都未命中时）
     if "SCALE" not in fields:
         sc = _pick_scale(items_tb)
         if sc:
             fields["SCALE"] = sc
-    # 3) TITLE
-    title = _title_from_label(items_tb)
+    # 3) TITLE：带引号图名 → 标签:值 → 含图类名 → 整图右35%含图类名 → 最长非标签文本
+    title = _quoted_title(items_tb)
+    if not title:
+        title = _title_from_label(items_tb)
     if not title:
         title = _pick_title(items_tb)
     if not title:
@@ -776,7 +867,7 @@ def extract_frame_fields(doc, frame_bbox, concepts=("TITLE", "DWG_NO", "SCALE", 
     if not title:
         title = _longest_in_region(doc, fx0, fy0, fx1, fy1)
     if title:
-        fields["TITLE"] = title
+        fields["TITLE"] = _strip_surrounding_quotes(title)
     return fields
 
 
