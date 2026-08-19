@@ -12,6 +12,9 @@
 > 实测：微信发来的「打散」类真实图纸（0 个 INSERT 块标题栏、含中文 SHX 字体）走策略二，
 > 住宅楼电气整套 11 张 DWG **11/11 全部成功**插入公司图框，旧框残线 **11/11 = 0**。
 
+🌐 **在线 Web 服务（无需装 AutoCAD，上传即用）：https://www.frame.lyf233.cn**
+（GitHub：https://github.com/nomadpanda1/cad-frame-replacement · 个人主页：https://www.lyf233.cn）
+
 ---
 
 ## 🚀 案例与效果（先看这里）
@@ -369,3 +372,43 @@ pytest -q
 
 > 注：曾试过用 PyInstaller 打包成单文件 exe，但冻结后目标机生成的 DXF 打不开、CLI 也起不来，
 > 故弃用 exe 方案，统一走源码运行——代码零改动即可在任意装了 Python + ezdxf 的机器上跑。
+
+---
+
+## 11. 🌐 Web 服务（在线试用）
+
+在线地址：**https://www.frame.lyf233.cn** —— 无头 Linux 服务器，上传 DWG / DXF 即可，无需本机装 AutoCAD。
+
+### 功能
+
+- 上传 `.dxf` / `.dwg` 单文件，自动检测旧图框幅面（A0~A4 / A4V / 加长），按检出框比例等比套用公司标准图框；
+- **自定义模板**：勾选「使用自定义模板」上传自己的 `.dxf` 图框文件（块式 / 打散式均可自动识别，含字段 ATTDEF）；
+- **字段迁移**：旧标题栏的 图名 / 图号 / 比例 / 材料 / 日期 自动提取并回填到新框对应字段；
+- **前后预览**：服务器渲染 SVG 对比图（文字转路径，中文不依赖浏览器字体）；
+- **DWG 输出**：可选经 ODA File Converter 转出 **ACAD2018** 格式 DWG。
+
+### 使用步骤
+
+1. 打开 https://www.frame.lyf233.cn
+2. 拖拽 / 点击上传图纸（`.dxf` 或 `.dwg`，单文件）
+3. 模板选「自动（按幅面检测）」或上传自定义模板
+4. （可选）勾选「同时输出 DWG」
+5. 点「开始置换」→ 查看前后预览 → 下载 DXF（+ DWG）
+
+### 保真度说明（重要）
+
+Web 端是无头 Linux 服务器，**无法运行 AutoCAD COM**，处理走 ezdxf 离线核心 + ODA 转换，属「便捷」路线；
+对复杂 / 敏感图纸，**建议使用本机 CLI 的 AutoCAD COM 模式**——AutoCAD 原生保存，完全规避 ezdxf 重写
+带来的编码 / 结构问题，效果最佳：
+
+```bash
+python run_skill.py --template templates/HH_FRAME_A4.dxf --dwg --fit max 你的图纸/*.dwg
+```
+
+### 已知不足
+
+- 预览为服务器端渲染，字体 / 线宽与 AutoCAD 有差异，仅供快速核对，请以下载文件为准；
+- 字段迁移依赖旧标题栏格式（标签式 / 冒号式），特殊排版的旧框可能识别不全（诊断信息的 unmatched 列出未识别字段，可人工补）；
+- SolidWorks「打散」图框的残留清理基于检测到的标题栏区域，旧框与绘图内容大面积重合时（如住宅 / 电气平面图）可能误删或漏删；
+- 自定义模板仅支持 `.dxf`（`.dwg` 模板请先在 AutoCAD 中另存为 DXF）；
+- DWG 输出为 ODA File Converter 转换（ACAD2018 格式），非 AutoCAD 原生直存，极个别对象类型可能有细微差异。
