@@ -51,12 +51,14 @@ def _atomic_save_doc(doc, out_path):
     """保存 DXF：先清理无名块，写临时文件再 os.replace 原子替换到目标；目标被锁
     则退化为带时间戳的备用名。返回最终路径。
 
-    编码处理：ezdxf 写出 UTF-8 字节流，而本机 AutoCAD 对中文 DXF 按 ANSI 码页解读。
-    源图/本机中文多为 GBK(ANSI_936)，故落盘后把 UTF-8 字节转码为 GBK，并把
-    $DWGCODEPAGE 声明为 ANSI_936，AutoCAD 即可正确显示中文且能正常打开。
-    （ANSI_1200 实为 UTF-16，会与 UTF-8 字节冲突导致『解密数据时出错』；
-     UTF-8 BOM 在本机 AutoCAD 2026 亦被拒绝，故采用 GBK 转码方案。）
-    全程二进制操作，避免文本解码损坏结构。"""
+    编码处理：直接输出 ezdxf 原生 UTF-8 字节（R2007+ DXF 标准文本编码）。
+    实测（2026-08-19，本机 AutoCAD 2026 COM）：把 UTF-8 转码成 GBK(ANSI_936)
+    后的文件会报『解密数据时出错』(错误码 53) 打不开；而 UTF-8 字节 + 保留
+    $DWGCODEPAGE 头（ANSI_936）则正常打开（web_src.dxf 与 ezdxf read+save
+    输出均验证 OPEN_OK）。早期「GBK 方案已验证」实为误判——当时 CNG 文件
+    因 decode('utf-8') 抛错而被 except 吞掉、跳过了转码，实际落盘仍是 UTF-8，
+    打开成功的是 UTF-8 而非 GBK。故这里不再做任何转码、不再改写 $DWGCODEPAGE。
+    """
     _sanitize_blocks(doc)
     out_dir = os.path.dirname(os.path.abspath(out_path))
     base_name = os.path.basename(out_path)
@@ -66,21 +68,6 @@ def _atomic_save_doc(doc, out_path):
         fd, tmp = tempfile.mkstemp(suffix=".tmp", prefix="._out_", dir=out_dir)
         os.close(fd)
         doc.saveas(tmp)
-        # 编码修正：ezdxf 写出 UTF-8 字节，但 AutoCAD 需按 ANSI 码页解读中文。
-        # 源图/本机中文多为 GBK(ANSI_936)，故把 UTF-8 字节转码为 GBK，并把
-        # $DWGCODEPAGE 声明为 ANSI_936，AutoCAD 即可正确显示中文且能打开。
-        # （ANSI_1200 是 UTF-16，会与 UTF-8 字节冲突导致『解密数据时出错』；
-        #  UTF-8 BOM 在本机 AutoCAD 2026 亦被拒，故采用 GBK 转码方案。）
-        try:
-            import re as _re
-            with open(tmp, "rb") as _f:
-                _data = _f.read()
-            _data = _data.decode("utf-8").encode("gbk", errors="replace")
-            _data = _re.sub(rb"(\$DWGCODEPAGE\s+3\s+)[^\n]+", rb"\1ANSI_936", _data)
-            with open(tmp, "wb") as _f:
-                _f.write(_data)
-        except Exception:
-            pass
         try:
             os.replace(tmp, out_path)
             tmp = None
@@ -587,6 +574,12 @@ def main():
                             # #8：清掉旧标题栏字段值（如 layer 0 上的“法兰”“PLA”），它们已
                             #     被提取回填到新模板 ATTRIB，不删会与新标题栏文字重叠。
                             n_txt = raw_replace.delete_titleblock_text(doc, tb)
+                            # #9：清 tb 矩形内的线类残留（LINE/LWPOLYLINE/POLYLINE）——SW
+                            #     导出的旧标题栏常把网格线放在通用层（layer 0/10/数字层）
+                            #     而不在 _TITLE_LAYERS，整层清 (n_grid) 与 delete_titleblock
+                            #     (按层名) 都够不到；这里在 tb 范围内无差别删线，与 #8
+                            #     delete_titleblock_text 同口径。INSERT/HATCH 不删。
+                            n_tbg = raw_replace.delete_titleblock_grid(doc, tb)
                             n_mark = raw_replace.delete_edge_markers(doc, outer, strip=10.0)
                             region = {"bbox": outer, "confidence": 1.0, "method": "frame",
                                       "source": "sheet", "entity": None}
@@ -594,7 +587,7 @@ def main():
                             _, written = block_replace.insert_template(
                                 doc, tpl, region, values, fit=args.fit or "max")
                             rec["written"] = list(dict.fromkeys(written))
-                            rec["deleted"] = n_edge + n_tb + n_grid + n_txt + n_mark
+                            rec["deleted"] = n_edge + n_tb + n_grid + n_txt + n_tbg + n_mark
                         rec["found"] = 1
                         rec["method"] = "raw-frame"
                         rec["mappings"] = [{"region": [round(x, 1) for x in outer],

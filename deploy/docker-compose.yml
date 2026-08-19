@@ -1,0 +1,39 @@
+# CAD 图框置换 Web 服务 — 与 postloanx-vps 共用其 Caddy（80/443）
+# 本文件只起 app，不映射宿主机端口；Caddy 站点配置在 /opt/lyf-sites/caddy/cadframe.caddy
+# 反代路径：frame.lyf233.cn -> cadframe:8000（容器名可达，因同处 postloanx-vps_internal 网络）
+services:
+  cadframe:
+    build:
+      context: ..
+      dockerfile: web/Dockerfile
+    image: cadframe:latest
+    container_name: cadframe
+    expose:
+      - "8000"
+    environment:
+      - PORT=8000
+      - CAD_PY=python3
+      - MPLCONFIGDIR=/tmp/matplotlib
+    volumes:
+      # 持久化任务产物（预览图 / 下载文件），容器重启不丢
+      - cadframe_jobs:/tmp/cadframe_jobs
+      - /opt/oda:/opt/oda
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c",
+             "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/api/templates').status==200 else 1)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
+    networks:
+      - default
+      - postloanx
+
+networks:
+  postloanx:
+    external: true
+    name: postloanx-vps_internal
+
+volumes:
+  cadframe_jobs:

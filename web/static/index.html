@@ -35,7 +35,7 @@
   @media(max-width:640px){ .grid{grid-template-columns:1fr;} }
   .pv { background:#000; border:1px solid var(--line); border-radius:10px; overflow:hidden; }
   .pv .cap { font-size:12px; color:var(--sub); padding:8px 10px; border-bottom:1px solid var(--line); }
-  .svgbox { background:#000; }
+  .svgbox { background:#212830; padding:8px; }
   .svgbox svg { width:100%; height:auto; display:block; }
   .dl { margin-top:14px; display:flex; gap:12px; flex-wrap:wrap; }
   .dl a { color:var(--acc); text-decoration:none; font-size:14px; border:1px solid var(--line);
@@ -61,10 +61,20 @@
       <div><label>模板</label><br/>
         <select id="tpl"><option value="auto">自动（按幅面检测）</option></select>
       </div>
+      <div class="chk">
+        <input type="checkbox" id="useCustom" />
+        <label for="useCustom">使用自定义模板</label>
+        <input type="file" id="tplFile" accept=".dxf" class="hidden" />
+        <span id="tplName" style="display:none"></span>
+      </div>
       <div><label>适配</label><br/>
         <select id="fit"><option value="max">max（整图幅）</option><option value="tight">tight</option></select>
       </div>
-      <div class="note">DWG 导出临时不可用（LibreDWG 写出的 DWG 在部分 AutoCAD 版本上无法打开/崩溃），已禁用；请下载 DXF（AutoCAD 原生可读、可靠）。DWG 文件作为输入仍可正常处理。</div>
+      <div class="chk">
+        <input type="checkbox" id="exportDwg" />
+        <label for="exportDwg">同时输出 DWG</label>
+      </div>
+      <div class="note">勾选「同时输出 DWG」可额外下载 DWG（服务器 ODA 转换，AutoCAD 2018 格式）。不勾选则只返回 DXF。</div>
       <button class="btn" id="go" disabled>开始置换</button>
     </div>
     <div class="status" id="status"></div>
@@ -96,11 +106,23 @@ fileInput.onchange = e=>{ if(e.target.files[0]) pick(e.target.files[0]); };
 ['dragleave','drop'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove('over');}));
 drop.ondrop = e=>{ const f=e.dataTransfer.files[0]; if(f) pick(f); };
 
-let chosen=null;
+let chosen=null, customTpl=null;
 function pick(f){
   if(!/\.(dxf|dwg)$/i.test(f.name)){ status.textContent='请选择 .dxf 或 .dwg 文件'; status.className='status err'; return; }
   chosen=f; drop.querySelector('.big').textContent='已选择：'+f.name; go.disabled=false; status.textContent=''; status.className='status';
 }
+
+// 自定义模板：勾选后弹出文件选择；选中后显示文件名并禁用内置下拉
+const useCustom = $('#useCustom'), tplFile = $('#tplFile'), tplName = $('#tplName'), tplSel = $('#tpl');
+useCustom.onchange = e=>{
+  if(e.target.checked){ tplFile.click(); } else { customTpl=null; tplName.style.display='none'; tplSel.disabled=false; }
+};
+tplFile.onchange = e=>{
+  const f = e.target.files[0];
+  if(!f){ useCustom.checked=false; tplSel.disabled=false; return; }
+  if(!/\.dxf$/i.test(f.name)){ status.textContent='自定义模板仅支持 .dxf'; status.className='status err'; useCustom.checked=false; tplSel.disabled=false; return; }
+  customTpl=f; tplName.textContent='已选：'+f.name; tplName.style.display='inline'; tplSel.disabled=true;
+};
 
 go.onclick = async ()=>{
   if(!chosen) return;
@@ -108,8 +130,10 @@ go.onclick = async ()=>{
   status.textContent='处理中…（DWG 转换 + 置换可能需 10–30 秒）'; status.className='status run';
   const fd=new FormData();
   fd.append('file', chosen);
-  fd.append('template', $('#tpl').value);
+  if(customTpl){ fd.append('template_file', customTpl); fd.append('template', 'custom'); }
+  else { fd.append('template', tplSel.value); }
   fd.append('fit', $('#fit').value);
+  if($('#exportDwg').checked){ fd.append('export_dwg', 'true'); }
   try{
     const r=await fetch('/api/process',{method:'POST',body:fd});
     const d=await r.json();

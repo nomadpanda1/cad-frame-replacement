@@ -238,6 +238,77 @@ def _compute_transform(template, region, fit):
     return s, insert_x, insert_y
 
 
+def _ensure_block_deps(doc, src, block_name):
+    """把模板块引用到的 图层 / 文字样式 / 线型 从模板文档拷进目标 doc。
+
+    关键修复：模板块里的 TEXT 标注了 style=HH_CHN、layer=HH_TITLE，但源图纸
+    的 STYLE/LAYER 表里根本没有这两条。AutoCAD 导入 DXF 时，TEXT 引用的文字
+    样式若不在 STYLE 表中会直接报「无效的 DXF 数据」而放弃图形（错误码 53）。
+    之前所有「跨文档复制块打不开」的根因就在这里——实体 tag 完全一致，坏的是
+    表记录缺失。所以复制块实体之前，必须先把依赖的表记录补齐。"""
+    need_layers = set()
+    need_styles = set()
+    need_lts = set()
+    if block_name in src.blocks:
+        for e in src.blocks[block_name]:
+            try:
+                if e.dxf.hasattr("layer"):
+                    need_layers.add(e.dxf.layer)
+            except Exception:
+                pass
+            try:
+                if e.dxf.hasattr("style"):
+                    need_styles.add(e.dxf.style)
+            except Exception:
+                pass
+            try:
+                if e.dxf.hasattr("linetype"):
+                    lt = e.dxf.linetype
+                    if lt not in ("BYLAYER", "BYBLOCK"):
+                        need_lts.add(lt)
+            except Exception:
+                pass
+    # 图层：缺则按模板属性补建（不复制 plotstyle/material 句柄，避免悬空引用）
+    for nm in need_layers:
+        if nm in doc.layers:
+            continue
+        if nm in src.layers:
+            sl = src.layers.get(nm)
+            nl = doc.layers.add(nm)
+            for a in ("color", "linetype", "lineweight", "flags", "description"):
+                try:
+                    setattr(nl.dxf, a, getattr(sl.dxf, a))
+                except Exception:
+                    pass
+        else:
+            doc.layers.add(nm)
+    # 文字样式：缺则按模板字体补建（HH_CHN -> simhei.ttf 等 TrueType）
+    for nm in need_styles:
+        if nm in doc.styles:
+            continue
+        if nm in src.styles:
+            ss = src.styles.get(nm)
+            ns = doc.styles.add(nm, font=(getattr(ss.dxf, "font", None) or "txt"))
+            for a in ("bigfont", "width", "oblique", "flags", "generation_flags", "height"):
+                try:
+                    setattr(ns.dxf, a, getattr(ss.dxf, a))
+                except Exception:
+                    pass
+        else:
+            doc.styles.add(nm, font="txt")
+    # 线型：缺则用 Importer 整条带图案复制
+    if need_lts:
+        try:
+            from ezdxf.addons.importer import Importer
+            imp = Importer(src, doc)
+            for nm in need_lts:
+                if nm not in doc.linetypes and nm in src.linetypes:
+                    imp.import_table("linetypes", [nm])
+            imp.finalize()
+        except Exception:
+            pass
+
+
 def import_template_block(doc, template):
     """确保模板块已存在于目标 doc（仅 block 类型需要）。返回块名。
     用跨文档 e.copy() 复制块定义（比 Importer 更稳，兼容 ezdxf 1.4）。"""
@@ -247,9 +318,15 @@ def import_template_block(doc, template):
     if block_name in [b.name for b in doc.blocks]:
         return block_name
     src = ezdxf.readfile(template["src_path"])
+    _ensure_block_deps(doc, src, block_name)
     src_blk = src.blocks[block_name]
     nb = doc.blocks.new(block_name)
     for e in src_blk:
+        # 跳过 ATTDEF：ezdxf 1.4.4 在 add_blockref 引用含 ATTDEF 的块时，
+        # 会在模型空间写出双重 AcDbText / 错误实体类型的 ATTRIB，AutoCAD 无法打开。
+        # 字段值改由 insert_template 用 add_text 干净写回。
+        if e.dxftype() == "ATTDEF":
+            continue
         try:
             nb.add_entity(e.copy())
         except Exception:
@@ -261,17 +338,48 @@ def insert_template(doc, template, region, values, fit="min"):
     """在 region 处插入公司图框并回填字段。返回 (insert_ref, written_fields)。"""
     msp = doc.modelspace()
 
+    # 补齐模板依赖的 图层/文字样式（缺则 AutoCAD 导入 DXF 报「无效的 DXF 数据」）
+    if template.get("src_path"):
+        try:
+            _src = ezdxf.readfile(template["src_path"])
+            _ensure_block_deps(doc, _src, template.get("block_name"))
+        except Exception:
+            pass
+
     if template["kind"] == "block":
         block_name = import_template_block(doc, template)
+        # 确定字段值要用的样式：取模板块里第一个有 style 的 TEXT 的样式
+        # （标准模板 HH_FRAME_* 用 HH_CHN=simhei.ttf），写出的独立 TEXT 才能
+        # 正常显示中文；否则走默认 STANDARD（ASCII SHX），中文显示成 ????。
+        # 自定义模板若用了别的中文样式名，也能自动适配。
+        label_style = None
+        try:
+            for _e in doc.blocks.get(block_name, []):
+                if _e.dxftype() == "TEXT":
+                    _s = getattr(_e.dxf, "style", None)
+                    if _s:
+                        label_style = _s
+                        break
+        except Exception:
+            pass
+        if not label_style:
+            label_style = "HH_CHN"
         s, ix, iy = _compute_transform(template, region, fit)
         ins = msp.add_blockref(block_name, (ix, iy),
                                dxfattribs={"xscale": s, "yscale": s})
-        # 回填 ATTDEF 字段：值缺失时写空串，保留可编辑占位（14 个字段齐全）。
-        kv = {}
+        # 回填字段：用 add_text 写文本（避免 ezdxf 1.4.4 add_auto_attribs
+        # 产生的双重 AcDbText / 错误实体类型，导致 AutoCAD 无法打开）。
+        # 块自带 ATTDEF，AutoCAD 打开 INSERT 时会显示标题栏占位；
+        # 这里再把已提取到的值以干净 TEXT 写回，避免与块内 ATTDEF 重叠。
+        written = []
         for fld, val in zip(template["fields"], values):
-            kv[fld["tag"]] = val if val else ""
-        ins.add_auto_attribs(kv)
-        written = [t for t, v in kv.items() if v]
+            if not val:
+                continue
+            x = ix + fld["x"] * s
+            y = iy + fld["y"] * s
+            msp.add_text(val, dxfattribs={"height": fld["height"] * s,
+                                          "style": label_style}).set_placement((x, y))
+            written.append(fld["tag"])
         return ins, written
 
     # exploded：重建几何 + 文本
@@ -279,12 +387,23 @@ def insert_template(doc, template, region, values, fit="min"):
     written = []
     for geo in (template.get("geometry") or []):
         _recreate_entity(msp, geo, ix, iy, s)
+    # 模板是 exploded 时，从 geometry 文本里取样式（自定义/标准模板都通用）
+    label_style = None
+    for geo in (template.get("geometry") or []):
+        if geo.get("type") == "TEXT":
+            _s = (geo.get("attribs") or {}).get("style")
+            if _s:
+                label_style = _s
+                break
+    if not label_style:
+        label_style = "HH_CHN"
     for fld, val in zip(template["fields"], values):
         if not val:
             continue
         x = ix + fld["x"] * s
         y = iy + fld["y"] * s
-        msp.add_text(val, dxfattribs={"height": fld["height"] * s}).set_placement((x, y))
+        msp.add_text(val, dxfattribs={"height": fld["height"] * s,
+                                      "style": label_style}).set_placement((x, y))
         written.append(fld["tag"])
     return None, written
 

@@ -29,6 +29,14 @@ RUN curl -fsSL "https://github.com/LibreDWG/libredwg/releases/download/${LIBREDW
     && ldconfig \
     && cd / && rm -rf /tmp/libredwg-${LIBREDWG_VER} /tmp/libredwg.tar.gz
 
+# ODA File Converter 运行时依赖（headless 容器无 X/GL 库；需用 xvfb 提供虚拟显示，
+# 且 Qt 只编译了 xcb 插件，必须靠 xvfb-run 起虚拟 display 才能 headless 运行）。
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        xvfb xauth libgl1 libglx0 libegl1 libxcb1 libxkbcommon0 \
+        libdbus-1-3 libfontconfig1 libx11-6 libice6 libsm6 libxext6 \
+        && ln -sf /usr/lib/x86_64-linux-gnu/libxcb-util.so.1 /usr/lib/x86_64-linux-gnu/libxcb-util.so.0 \
+        && rm -rf /var/lib/apt/lists/*
+
 # 仅复制运行时所需（不含 cases/ 大体积测试数据、.git）
 WORKDIR /app
 COPY run_skill.py /app/run_skill.py
@@ -36,12 +44,9 @@ COPY lib /app/lib
 COPY templates /app/templates
 COPY web /app/web
 
-# 可选增强：ODA File Converter（DWG 导出 + 更高保真度）。因授权页需登录，Docker 构建无法自动下载。
-# 在服务器/宿主机上手动放置后自动启用（无需重建镜像）：
-#   curl -fsSL <ODA官网 Linux tarball> | tar xz -C /opt/oda
-#   chmod +x /opt/oda/ODAFileConverter
-# 或将含 ODAFileConverter 的目录挂载到容器 /opt/oda。converter.py 运行时会优先检测并使用它；
-# 缺失时 DWG 导出由 app.py 直接拒绝（不再用 LibreDWG dxf2dwg 吐损坏文件）。
+# 可选增强：ODA File Converter。因授权页需登录，Docker 构建无法自动下载。
+# 在宿主机把含 ODAFileConverter 的目录放到 /opt/oda 并挂进容器即可自动启用
+# （converter.py 优先检测 /opt/oda/ODAFileConverter，无需本软链，本步仅兼容旧约定）。
 RUN if [ -x /opt/oda/ODAFileConverter ]; then ln -sf /opt/oda/ODAFileConverter /usr/local/bin/ODAFileConverter; fi
 
 RUN pip install --no-cache-dir -r web/requirements.txt
