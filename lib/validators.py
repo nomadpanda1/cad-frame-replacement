@@ -30,6 +30,15 @@ for _a in CONCEPT_ALIASES["TITLE"]:
     if _a:
         _TITLE_LABELS.add(_a.replace(" ", "").lower())
 
+# 标题栏常见标签词（含非字段名的：描图/制图/密级/建设单位/工程名称/设计号/张次…）。
+# 值若等于这些词本身（归一后），基本是「标签单元格」而非真实图名——如 SW 打散图框里
+# 的“描  图”（描图人栏的标签）就曾被提取成 TITLE 写入新标题栏（92DZ1 帧3/4）。
+_TITLE_BAD_NORMS = {
+    "描图", "制图", "密级", "建设单位", "工程名称", "项目名称", "设计号",
+    "张次", "页码", "总页数", "阶段标记", "图样名称", "标准化", "制表",
+    "审核", "校对", "批准", "审定", "会签", "设计", "制图人", "描图人",
+}
+
 # 环绕引号（中英/弯直）归一时去掉，避免 "图样名称" 因带弯引号而漏判标签
 _QUOTE_RE = re.compile(r'^[「『"\'“”‘’]+|[「『"\'“”‘’]+$')
 
@@ -66,7 +75,7 @@ def validate(concept, value):
     if concept == "TITLE":
         # 仅用字段名别名拒值（图名/名称/零件名称/图样名称/件名…），
         # 不用 SW_TITLE_VOCAB（含 装配图/零件图 等合法图名）
-        if nv in _TITLE_LABELS:
+        if nv in _TITLE_LABELS or nv in _TITLE_BAD_NORMS:
             return False
         # 形如「图号：BESS-LST-001」被误当图名
         if re.match(r"^(图号|图名|名称|材料|比例|重量|阶段|版本|日期|设计|校对|"

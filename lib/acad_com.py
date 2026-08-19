@@ -26,8 +26,11 @@ COM 在原 DWG 副本上做：删旧图框/会签栏 → 插公司图框块 → 
 import os
 import shutil
 import time
-import win32com.client
 
+
+# win32com 仅在 Windows + 本机有 AutoCAD 的 COM 直处理路径才会用到；
+# 移到函数内惰性导入，避免 Linux/无 pywin32 环境下 import acad_com 直接崩溃
+# （run_skill.py 在模块顶部就 from lib import acad_com，必须可无 win32com 导入）。
 
 # 公司标准图框尺寸（毫米），用于按外框比例选模板、算等比缩放。
 A_SIZES = {
@@ -48,6 +51,7 @@ A_SIZES = {
 
 def variant_point(x, y, z=0.0):
     """InsertBlock 需要的插入点 VARIANT。"""
+    import win32com.client
     return win32com.client.VARIANT(
         win32com.client.pythoncom.VT_ARRAY | win32com.client.pythoncom.VT_R8,
         [float(x), float(y), float(z)],
@@ -56,6 +60,7 @@ def variant_point(x, y, z=0.0):
 
 def get_acad_dispatch():
     """只取已打开的 AutoCAD 实例（不自动启动，Dispatch 启动的实例 COM 不稳）。"""
+    import win32com.client
     return win32com.client.Dispatch("AutoCAD.Application")
 
 
@@ -87,6 +92,42 @@ def _retry(fn, tries=6, wait=1.5, label="op"):
             if i < tries - 1:
                 time.sleep(wait)
     raise last
+
+
+def _dyn(obj):
+    """把一个 COM 对象重新包装成 late-bound（动态分派）代理。
+
+    为什么必须这么做（本机实测根因）：
+    win32com 默认 early-binding 会把 msp.Item(i) 等返回成**基类型 IAcadEntity**
+    （无论实体实际是 Line/Polyline/Text/BlockReference），于是 StartPoint /
+    Coordinates / InsertionPoint / Center / Radius / TextString / TagString /
+    GetAttributes / GetBoundingBox 等“子类型属性”全部报 AttributeError。
+
+    原来这些读取都被 _retry 包着，于是每遇到一个实体就：抛 AttributeError →
+    睡 1.5s → 重试 6 次 ≈ 9s，单图几百实体累计上千秒，表现成“COM 永久卡死”
+    （其实是被海量异常-重试拖死，shell 超时被杀）。
+
+    改用 win32com.client.dynamic.Dispatch 让属性在运行时按**实际**类型解析，
+    与本地缓存的 typelib 版本（本机甚至是“AutoCAD 2025 Type Library”）无关，
+    彻底消除该问题。返回对象底层仍是同一个 COM 指针，Delete/InsertBlock 等照常可用。
+    """
+    import win32com.client
+    return win32com.client.dynamic.Dispatch(obj)
+
+
+def _prune_deleted(ents, to_del):
+    """删除后把已删实体从共享 ents 列表中剔除。
+
+    根因（本机实测）：del_* 函数通过 COM 删除实体后，该实体的 Python 代理对象并未
+    从 ents 列表移除。后续 del_* 函数再对这些“已删除”对象读属性（TextString /
+    StartPoint 等）时，AutoCAD COM 调用会**永久阻塞**（既不抛异常也不返回），
+    表现成“卡死”，而 _retry 只能抓异常、抓不住阻塞。每次删除批次后把已删项剔除，
+    后续函数便不会再触碰死对象。
+    """
+    if not to_del:
+        return
+    dead = {id(e) for e in to_del}
+    ents[:] = [d for d in ents if id(d["e"]) not in dead]
 
 
 def entity_bbox(e):
@@ -167,7 +208,7 @@ def collect_entities(msp):
         return ents
     for i in range(n):
         try:
-            e = _retry(lambda: msp.Item(i))
+            e = _dyn(_retry(lambda: msp.Item(i)))
         except Exception:
             continue
         et = _entity_name(e)
@@ -363,12 +404,35 @@ def insert_frame(msp, frame, tpl_dwg, fields, size_table=None):
         print("    delete wrapper warn:", e)
 
     # 属性回填：只对 tag 命中 fields 的 ATTDEF 写值。
+    # 注意：insert / attrs / a 必须 early-binding——InsertBlock 返回的是真正的
+    # IAcadBlockReference 子类型，GetAttributes 在其上正常返回属性集合；若误用
+    # _dyn 包成动态代理，含 out 参数的 GetAttributes 会被动态分派成 tuple，
+    # 导致“'tuple' object has no attribute 'GetTypeInfo'”而无法回填属性。
     try:
         attrs = _retry(lambda: insert.GetAttributes())
         for a in attrs:
-            tag = a.TagString
-            if tag in fields:
-                a.TextString = fields[tag]
+            try:
+                tag = a.TagString
+                if tag not in fields:
+                    continue
+                v = fields[tag]
+                if v is None:
+                    v = ""
+                v = str(v).replace("\r", " ").replace("\n", " ").strip()
+                # 占位标签当值（提取到的是 tag 名本身，如 TITLE="TITLE"）→ 清空，
+                # 不把占位符写进标题栏；validators 已挡大部分，这里兜底。
+                if v and v.upper() == str(tag).upper():
+                    v = ""
+                # 保证新框字段值用中文样式（HH_CHN），避免源图缺该样式时回填值变 ????。
+                # InsertBlock 已把模板样式导入目标图，这里显式绑定更稳。
+                try:
+                    if a.StyleName != "HH_CHN":
+                        a.StyleName = "HH_CHN"
+                except Exception:
+                    pass
+                a.TextString = v
+            except Exception:
+                continue
     except Exception as e:
         print("    set attribs warn:", e)
 
@@ -510,6 +574,7 @@ def del_frame_lines_acad(ents, frames, margin=1.0):
             n += 1
         except Exception:
             pass
+    _prune_deleted(ents, to_del)
     return n
 
 
@@ -554,6 +619,7 @@ def del_titleblock_acad(ents, tb, maxdim=None):
             n += 1
         except Exception:
             pass
+    _prune_deleted(ents, to_del)
     return n
 
 
@@ -587,4 +653,5 @@ def del_edge_markers_acad(ents, outer, strip=10.0):
             n += 1
         except Exception:
             pass
+    _prune_deleted(ents, to_del)
     return n
