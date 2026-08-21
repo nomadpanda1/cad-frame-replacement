@@ -334,6 +334,7 @@ def _process_one_acad(app, src, doc, args, template, override, tplctx):
                 "sheet": spec.as_dict(),
                 "fields": _values_to_fields(template["fields"], values),
                 "mode": "multiframe",
+                "fit": args.fit,
             })
             print("   帧%d bbox=%s 字段=%s 回填=%s" % (
                 i + 1, [float(round(v, 1)) for v in fb], fields,
@@ -365,8 +366,9 @@ def _process_one_acad(app, src, doc, args, template, override, tplctx):
                     "tpl_size": list(tpl_size),
                     "sheet": spec.as_dict(),
                     "fields": _values_to_fields(template["fields"], values),
-                    "mode": "block",
-                })
+                "mode": "block",
+                "fit": args.fit,
+            })
         else:
             # 线框检测回退（SolidWorks 打散图框）
             sg0, groups0 = finder.detect_frame_groups(doc)
@@ -397,6 +399,7 @@ def _process_one_acad(app, src, doc, args, template, override, tplctx):
                 "sheet": spec.as_dict(),
                 "fields": _values_to_fields(template["fields"], values),
                 "mode": "raw-frame",
+                "fit": args.fit,
             })
             rec["mode"] = "raw-frame"
             rec["found"] = 1
@@ -419,8 +422,8 @@ def main():
     ap.add_argument("--dwg", action="store_true", help="输出 DWG（需转换器）")
     ap.add_argument("--detect-only", action="store_true", help="仅检测标题栏并写 detection.json")
     ap.add_argument("--dry-run", action="store_true", help="仅提取+映射，不改图")
-    ap.add_argument("--fit", default="min", choices=["min", "max", "width", "height"],
-                    help="新框缩放方式：min 保比例居中(默认) / max 满填 / width 按宽 / height 按高")
+    ap.add_argument("--fit", default="max", choices=["min", "max", "width", "height"],
+                    help="新框缩放方式：max 满填(默认，与网站一致) / min 保比例居中 / width 按宽 / height 按高")
     ap.add_argument("--margin", type=float, default=5.0, help="打散图框删除边距")
     ap.add_argument("--override", default="", help="字段映射覆盖 JSON，如 {\"TITLE\":\"OLD_TITLE\"}")
     ap.add_argument("--mode", default="auto", choices=["auto", "single", "multi"],

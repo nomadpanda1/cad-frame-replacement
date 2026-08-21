@@ -365,37 +365,50 @@ def _size_name_from_tpl(tpl_dwg):
     return base
 
 
-def insert_frame(msp, frame, tpl_dwg, fields, size_table=None):
-    """在 frame 左下角插入公司图框块（tpl_dwg 为 prepare_templates 生成的 *.dwg），缩放并回填属性。
+def insert_frame(msp, frame, tpl_dwg, fields, size_table=None, fit="max"):
+    """在 frame 处插入公司图框块（tpl_dwg 为 prepare_templates 生成的 *.dwg），缩放并回填属性。
 
-    由于模板 dwg 内部是“块 HH_FRAME_Ax 内嵌于模型空间”，直接 InsertBlock 该 dwg 会得到一个
-    “外壳块 + 嵌套 HH_FRAME_Ax”的结构，外层 GetAttributes 为空。为拿到可直接回填的 14 个属性，
-    采用双插法：先 InsertBlock(dwg) 把 HH_FRAME_Ax 块定义导入目标图，再按名 InsertBlock("HH_FRAME_Ax")
-    得到干净、带属性的块引用，最后删掉外壳块。
+    双插法（外壳块导入 HH_FRAME_Ax 定义 → 按名插干净块 → 删外壳）同前。
 
-    缩放采用非等比拉伸（xscale=W/tw, yscale=H/th），使新图框外框与旧框 bbox 完全重合，
-    根治非√2 幅面因等比缩放导致的留白/内容被裁。对标准√2 幅面，两个比例几乎相等，视觉上无失真。
+    缩放与 ezdxf 路径的 lib/block_replace._compute_transform(fit) 完全对齐：
+    等比缩放 s + 居中插入。此前用「非等比拉伸 xscale=W/tw, yscale=H/th」会把标题栏
+    比例压扁/拉长（尤其检出框比例与模板 √2 略有出入的非标幅面），这正是本地 --dwg
+    输出比网站（ezdxf）观感差的根因。统一为等比+居中后两者几何一致。
+    fit 默认 "max"（满填），与网站默认一致；也可由调用方按 --fit 覆盖。
     """
     if size_table is None:
         size_table = A_SIZES
     x0, y0, x1, y1 = frame
     W, H = x1 - x0, y1 - y0
     size_name = _size_name_from_tpl(tpl_dwg)
+    # 模板实际幅面：优先用上游即时生成的精确尺寸（size_table，由 for_frame 给出），
+    # 缺则退回 A_SIZES。tw/th 与 frame 同单位，等比缩放 s 即「图形单位/模板单位」。
     tw, th = size_table.get(size_name, (W, H))
-    xscale = W / tw if tw else 1.0
-    yscale = H / th if th else 1.0
+    if fit == "min":
+        s = min(W / tw, H / th)
+    elif fit == "width":
+        s = W / tw
+    elif fit == "height":
+        s = H / th
+    else:  # max / 默认
+        s = max(W / tw, H / th)
+    s = s if (tw and th and s > 0) else 1.0
+    # 模板块以 (0,0) 为左下角，居中映射到 frame（与 _compute_transform 一致）
+    target_x = x0 + (W - tw * s) / 2
+    target_y = y0 + (H - th * s) / 2
+    ins_pt = variant_point(target_x, target_y, 0.0)
 
     # 1) 插入外壳块（导入 HH_FRAME_Ax 块定义）
     wrapper = _retry(lambda: msp.InsertBlock(
-        variant_point(x0, y0, 0.0),
+        ins_pt,
         tpl_dwg,
-        xscale, yscale, 1.0, 0.0,
+        s, s, 1.0, 0.0,
     ), label="InsertBlock wrapper")
     # 2) 按名插入干净的带属性块
     insert = _retry(lambda: msp.InsertBlock(
-        variant_point(x0, y0, 0.0),
+        ins_pt,
         "HH_FRAME_" + size_name,
-        xscale, yscale, 1.0, 0.0,
+        s, s, 1.0, 0.0,
     ), label="InsertBlock frame")
     # 3) 删除外壳块，只保留按名插入的块
     try:
@@ -436,7 +449,7 @@ def insert_frame(msp, frame, tpl_dwg, fields, size_table=None):
     except Exception as e:
         print("    set attribs warn:", e)
 
-    return insert, (xscale, yscale)
+    return insert, (s, s)
 
 
 def _is_dwg(path):

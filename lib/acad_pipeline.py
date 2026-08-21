@@ -113,7 +113,8 @@ def process_file(app, src, dst, plan, wait_open=2.0):
                 size_table = {acad_com._size_name_from_tpl(tpl_dwg):
                               (float(tpl_size[0]), float(tpl_size[1]))}
             insert, scale = acad_com.insert_frame(
-                msp, frame, tpl_dwg, fields, size_table=size_table)
+                msp, frame, tpl_dwg, fields, size_table=size_table,
+                fit=item.get("fit", "max"))
             status = "ok"
         except Exception as e:
             print("   帧 %d 处理失败: %r" % (idx, e))
