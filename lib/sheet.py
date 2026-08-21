@@ -56,6 +56,12 @@ STD_SHORT = [210.0, 297.0, 420.0, 594.0, 841.0, 1189.0]
 # 判定「命中标准幅面」的相对误差上限（两个方向误差之和）
 EXACT_TOL = 0.06
 
+# 无真框判定阈值（图形单位面积）：检出框面积超过 2×A0 且无非块式标题栏时，
+# 视为「LLM/无框图的超大画布」而非真实图框，降级到标准幅面，避免标题栏被撑成「米粒」。
+# 注意：图形单位面积随出图比例放大（1:100 的 A1 面积 = (84100×59400)），这类真实大图
+# 触发后也会正确降级到其真实标准幅面（如 A1），输出不变，故阈值用图形单位也安全。
+NO_FRAME_AREA = 2.0 * 1189.0 * 841.0
+
 # GB/T 14689 图框内边距（mm）：装订边 25，其余边 A0/A1 取 10、A2~A4 取 5。
 # 这组固定毫米值是**反推出图比例的锚**：外框到内框的间距 / 标准边距 = 出图比例。
 BINDING_MARGIN = 25.0
@@ -156,7 +162,27 @@ def _candidates():
     return out
 
 
-def guess_sheet(width, height, scale_hint=None):
+def _nearest_standard(ratio):
+    """返回与给定长宽比最接近的标幅面 SheetSpec（A 系列 + 加长，含横竖）。
+
+    用于「无真框」降级：优先选面积最小的匹配幅面，使 fit=max 缩放后标题栏最大、
+    最易读。返回 exact=True 的标准幅面（不再生成自定义 C<w>X<h> 巨型幅面）。
+    """
+    best = None
+    best_score = 1e18
+    for name, cw, ch in _candidates():
+        r = cw / ch
+        err = abs(r - ratio) / ratio
+        # 面积做次要惩罚（err 占主导），err 相近时选更小幅面 -> 标题栏更大
+        score = err + (cw * ch) / 5.0e7
+        if score < best_score:
+            best_score = score
+            best = (name, cw, ch, r)
+    name, cw, ch, r = best
+    return SheetSpec(name, cw, ch, 1.0, True, r)
+
+
+def guess_sheet(width, height, scale_hint=None, no_frame=False):
     """按检出框尺寸（图形单位）推断幅面。
 
     width/height: 检出框的宽高，单位是图纸自身的图形单位（不一定是 mm）。
@@ -203,6 +229,11 @@ def guess_sheet(width, height, scale_hint=None):
         name, cw, ch, s = best
         return SheetSpec(name, cw, ch, s, True, ratio)
 
+    # 无真框（LLM/无框图的超大画布）：降级到最接近的标准幅面。
+    # 标题栏保持 GB/T 正常尺寸，fit=max 缩放后也不会被撑成「米粒」。
+    if no_frame:
+        return _nearest_standard(ratio)
+
     # 非标幅面：保留精确比例
     if scale_hint:
         # 有可靠比例时直接按「图形单位 / 比例」定纸面，标题栏在纸面上就是标准大小
@@ -234,13 +265,14 @@ def _normalize_short(short_du):
     return best
 
 
-def guess_sheet_bbox(bbox, inner=None):
+def guess_sheet_bbox(bbox, inner=None, no_frame=False):
     """bbox = (x0, y0, x1, y1) 版本的 guess_sheet。
 
     inner 给出同一个图框的内层框线 bbox 时，用它的边距反推出图比例作为 hint。
+    no_frame=True 时降级到标准幅面（见 guess_sheet 同名参数）。
     """
     x0, y0, x1, y1 = [float(v) for v in bbox]
     hint = None
     if inner:
         hint = scale_from_margins([x0, y0, x1, y1], [float(v) for v in inner])
-    return guess_sheet(x1 - x0, y1 - y0, scale_hint=hint)
+    return guess_sheet(x1 - x0, y1 - y0, scale_hint=hint, no_frame=no_frame)

@@ -223,13 +223,14 @@ class TemplateCtx(object):
                                   # 供 ezdxf 路径按帧插入正确幅面的模板块
         self.log = []            # 记录每帧的幅面判定，写进报告便于复核
 
-    def for_frame(self, bbox, inner=None):
+    def for_frame(self, bbox, inner=None, no_frame=False):
         """返回 (tpl_dwg_path, (tpl_w, tpl_h), spec)。
 
         inner 给出同一图框的内层框线 bbox 时，用其边距反推出图比例作为 hint，
         消解「A0@1:100 vs A2@1:200」这类数值等价但比例不同的歧义（见 sheet.scale_from_margins）。
+        no_frame=True 时降级到标准幅面（LLM/无框图的超大画布，避免标题栏被撑成「米粒」）。
         """
-        spec = sheet.guess_sheet_bbox(bbox, inner)
+        spec = sheet.guess_sheet_bbox(bbox, inner, no_frame=no_frame)
         if spec.name in self.cache:
             return self.cache[spec.name]
         dxf, size = frame_gen.ensure_template(
@@ -256,13 +257,13 @@ class TemplateCtx(object):
         self.cache[spec.name] = out
         return out
 
-    def template_for(self, bbox, inner=None):
+    def template_for(self, bbox, inner=None, no_frame=False):
         """ezdxf 路径用：返回 (template_dict, spec)。
 
         template_dict 已按检出框比例从 --template 重定向出对应幅面并 learn 好，
         可直接喂给 block_replace.insert_template / mapper.map_fields。
         """
-        _, _, spec = self.for_frame(bbox, inner)
+        _, _, spec = self.for_frame(bbox, inner, no_frame=no_frame)
         return self.dict_cache.get(spec.name), spec
 
     def note(self, bbox, spec, size):
@@ -389,7 +390,9 @@ def _process_one_acad(app, src, doc, args, template, override, tplctx):
             values, unmatched, unused = mapper.map_fields(
                 template["fields"], old, override)
             outer_f = [float(v) for v in outer]
-            tpl_dwg, tpl_size, spec = tplctx.for_frame(outer_f, inner0)
+            # 无真框（LLM/无框图的超大画布，且无非块式标题栏）：降级到标准幅面
+            no_frame = (outer[2] - outer[0]) * (outer[3] - outer[1]) > sheet.NO_FRAME_AREA
+            tpl_dwg, tpl_size, spec = tplctx.for_frame(outer_f, inner0, no_frame=no_frame)
             tplctx.note(outer_f, spec, tpl_size)
             plan["frames"].append({
                 "frame": outer_f,
@@ -544,7 +547,9 @@ def main():
                         #     避免图内 stray 远点实体把新公司图框撑大/错位
                         maxdim = max(outer[2] - outer[0], outer[3] - outer[1])
                         # 按检出框幅面自动选/重定向模板（A0~A4/A4V/加长），不再硬套 --template 单一幅面
-                        tpl, spec = tplctx.template_for(list(outer))
+                        # 无真框（LLM/无框图的超大画布）：降级到标准幅面，标题栏不再被撑成「米粒」
+                        no_frame = (outer[2] - outer[0]) * (outer[3] - outer[1]) > sheet.NO_FRAME_AREA
+                        tpl, spec = tplctx.template_for(list(outer), no_frame=no_frame)
                         if spec is not None:
                             tplctx.note(list(outer), spec, (spec.width, spec.height))
                         # 弱提取（extract：SW 单元式标题栏友好，正确抓 材料/比例/图名）
