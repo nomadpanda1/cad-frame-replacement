@@ -21,6 +21,7 @@ import time
 import argparse
 import tempfile
 import shutil
+import ezdxf
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
@@ -549,9 +550,22 @@ def main():
                         # 按检出框幅面自动选/重定向模板（A0~A4/A4V/加长），不再硬套 --template 单一幅面
                         # 无真框（LLM/无框图的超大画布）：降级到标准幅面，标题栏不再被撑成「米粒」
                         no_frame = (outer[2] - outer[0]) * (outer[3] - outer[1]) > sheet.NO_FRAME_AREA
-                        tpl, spec = tplctx.template_for(list(outer), no_frame=no_frame)
+                        # #10：无真框时，detect_frames 检出的 outer 只是「内容回退矩形」，
+                        #      实际内容 bbox 可能更大（如右侧控制子电路溢出 outer 297mm），
+                        #      若仍用 outer 插入新 HH_FRAME，新框右/下边框会切过内容/连线
+                        #      （用户反馈「图框导致与电路图重合」）。改用 ezdxf 全内容
+                        #      bbox + margin 作为新框区域——边框画在所有内容外侧，含右
+                        #      侧溢出子电路，对真实有框图无影响（no_frame=False 不进此分支）。
+                        if no_frame:
+                            _ext = ezdxf.bbox.extents(doc.modelspace())
+                            _pad = 20.0  # 20mm=GB/T 14689 A0-A3 内框边距余量，确保内容在双线内框内侧
+                            frame_box = [_ext.extmin[0] - _pad, _ext.extmin[1] - _pad,
+                                         _ext.extmax[0] + _pad, _ext.extmax[1] + _pad]
+                        else:
+                            frame_box = list(outer)
+                        tpl, spec = tplctx.template_for(list(frame_box), no_frame=no_frame)
                         if spec is not None:
-                            tplctx.note(list(outer), spec, (spec.width, spec.height))
+                            tplctx.note(list(frame_box), spec, (spec.width, spec.height))
                         # 弱提取（extract：SW 单元式标题栏友好，正确抓 材料/比例/图名）
                         old = extract.extract_fields(doc, {"bbox": tb, "method": "keyword", "entity": None})
                         # 强提取（finder：冒号式标题栏友好，补 DWG_NO/STAGE/DATE/DESIGN）
@@ -589,7 +603,7 @@ def main():
                             #     delete_titleblock_text 同口径。INSERT/HATCH 不删。
                             n_tbg = raw_replace.delete_titleblock_grid(doc, tb)
                             n_mark = raw_replace.delete_edge_markers(doc, outer, strip=10.0)
-                            region = {"bbox": outer, "confidence": 1.0, "method": "frame",
+                            region = {"bbox": frame_box, "confidence": 1.0, "method": "frame",
                                       "source": "sheet", "entity": None}
                             # #3：尊重 GUI「缩放」选择（args.fit），不再写死 "max"
                             _, written = block_replace.insert_template(
