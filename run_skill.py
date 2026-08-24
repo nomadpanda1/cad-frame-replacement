@@ -28,6 +28,22 @@ sys.path.insert(0, HERE)
 from lib import template_learn, finder, extract, mapper, block_replace, acad, logbook, raw_replace, acad_pipeline, acad_com, sheet, frame_gen, validators  # noqa
 
 
+_V1_EXTRACT_FIELDS = finder.extract_frame_fields  # 别名，避免下面 replace_all 误伤
+
+
+def _extract_fields(doc, bbox):
+    """字段提取统一入口：默认 v1（extract_frame_fields）；
+
+    设环境变量 CFR_EXTRACT_V2=1 时切换 v2（extract_frame_fields_v2，几何约束 +
+    标签/值分离类型打分，修复「标签/列头/注记当值」误判）。仅用于 A/B 对比，
+    不影响默认行为。
+    """
+    fn = getattr(finder, "extract_frame_fields_v2", None)
+    if os.environ.get("CFR_EXTRACT_V2") == "1" and fn is not None:
+        return fn(doc, bbox)
+    return _V1_EXTRACT_FIELDS(doc, bbox)
+
+
 def _count_entities(doc):
     n = 0
     for _ in doc.modelspace():
@@ -177,7 +193,7 @@ def _process_multiframe(doc, template, targets, override, fit, tplctx=None):
             tpl, spec = tplctx.template_for(list(fb), inner[0] if inner else None)
             if spec is not None:
                 tplctx.note(list(fb), spec, (spec.width, spec.height))
-        fields = finder.extract_frame_fields(doc, fb)
+        fields = _extract_fields(doc, fb)
         values, unmatched, unused = mapper.map_fields(tpl["fields"], fields, override)
         ndel = block_replace.delete_frame_border(doc, fb)
         ndel += block_replace.delete_title_strip(doc, fb)
@@ -320,7 +336,7 @@ def _process_one_acad(app, src, doc, args, template, override, tplctx):
         for i, t in enumerate(targets):
             fb = t["outer"]
             inner = t.get("inner") or []
-            fields = finder.extract_frame_fields(doc, fb)
+            fields = _extract_fields(doc, fb)
             fields = {k: v for k, v in fields.items() if validators.validate(k, v)}
             values, unmatched, unused = mapper.map_fields(
                 template["fields"], fields, override)
@@ -385,7 +401,7 @@ def _process_one_acad(app, src, doc, args, template, override, tplctx):
             # 它按"图名字号最大 / 标题栏标签"定位真实图名，能排除「注：…」注记、电缆型号、
             # 房间号等干扰（此前错用 extract.extract_fields 抓"最长文本"，把注记/电缆当图名）。
             # extract_frame_fields 内部会自行 detect_titleblock，这里 tb 仅用于 plan 删除区。
-            old = finder.extract_frame_fields(doc, outer)
+            old = _extract_fields(doc, outer)
             # 与 DXF 路径一致：用 validators 过滤明显错位的标签当值（如 DESIGN='标准化'）
             old = {k: v for k, v in old.items() if validators.validate(k, v)}
             values, unmatched, unused = mapper.map_fields(
@@ -426,8 +442,8 @@ def main():
     ap.add_argument("--dwg", action="store_true", help="输出 DWG（需转换器）")
     ap.add_argument("--detect-only", action="store_true", help="仅检测标题栏并写 detection.json")
     ap.add_argument("--dry-run", action="store_true", help="仅提取+映射，不改图")
-    ap.add_argument("--fit", default="max", choices=["min", "max", "width", "height"],
-                    help="新框缩放方式：max 满填(默认，与网站一致) / min 保比例居中 / width 按宽 / height 按高")
+    ap.add_argument("--fit", default="min", choices=["min", "max", "width", "height"],
+                    help="新框缩放方式：min 保比例居中(默认，住宅/建筑大图推荐) / max 满填(与网站一致) / width 按宽 / height 按高")
     ap.add_argument("--margin", type=float, default=5.0, help="打散图框删除边距")
     ap.add_argument("--override", default="", help="字段映射覆盖 JSON，如 {\"TITLE\":\"OLD_TITLE\"}")
     ap.add_argument("--mode", default="auto", choices=["auto", "single", "multi"],
@@ -571,7 +587,7 @@ def main():
                         # 强提取（finder：冒号式标题栏友好，补 DWG_NO/STAGE/DATE/DESIGN）
                         # —— 高召回融合：弱为基础，强仅在弱未覆盖的概念上补充，避免强覆盖弱的正确值
                         try:
-                            strong = finder.extract_frame_fields(doc, outer)
+                            strong = _extract_fields(doc, outer)
                             for k, v in strong.items():
                                 if v and (k not in old or not old[k]):
                                     old[k] = v
@@ -593,6 +609,11 @@ def main():
                             #     按 tb 区域删会漏，导致替换后残留横线。图框层只承载旧框几何，
                             #     新 HH_FRAME 在 HH_TITLE/0 层，整层清残留安全；INSERT/HATCH 保留。
                             n_grid = raw_replace.delete_old_frame_grid(doc)
+                            # #10：清 0 通用层上的旧白框栅格（扩展版，2026-08-24）。
+                            #     原 delete_old_frame_grid 只清 _TITLE_LAYERS，对 0 层长直线
+                            #     （旧白框栅格+旧标题栏栅格）无效——SolidWorks 经常把这些打散
+                            #     到 0 层。规则：x>xR-0.30W AND y<yB+0.30H AND 长度>4000mm。
+                            n_grid_ext = raw_replace.delete_old_frame_grid_extended(doc, outer, tb=tb)
                             # #8：清掉旧标题栏字段值（如 layer 0 上的“法兰”“PLA”），它们已
                             #     被提取回填到新模板 ATTRIB，不删会与新标题栏文字重叠。
                             n_txt = raw_replace.delete_titleblock_text(doc, tb)
@@ -607,9 +628,9 @@ def main():
                                       "source": "sheet", "entity": None}
                             # #3：尊重 GUI「缩放」选择（args.fit），不再写死 "max"
                             _, written = block_replace.insert_template(
-                                doc, tpl, region, values, fit=args.fit or "max")
+                                doc, tpl, region, values, fit=args.fit or "min")
                             rec["written"] = list(dict.fromkeys(written))
-                            rec["deleted"] = n_edge + n_tb + n_grid + n_txt + n_tbg + n_mark
+                            rec["deleted"] = n_edge + n_tb + n_grid + n_grid_ext + n_txt + n_tbg + n_mark
                         rec["found"] = 1
                         rec["method"] = "raw-frame"
                         rec["mappings"] = [{"region": [round(x, 1) for x in outer],
@@ -646,7 +667,7 @@ def main():
                         fb = t["outer"]
                         inner = t.get("inner") or []
                         tpl, _ = tplctx.template_for(list(fb), inner[0] if inner else None)
-                        fields = finder.extract_frame_fields(doc, fb)
+                        fields = _extract_fields(doc, fb)
                         values, unmatched, unused = mapper.map_fields(
                             tpl["fields"], fields, override)
                         mappings.append({"region": [round(v, 1) for v in fb],

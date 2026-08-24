@@ -85,6 +85,31 @@ _TITLE_LAYERS = {"tukuang", "图框", "pub_title", "图签", "tk", "title",
                  "frame", "border", "borders", "边框", "titleblock", "图框线", "图框层"}
 
 
+# 内容层白名单：detect_titleblock tb 圈已收紧，但若仍误入内容区，delete_titleblock_grid
+# 应跳过这些「明显是真实绘图内容」的层。覆盖建筑/电气/暖通常见层名（大小写不敏感）。
+# 旧标题栏网格线一般落在通用层（0、10、数字层）而非这些「领域层」，故白名单不会
+# 误伤旧标题栏清场。
+_CONTENT_LAYER_HINTS = frozenset({
+    # 建筑
+    "wall", "walls", "墙", "墙体", "wall-1", "wall-2",
+    "window", "windows", "窗", "窗户",
+    "door", "doors", "门", "门洞", "门联窗",
+    "column", "columns", "柱", "柱子", "轴线",
+    "furn", "furniture", "家具", "洁具", "橱柜", "柜台",
+    "stair", "楼梯", "台阶", "坡道",
+    "room", "房间", "功能", "隔墙",
+    # 电气
+    "wire", "wires", "电线", "导线", "线槽", "桥架", "母线", "母线槽", "配电",
+    "dj", "灯具", "灯", "lamp", "light", "lighting", "开关", "插座", "配电箱",
+    "fire", "消防", "报警", "烟感", "手报", "广播", "应急照明",
+    # 暖通/给排水
+    "hvac", "暖通", "空调", "空调位", "风口", "diff", "风管", "水管", "给水",
+    # 标注/文字
+    "文字", "text", "annotation", "注记", "标注", "tag", "label",
+    "dim", "dimension", "defpoints",  # defpoints=AutoCAD 尺寸默认层
+})
+
+
 def delete_titleblock(doc, tb, maxdim=None):
     """删标题栏区域内「旧标题栏自身」实体，保留真实绘图内容。
 
@@ -182,6 +207,11 @@ def delete_titleblock_grid(doc, tb):
     若真实绘图内容与标题栏区域大面积重合（住宅/电气图常见），会误删。
     raw-frame 路径已用 detect_titleblock 把 tb 圈定在小区域，对「打散图框」
     类图纸（标题栏相对独立）安全。保留 INSERT/HATCH 真实标注。
+
+    2026-08-24 fix (#3 过度删 治标)：加 _CONTENT_LAYER_HINTS 白名单。
+    即使 tb 圈仍偏大（建筑/电气图内容铺到 tb 区），白名单内的领域层
+    （wall/wire/window/dj/文字/空调位…）也会被跳过，旧标题栏通用层（0/10/数字）
+    仍正常清理。
     """
     msp = doc.modelspace()
     n = 0
@@ -189,6 +219,9 @@ def delete_titleblock_grid(doc, tb):
         dt = e.dxftype()
         if dt not in ("LINE", "LWPOLYLINE", "POLYLINE"):
             continue
+        layer = (e.dxf.layer or "").lower()
+        if layer in _CONTENT_LAYER_HINTS:
+            continue  # 内容层白名单：保护 wall/wire/window/dj/文字/空调位 等
         try:
             b = bbox_mod.extents([e])
         except Exception:
@@ -199,6 +232,59 @@ def delete_titleblock_grid(doc, tb):
         if eb[2] < tb[0] or eb[0] > tb[2] or eb[3] < tb[1] or eb[1] > tb[3]:
             continue
         msp.delete_entity(e); n += 1
+    return n
+
+
+def delete_old_frame_grid_extended(doc, outer, tb=None):
+    """扩展版旧图框栅格清理：0 通用层 + 长度 > 4000mm 的长直线 + 落在「旧标题栏区」。
+
+    2026-08-24 fix (#10 旧白框栅格残留治本)：
+      - 原 `delete_old_frame_grid` 只清 _TITLE_LAYERS（TK/图框/...）上的线类，对 0 通用层
+        上的「旧白框栅格 + 旧标题栏栅格」无效（SolidWorks 把这些打散到 0 层）。
+      - 住宅电气图（强电平面.dxf）实测：0 层有 10 条长直线构成两个矩形（"标准层照明"
+        行 + "八-十三层"行 + "注:B1栋"分隔线），是旧白框栅格核心，但 4.8% tb bbox 圈
+        不到（这些线在 tb 顶上方 5~15m）。
+      - 规则：x > xR-0.30W AND y < yB+0.30H（旧标题栏区）AND layer ∈ {"0"} AND 长直线
+        (min(w,h)<1 且 max(w,h)>4000) → 视为旧白框栅格，删。
+      - 真实内容（1-1 剖面/卧室/A/C/K/强欣设计图库）均在 y > yB+0.30H = -57347 或
+        x < xR-0.30W = 104605，本规则不会误伤。
+      - 旧白框栅格通常成对出现（水平 + 垂直 + 水平 + 垂直 → 矩形），单条删除会破坏
+        视觉但不留残线；与 `delete_old_frame_grid`（清 TK 层）互补。
+    """
+    msp = doc.modelspace()
+    xL, yB, xR, yT = outer
+    W = max(1e-6, xR - xL)
+    H = max(1e-6, yT - yB)
+    x_min = xR - 0.30 * W  # = 104605 for 强电平面
+    y_max = yB + 0.30 * H  # = -57347 for 强电平面
+    n = 0
+    for e in list(msp):
+        dt = e.dxftype()
+        if dt not in ("LINE", "LWPOLYLINE", "POLYLINE"):
+            continue
+        layer = (e.dxf.layer or "").upper()
+        if layer not in ("0",):
+            continue  # 只清 0 通用层（保护 wall/wire/window/dj/文字 等内容层）
+        try:
+            b = bbox_mod.extents([e])
+        except Exception:
+            continue
+        if not b or not b.has_data:
+            continue
+        w = b.extmax.x - b.extmin.x
+        h = b.extmax.y - b.extmin.y
+        # 长直线：min(w,h) < 1.0（实际直线/极扁矩形）且 max(w,h) > 4000
+        if min(w, h) >= 1.0:
+            continue
+        if max(w, h) <= 4000:
+            continue
+        # 落在旧标题栏区
+        cx = (b.extmin.x + b.extmax.x) / 2
+        cy = (b.extmin.y + b.extmax.y) / 2
+        if cx < x_min or cy > y_max:
+            continue
+        msp.delete_entity(e)
+        n += 1
     return n
 
 
