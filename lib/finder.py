@@ -358,7 +358,14 @@ def _expand_tb_by_grid(doc, tb, outer, max_left_span=200.0, max_top_span=70.0):
 
 
 def detect_titleblock(doc, outer):
-    """用标题栏词表锚定右下角标题栏紧凑区域。outer=(x0,y0,x1,y1)。"""
+    """用标题栏词表锚定右下角标题栏紧凑区域。outer=(x0,y0,x1,y1)。
+
+    2026-08-24 fix (#3 过度删 治本)：
+      - 兜底（无 anchor）时 tb 默认 0.45W×0.32H 在「无标题栏标签词」建筑/电气图里会
+        圈进 1-1 剖面图、右侧墙/窗/线（实测 强电平面.dxf tb/outer=14.4% → delete_titleblock_grid
+        误删 238 实体）。收紧到 0.30W×0.18H（约 5.4%）。
+      - 终态 tb 宽度再加硬上限 0.32W：任何情况下 tb 都不会吞进图幅右 1/3 以外的内容。
+    """
     msp = doc.modelspace()
     xL, yB, xR, yT = outer
     W = max(1e-6, xR - xL)
@@ -367,6 +374,9 @@ def detect_titleblock(doc, outer):
     xmin_q = xL + 0.40 * W
     ymax_q = yB + 0.55 * H
     anchors = []
+    # Track anchor provenance: "vocab" 路径用 SW_TITLE_VOCAB 命中，强信号；
+    # "layer" 路径只按层名兜底（强电平面 TK 层「注:B1栋…」典型例），弱信号。
+    anchor_source = "vocab"
     for e in msp:
         dt = e.dxftype()
         if dt not in ("TEXT", "MTEXT"):
@@ -390,39 +400,107 @@ def detect_titleblock(doc, outer):
                 continue
             anchors.append((b.extmin.x, b.extmin.y, b.extmax.x, b.extmax.y))
     if not anchors:
-        # 兜底：右下角 0.45W × 0.32H，再按网格线扩展
-        tb = (xR - 0.45 * W, yB, xR, yB + 0.32 * H)
-        return _expand_tb_by_grid(doc, tb, outer)
+        # Anchor 2（#5 增强）：标题层（TK/图框/frame/border/…）上的文本，
+        # 即使不含 图名/图号/比例 等标签词，也作为标题栏锚点。
+        # 强电平面.dxf 等住宅电气图的旧标题栏只有「注:B1栋标准层...」这种
+        # TITLE 值文本，落在 TK 层，不在 SW_TITLE_VOCAB 里。命中后用文本
+        # 真实 bbox 做 tb 边界，比 fallback 百分比准确得多。
+        #
+        # ⚠️ layer 路径信号弱，必须限制高度 cap（不超 0.30H ≈ 旧白框高度），
+        # 防止把 tb 上方「主卧室 / 卧室 / 1:100 / 强电设计说明」等真实内容圈进
+        # tb 后被 delete_titleblock_text 误删（无白名单保护）。同时跳过下方
+        # anchor 路径的 top_scan 向上扩展——layer 锚点只有「标题栏文本位置」
+        # 的弱信号，不足以推断上边界。
+        anchor_source = "layer"
+        _TITLE_LAYER_ANCHOR = {
+            "tukuang", "图框", "pub_title", "图签", "tk", "title",
+            "frame", "border", "borders", "边框", "titleblock",
+            "图框线", "图框层", "0",  # 0 层也兜底：部分图把标题文本画在 0
+        }
+        for e in msp:
+            dt = e.dxftype()
+            if dt not in ("TEXT", "MTEXT"):
+                continue
+            layer_norm = (e.dxf.layer or "").strip().lower()
+            if layer_norm not in _TITLE_LAYER_ANCHOR:
+                continue
+            raw = e.text if dt == "MTEXT" else e.dxf.text
+            if not raw:
+                continue
+            n = _norm(raw)
+            if not n:
+                continue
+            # 跳过 0 层上明显是「普通文字」的内容（短句、含中文长尾）
+            if layer_norm == "0" and len(n) < 6:
+                continue
+            try:
+                b = bbox_mod.extents([e])
+            except Exception:
+                continue
+            if not (b and b.has_data):
+                continue
+            cx = (b.extmin.x + b.extmax.x) / 2
+            cy = (b.extmin.y + b.extmax.y) / 2
+            if cx < xmin_q or cy > ymax_q:
+                continue
+            anchors.append((b.extmin.x, b.extmin.y, b.extmax.x, b.extmax.y))
+    if not anchors:
+        # 兜底：右下角 0.30W × 0.18H（≈5.4% of outer），再按网格线扩展。
+        # 旧值 0.45×0.32 = 14.4% 在 强电平面/裙楼消防/消防弱电2 等无 anchor 图上
+        # 把 1-1 剖面/设备材料表/右侧墙/窗/线全部圈进 tb，被 delete_titleblock_grid
+        # 误删（用户反馈「修改后多删了一些元素」）。
+        tb = (xR - 0.30 * W, yB, xR, yB + 0.18 * H)
+        tb = _expand_tb_by_grid(doc, tb, outer)
+        # 兜底硬上限：宽度不超过 0.32W（标准标题栏宽不超过图幅 1/3）。
+        # 注意：只对无 anchor 的兜底路径生效；anchor 路径下 minx 已限定 tb 左界，
+        # 再加 cap 会误伤小图（如 200×100 测例，标题栏文字在 x=100 会跑出 tb）。
+        if (tb[2] - tb[0]) > 0.32 * W:
+            tb = (tb[2] - 0.32 * W, tb[1], tb[2], tb[3])
+        return tb
     minx = min(a[0] for a in anchors)
     miny = min(a[1] for a in anchors)
     maxy = max(a[3] for a in anchors)
     # 标题栏贴右边框：右界直接取到外框右边
     left = max(minx, xR - 0.72 * W) - 2.0
-    # 上界：扫描右下角区域内的所有文本，取最高一行的顶边（含图名行），避免截断图名
-    top_scan = yB + 0.50 * H
-    top_y = maxy
-    for e in msp:
-        dt = e.dxftype()
-        if dt not in ("TEXT", "MTEXT"):
-            continue
-        raw = e.text if dt == "MTEXT" else e.dxf.text
-        if raw and re.fullmatch(r"[A-Za-z0-9]{1,2}", raw.strip()):
-            continue  # 跳过区号字母/数字，避免抬高上界
-        try:
-            b = bbox_mod.extents([e])
-        except Exception:
-            continue
-        if not (b and b.has_data):
-            continue
-        cx = (b.extmin.x + b.extmax.x) / 2
-        cy = (b.extmin.y + b.extmax.y) / 2
-        if left - 4 <= cx <= xR + 4 and yB - 4 <= cy <= top_scan:
-            top_y = max(top_y, b.extmax.y)
-    top_y = min(top_y, top_scan)
-    # 小余量
-    tb = (left, yB - 2.0, xR + 2.0, top_y + 4.0)
+    if anchor_source == "vocab":
+        # vocab 路径信号强：扫描右下角区域内的所有文本，取最高一行的顶边（含图名行），
+        # 避免截断图名（图名行可能在锚点上方）。
+        top_scan = yB + 0.50 * H
+        top_y = maxy
+        for e in msp:
+            dt = e.dxftype()
+            if dt not in ("TEXT", "MTEXT"):
+                continue
+            raw = e.text if dt == "MTEXT" else e.dxf.text
+            if raw and re.fullmatch(r"[A-Za-z0-9]{1,2}", raw.strip()):
+                continue  # 跳过区号字母/数字，避免抬高上界
+            try:
+                b = bbox_mod.extents([e])
+            except Exception:
+                continue
+            if not (b and b.has_data):
+                continue
+            cx = (b.extmin.x + b.extmax.x) / 2
+            cy = (b.extmin.y + b.extmax.y) / 2
+            if left - 4 <= cx <= xR + 4 and yB - 4 <= cy <= top_scan:
+                top_y = max(top_y, b.extmax.y)
+        top_y = min(top_y, top_scan)
+        # 小余量
+        tb = (left, yB - 2.0, xR + 2.0, top_y + 4.0)
+    else:
+        # layer 路径信号弱：禁用 top_scan（避免把上方「主卧室 / 1:100 / 强电设计说明」
+        # 等真实内容圈进 tb 被 delete_titleblock_text 误删）。只取 anchor 自身 bbox 顶边
+        # + 网格扩展，并加 0.30H 高度硬封顶（标准旧白框不会超过 0.30H）。
+        tb = (left, yB - 2.0, xR + 2.0, maxy + 4.0)
     # 再按实际网格线扩展，防止文字偏右导致左侧格子线漏删
-    return _expand_tb_by_grid(doc, tb, outer)
+    tb = _expand_tb_by_grid(doc, tb, outer)
+    # layer 路径加 0.30H 高度 cap（vocab 路径不加，避免误伤含图名行的小图）
+    if anchor_source == "layer":
+        max_top = yB + 0.30 * H
+        if tb[3] > max_top:
+            tb = (tb[0], tb[1], tb[2], max_top)
+    # 注意：anchor 路径不加 0.32W 宽度 cap（见上方兜底分支注释）。
+    return tb
 
 
 # ---------- 多图框逐框检测（案例七） ----------
@@ -909,3 +987,156 @@ def find_titleblocks(doc, margin_ratio=0.02):
             regions.append({"bbox": bb, "confidence": min(0.99, 0.7 + 0.1 * score),
                             "method": "block", "source": bname, "entity": e})
     return regions
+
+# ===================== v2: 几何约束 + 标签/值分离打分 =====================
+# 改进点（相对 extract_frame_fields）：
+#  1) 扩展「标签/列头」排除集：标题栏字段名 + SW 词表 + 设备表列头（名称/型号规格/单位/
+#     数量/备注/编号/进线编号/档案号/项目号/室别…），这些文本绝不当作字段值。
+#  2) 标签:值 取值时做「类型打分」——优先选符合该字段类型正则的候选（SCALE=比例、
+#     DATE=日期、DWG_NO=图号码、STAGE=阶段值…），而不是盲取「同行右邻最近文本」。
+#  3) TITLE 增加「标题栏上栏居中」位置权重，并排除列头/字段名（避免把 型号规格 当图名）。
+# 不改动 v1，供对比与后续接管使用。
+
+_TB_COLHEAD = {
+    "名称", "型号规格", "型号", "规格", "单位", "数量", "备注", "编号", "进线编号",
+    "进线回路编号", "出线回路编号", "回路编号", "配电箱编号", "低压配电柜编号",
+    "低压配电柜型号", "配电箱型号及规格", "设备容量", "电缆型号及规格", "用途", "栋数",
+    "档案号", "项目号", "室别", "比例", "阶段", "日期", "材料", "重量", "版本",
+    "设计", "制图", "校对", "审核", "批准", "会签", "标准化", "图名", "图号",
+}
+_TB_LABEL_SET_V2 = set(_LABEL_NORM_SET) | {_norm(x) for x in _TB_COLHEAD}
+
+
+def _is_pure_label_v2(raw):
+    """v2：文本本身是否就是标题栏字段名/列头（绝不当字段值）。"""
+    return _norm(raw) in _TB_LABEL_SET_V2
+
+
+_V2_DATE = re.compile(r"^\d{4}\s*[-/.年]\s*\d{1,2}\s*[-/.月]\s*\d{1,2}")
+_V2_CODE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9\-_/.]{2,}$")
+_STAGE_VALS = {"初步设计", "施工图", "方案设计", "竣工图", "设计", "施工", "招标",
+               "报批", "规划", "可研", "代初设", "施工图设计"}
+
+
+def _vtype_score(concept, raw):
+    """提取端类型打分：候选文本越像该字段的合法值，分越高。"""
+    v = (raw or "").strip()
+    if concept == "SCALE":
+        return 1.0 if _RATIO_RE.match(v) else 0.0
+    if concept == "DATE":
+        return 1.0 if (_V2_DATE.search(v) or re.search(r"\d{4}", v)) else 0.1
+    if concept == "DWG_NO":
+        if re.search(r"[，。、（）()：:\s]", v):
+            return 0.05
+        return 1.0 if _V2_CODE.match(v) else 0.1
+    if concept == "STAGE":
+        return 1.0 if _norm(v) in _STAGE_VALS else 0.4
+    if concept == "WEIGHT":
+        return 1.0 if re.match(r"^\d", v) else 0.2
+    if concept in ("DESIGN", "CHECK", "REVIEW", "APPROVE", "DRAWN", "COUNTERSIGN"):
+        return 0.1 if _is_pure_label_v2(v) else 0.7
+    return 0.5
+
+
+# 各概念「接受最小值」：候选打分低于此阈值即视为误判（标签/列头/注记/非类型文本），
+# 直接留空，不写入新标题栏。门槛目标：
+#   STAGE >=0.8  —— 必须是真实阶段值（初步设计/施工图…），拒绝「档案号:」之类错拍；
+#   DWG_NO >=0.5 —— 必须是图号码（alnum/-_/.，如 BESS-LST-001、001），拒绝注记长句
+#                   （如「1, 1Q1(B2)箱同1Q(B1)箱,其进线编号如下:」）；
+#   其余 >=0.5   —— 类型不可信（DATE/WEIGHT 非类型文本）也留空，避免污染数据。
+_MIN_SCORE = {"STAGE": 0.8, "DWG_NO": 0.5}
+
+
+def extract_frame_fields_v2(doc, frame_bbox, concepts=("TITLE", "DWG_NO", "SCALE", "STAGE", "DATE", "DESIGN")):
+    """v2 提取：几何约束 + 标签/值分离打分。"""
+    fx0, fy0, fx1, fy1 = frame_bbox
+    tb = detect_titleblock(doc, frame_bbox)
+    items = _collect_items(doc, tb)
+    tbw = max(1e-6, tb[2] - tb[0])
+    max_gap = max(20.0, 0.4 * tbw)
+    fields = {}
+    # SCALE 优先「比例」标签附近比例文本
+    ratio = _nearest_ratio_to_label(items, "比例")
+    if ratio:
+        fields["SCALE"] = ratio
+    # 标签:值 概念（类型打分 + 标签排除）
+    for concept in concepts:
+        if concept == "TITLE":
+            continue
+        if concept == "SCALE" and "SCALE" in fields:
+            continue
+        aliases = CONCEPT_ALIASES.get(concept, [concept.lower()])
+        best = None
+        best_score = -1.0
+        for al in aliases:
+            if not al:
+                continue
+            for cx, cy, raw, h in items:
+                n = _norm(raw)
+                labeled = (n == al) or (al in n and (":" in raw or "：" in raw))
+                if not labeled:
+                    continue
+                cands = []
+                if ":" in raw or "：" in raw:
+                    val = re.split(r"[:：]", raw, 1)[-1].strip()
+                    if val and not _is_pure_label_v2(val):
+                        sc = _vtype_score(concept, val)
+                        if sc > 0:
+                            cands.append((val, cx, cy, sc))
+                for cx2, cy2, raw2, h2 in items:
+                    if raw2 == raw:
+                        continue
+                    if _is_pure_label_v2(raw2):
+                        continue
+                    if concept != "SCALE" and _RATIO_RE.match(raw2.strip()):
+                        continue
+                    if abs(cy2 - cy) < 6 and cx2 > cx:
+                        dx = cx2 - cx
+                        if dx > max_gap:
+                            continue
+                        sc = _vtype_score(concept, raw2)
+                        sc -= min(0.3, dx / max_gap * 0.3)
+                        if sc > 0:
+                            cands.append((raw2, cx2, cy2, sc))
+                if cands:
+                    cands.sort(key=lambda c: -c[3])
+                    if cands[0][3] > best_score:
+                        best_score = cands[0][3]
+                        best = cands[0][0]
+        if best is not None:
+            _thr = _MIN_SCORE.get(concept, 0.5)
+            if best_score >= _thr:
+                fields[concept] = best.strip()
+    # SCALE 裸兜底
+    if "SCALE" not in fields:
+        sc = _pick_scale(items)
+        if sc:
+            fields["SCALE"] = sc
+    # TITLE：字高 + 上栏居中 + 排注记/列头
+    title = _pick_title_v2(items, tb)
+    if title:
+        fields["TITLE"] = _strip_surrounding_quotes(title)
+    return fields
+
+
+def _pick_title_v2(items, tb):
+    """v2 图名：字高最大 + 完整图类名加权 + 标题栏越靠上越好；排除注记/列头/字段名。"""
+    tbx0, tby0, tbx1, tby1 = tb
+    th = max(1e-6, tby1 - tby0)
+    cands = []
+    for cx, cy, raw, h in items:
+        if _is_note(raw):
+            continue
+        if _is_pure_label_v2(raw):
+            continue
+        if not any(k in raw for k in _TITLE_KW):
+            continue
+        if raw.startswith(("接", "由", "详见", "做法")):
+            continue
+        full = any(k in raw for k in _TITLE_FULL)
+        ypos = (cy - tby0) / th
+        cands.append((h + (100.0 if full else 0.0) + 30.0 * max(0.0, ypos), cy, raw))
+    if not cands:
+        return None
+    cands.sort(key=lambda r: (r[0], r[1]), reverse=True)
+    return cands[0][2]
