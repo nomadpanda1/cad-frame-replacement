@@ -771,6 +771,11 @@ def main():
                             rec["deleted"] = 0
                         else:
                             n_edge = raw_replace.delete_frame_lines(doc, frames)
+                            # #15-2（缺陷 H，2026-08-25）：删旧框边标刻度线（坐标/比例短线）。
+                            # 这些线落在旧框矩形 outer 外侧的边距带、非边框线上，
+                            # delete_frame_lines 够不到；新框放大铺满整页后它们残留于
+                            # 新框内（用户所见「上个图框的白线存在」）。短段 + 边距带内 → 删。
+                            n_edge_ticks = raw_replace.delete_frame_edge_ticks(doc, outer)
                             n_tb = raw_replace.delete_titleblock(doc, tb, maxdim)
                             # #7：清旧「打散」图框层残留（标题栏网格+字段标签）——这些常落在
                             #     tb 之外（左栏 x<111、页中分隔线 y=105/155），delete_titleblock
@@ -808,7 +813,7 @@ def main():
                             _, written = block_replace.insert_template(
                                 doc, tpl, region, values, fit=args.fit or "min")
                             rec["written"] = list(dict.fromkeys(written))
-                            rec["deleted"] = n_edge + n_tb + n_grid + n_grid_ext + n_txt + n_tbg + n_cluster + n_cluster_tbl + n_mark
+                            rec["deleted"] = n_edge + n_edge_ticks + n_tb + n_grid + n_grid_ext + n_txt + n_tbg + n_cluster + n_cluster_tbl + n_mark
                         rec["found"] = 1
                         rec["method"] = "raw-frame"
                         rec["mappings"] = [{"region": [round(x, 1) for x in outer],

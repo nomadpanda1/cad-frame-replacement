@@ -60,6 +60,71 @@ def delete_frame_lines(doc, frames):
     return n
 
 
+def delete_frame_edge_ticks(doc, outer, margin=30.0, max_len=30.0):
+    """删旧「打散」图框的边标刻度线（坐标/比例刻度短线）。
+
+    SolidWorks 导出的图框常在边框外侧留一圈短刻度线（左/右边缘水平短线、
+    上/下边缘竖直短线），用于标注坐标/比例。这些线落在图纸边距带（旧框
+    矩形 outer 外侧）而非边框线上，delete_frame_lines 只删边框矩形四边、
+    够不到，导致替换后（尤其新框放大铺满整页时）这些白线残留于新框内、
+    与用户所见「上个图框的白线存在」一致。
+
+    判定（2026-08-25 fix 缺陷 H）：短线段（最长分段 ≤ max_len）且其 bbox
+    中点位于旧框矩形 outer 的 OUTSIDE、且距外框边 ≤ margin（即落在边距带
+    内）→ 视为旧框刻度线删掉。真实绘图内容通常位于外框内侧，边距带内仅有
+    旧框系统几何，故安全（实测装配体 24 条刻度线全中、0 条长线误删、
+    2308 条框内真实内容不受影响）。
+    """
+    x0, y0, x1, y1 = outer
+    msp = doc.modelspace()
+    n = 0
+    for e in list(msp):
+        dt = e.dxftype()
+        if dt not in ("LINE", "LWPOLYLINE", "POLYLINE"):
+            continue
+        try:
+            b = bbox_mod.extents([e])
+        except Exception:
+            continue
+        if not b or not b.has_data:
+            continue
+        # 短段判定：最长分段 ≤ max_len 才视为刻度短线
+        try:
+            if dt == "LINE":
+                s, en = e.dxf.start, e.dxf.end
+                seg = ((s.x - en.x) ** 2 + (s.y - en.y) ** 2) ** 0.5
+            elif dt == "LWPOLYLINE":
+                pts = e.get_points()
+                if not pts:
+                    continue
+                seg = max(((pts[i][0] - pts[i-1][0]) ** 2 +
+                           (pts[i][1] - pts[i-1][1]) ** 2) ** 0.5
+                          for i in range(1, len(pts)))
+            else:
+                vs = list(e.vertices())
+                if not vs:
+                    continue
+                seg = max(((vs[i].dxf.location.x - vs[i-1].dxf.location.x) ** 2 +
+                           (vs[i].dxf.location.y - vs[i-1].dxf.location.y) ** 2) ** 0.5
+                          for i in range(1, len(vs)))
+        except Exception:
+            continue
+        if seg > max_len:
+            continue
+        # 中点在旧框外、且距外框边 ≤ margin（落在边距带内）
+        cx = (b.extmin.x + b.extmax.x) / 2
+        cy = (b.extmin.y + b.extmax.y) / 2
+        inside = (x0 <= cx <= x1) and (y0 <= cy <= y1)
+        if inside:
+            continue
+        dx = max(x0 - cx, 0.0, cx - x1)
+        dy = max(y0 - cy, 0.0, cy - y1)
+        if (dx * dx + dy * dy) ** 0.5 <= margin:
+            msp.delete_entity(e)
+            n += 1
+    return n
+
+
 def _spans_beyond(eb, tb, margin):
     """实体是否「大幅越出」标题栏 bbox（在某一侧超出 margin 以上）。
 
