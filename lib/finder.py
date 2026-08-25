@@ -852,6 +852,75 @@ def _quoted_title(items):
     return None
 
 
+# ---------- ATTDEF/ATTRIB 标题栏提取（92DZ1 类图：旧标题栏由属性定义构成） ----------
+def _attdef_value(e):
+    """从 ATTDEF/ATTRIB 取字段值。值通常写在 tag(group2) 或 text(group1)。
+
+    92DZ1 类图把真实值写在 tag（如 项目名称 的 tag=单台消火栓泵闭式自耦降压起动），
+    text(group1) 反而是占位符（如「公寓」）；常规图则 text 为值、tag 为短代码。
+    规则：优先含中文且更长者；若都无中文取 text(group1)。
+    """
+    tag = (getattr(e.dxf, "tag", None) or "").strip()
+    txt = (getattr(e.dxf, "text", None) or "").strip()
+
+    def has_cjk(s):
+        return any("\u4e00" <= c <= "\u9fff" for c in s)
+    if txt and has_cjk(txt) and (not has_cjk(tag) or len(txt) >= len(tag)):
+        return txt
+    if tag and has_cjk(tag):
+        return tag
+    return txt or tag
+
+
+_ATTDEF_PROMPT_MAP = {
+    "项目名称": "TITLE", "图名": "TITLE", "图样名称": "TITLE", "名称": "TITLE",
+    "比例": "SCALE",
+    "日期": "DATE", "制图日期": "DATE",
+    "图号": "DWG_NO", "图纸编号": "DWG_NO", "档案号": "DWG_NO", "档 案 号": "DWG_NO",
+    "阶段": "STAGE",
+    "单位名称": "UNIT", "设计单位": "UNIT", "设计单位名称": "UNIT",
+    "设计": "DESIGN", "制图": "DESIGN", "绘制": "DESIGN",
+    "审核": "CHECKED", "校对": "CHECKED",
+    "审定": "REVIEWED", "审查": "REVIEWED",
+    "批准": "APPROVED", "审批": "APPROVED",
+    "会签": "COUNTERSIGN",
+}
+
+
+def _collect_attdef_fields(doc, tb):
+    """从标题栏区域 tb 内的 ATTDEF/ATTRIB 提取字段。
+
+    部分图纸（如 92DZ1 消火栓泵控制图）旧标题栏完全由 ATTDEF 构成，值写在
+    tag/text，而非独立 TEXT/MTEXT，常规 extract_frame_fields 读不到 → 标题留空、
+    旧标题栏 ATTDEF 残留。这里按 prompt(组3) 映射到概念，取描述性字符串为值。
+    仅取落在 tb 内的 ATTDEF/ATTRIB，避免误抓图幅其它位置的属性定义。
+    """
+    fx0, fy0, fx1, fy1 = tb
+    out = {}
+    msp = doc.modelspace()
+    for e in msp:
+        dt = e.dxftype()
+        if dt not in ("ATTDEF", "ATTRIB"):
+            continue
+        try:
+            b = bbox_mod.extents([e])
+        except Exception:
+            continue
+        if not b or not b.has_data:
+            continue
+        eb = (b.extmin.x, b.extmin.y, b.extmax.x, b.extmax.y)
+        if eb[2] < fx0 or eb[0] > fx1 or eb[3] < fy0 or eb[1] > fy1:
+            continue
+        prompt = (getattr(e.dxf, "prompt", None) or "").strip()
+        concept = _ATTDEF_PROMPT_MAP.get(prompt)
+        if not concept:
+            continue
+        val = _attdef_value(e)
+        if val:
+            out[concept] = val
+    return out
+
+
 def extract_frame_fields(doc, frame_bbox, concepts=("TITLE", "DWG_NO", "SCALE", "STAGE", "DATE", "DESIGN")):
     """从单个图框 frame_bbox 的右下角标题栏提取字段，返回 {concept: value}。
 
@@ -950,6 +1019,13 @@ def extract_frame_fields(doc, frame_bbox, concepts=("TITLE", "DWG_NO", "SCALE", 
         title = _longest_in_region(doc, fx0, fy0, fx1, fy1)
     if title:
         fields["TITLE"] = _strip_surrounding_quotes(title)
+    # ATTDEF/ATTRIB 标题栏（92DZ1 类）：用属性定义里的值覆盖/补全字段。
+    # ATTDEF 是结构化标题栏数据，比启发式 TEXT 扫描更可靠，故以 ATTDEF 为准；
+    # 无 ATTDEF 的常规图 att_fields 为空，不产生任何影响。
+    att_fields = _collect_attdef_fields(doc, tb)
+    for k, v in att_fields.items():
+        if v:
+            fields[k] = v
     return fields
 
 

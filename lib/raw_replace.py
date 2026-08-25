@@ -223,11 +223,17 @@ def delete_titleblock_cluster_text(doc, tb, outer):
     n = 0
     for e in list(msp):
         dt = e.dxftype()
-        if dt not in ("TEXT", "MTEXT"):
+        is_att = dt in ("ATTDEF", "ATTRIB")
+        if dt not in ("TEXT", "MTEXT", "ATTDEF", "ATTRIB"):
             continue
-        layer = (e.dxf.layer or "").lower()
-        if layer in _CONTENT_LAYER_HINTS:
-            continue
+        # ATTDEF/ATTRIB 是标题栏数据实体（属性定义/属性引用），结构上属于旧图框
+        # 标题栏，不属于自由文字绘图内容；不受 _CONTENT_LAYER_HINTS 内容层白名单保护，
+        # 否则落在「文字」层的旧标题栏 ATTDEF（如 92DZ1 的「项目名称/比例/日期」）
+        # 会被白名单跳过而残留，与新 HH_FRAME 标题栏重叠（用户反馈「名字位置还是有偏差」）。
+        if not is_att:
+            layer = (e.dxf.layer or "").lower()
+            if layer in _CONTENT_LAYER_HINTS:
+                continue
         try:
             b = bbox_mod.extents([e])
         except Exception:
