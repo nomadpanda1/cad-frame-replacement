@@ -241,6 +241,131 @@ def delete_titleblock_cluster_text(doc, tb, outer):
     return n
 
 
+def delete_titleblock_cluster_grid(doc, outer, tb=None):
+    """删「标题栏簇」区（含紧邻的明细栏/BOM 表格）内的 LINE/LWPOLYLINE/POLYLINE 网格。
+
+    与 delete_titleblock_cluster_text 配对：后者清文字，本函数清表格网格。
+    92DZ1 / 装配体 类图纸的源「设备材料表/明细栏」是 LWPOLYLINE 矩形网格 + 文字，
+    仅删文字会留下整片空白表格压在新 HH_FRAME 标题栏上方/相切。
+
+    删线规则（必须同时满足，避免误伤原理图长线/尺寸线）：
+      - 落在簇区 [right 45% × bottom 55% of outer] ∪ tb（与文字同区）
+      - 图层非 _CONTENT_LAYER_HINTS
+      - 短段：最长分段 ≤ max(W,H) * 0.45（标题栏格线通常 < 200mm；原理图长线/Wire 远超此值）
+    INSERT / HATCH / DIMENSION 等真实标注一律保留。
+    """
+    if not outer:
+        return 0
+    xL, yB, xR, yT = outer
+    W = max(1e-6, xR - xL)
+    H = max(1e-6, yT - yB)
+    cx0 = xR - 0.45 * W
+    cy0 = yB
+    cx1 = xR
+    cy1 = yB + 0.55 * H
+    if tb:
+        zx0 = max(min(tb[0], cx0), xL)
+        zy0 = max(min(tb[1], cy0), yB)
+        zx1 = min(max(tb[2], cx1), xR)
+        zy1 = min(max(tb[3], cy1), yT)
+    else:
+        zx0, zy0, zx1, zy1 = cx0, cy0, cx1, cy1
+    long_th = max(W, H) * 0.45
+    msp = doc.modelspace()
+    n = 0
+    for e in list(msp):
+        dt = e.dxftype()
+        if dt not in ("LINE", "LWPOLYLINE", "POLYLINE"):
+            continue
+        layer = (e.dxf.layer or "").lower()
+        if layer in _CONTENT_LAYER_HINTS:
+            continue
+        try:
+            b = bbox_mod.extents([e])
+        except Exception:
+            continue
+        if not b or not b.has_data:
+            continue
+        if b.extmax.x < zx0 or b.extmin.x > zx1 or b.extmax.y < zy0 or b.extmin.y > zy1:
+            continue
+        # 短段判定：最长分段 ≤ long_th 才视为表格格线
+        try:
+            if dt == "LINE":
+                s, en = e.dxf.start, e.dxf.end
+                seg = ((s.x - en.x) ** 2 + (s.y - en.y) ** 2) ** 0.5
+                if seg > long_th:
+                    continue
+            elif dt == "LWPOLYLINE":
+                pts = e.get_points()
+                if len(pts) >= 2:
+                    seg = max(((pts[i][0] - pts[i-1][0]) ** 2 +
+                               (pts[i][1] - pts[i-1][1]) ** 2) ** 0.5
+                              for i in range(1, len(pts)))
+                    if seg > long_th:
+                        continue
+            elif dt == "POLYLINE":
+                vs = list(e.vertices())
+                if len(vs) >= 2:
+                    seg = max(((vs[i].dxf.location.x - vs[i-1].dxf.location.x) ** 2 +
+                               (vs[i].dxf.location.y - vs[i-1].dxf.location.y) ** 2) ** 0.5
+                              for i in range(1, len(vs)))
+                    if seg > long_th:
+                        continue
+        except Exception:
+            continue
+        msp.delete_entity(e)
+        n += 1
+    return n
+
+
+def delete_titleblock_cluster_table(doc, outer, tb=None):
+    """删「标题栏簇」区内的 ACAD_TABLE（AutoCAD 原生明细栏/BOM 表格）。
+
+    与 cluster_text/cluster_grid 配对：92DZ1/装配体 类的源「设备材料表/明细栏」
+    常是 ACAD_TABLE 原生表对象（不是 LWPOLYLINE+TEXT），前述函数只删
+    LINE/LWPOLYLINE/POLYLINE 与 TEXT/MTEXT，完全够不到 ACAD_TABLE → 旧表
+    整张压在新 HH_FRAME 标题栏上方相切（用户反馈「还是有重合」）。
+
+    ACAD_TABLE 是单实体、无分段，故不判「短段」，只判：
+      - 落在簇区 [right 45% × bottom 55% of outer] ∪ tb（与文字/网格同区）
+      - 与簇区有交叠（非完全包含，避免贴边 1mm 漏删）即删
+    真实绘图内容（非 ACAD_TABLE 类型）不受影响。
+    """
+    if not outer:
+        return 0
+    xL, yB, xR, yT = outer
+    W = max(1e-6, xR - xL)
+    H = max(1e-6, yT - yB)
+    cx0 = xR - 0.45 * W
+    cy0 = yB
+    cx1 = xR
+    cy1 = yB + 0.55 * H
+    if tb:
+        zx0 = max(min(tb[0], cx0), xL)
+        zy0 = max(min(tb[1], cy0), yB)
+        zx1 = min(max(tb[2], cx1), xR)
+        zy1 = min(max(tb[3], cy1), yT)
+    else:
+        zx0, zy0, zx1, zy1 = cx0, cy0, cx1, cy1
+    msp = doc.modelspace()
+    n = 0
+    for e in list(msp):
+        if e.dxftype() != "ACAD_TABLE":
+            continue
+        try:
+            b = bbox_mod.extents([e])
+        except Exception:
+            continue
+        if not b or not b.has_data:
+            continue
+        # 交叠判定（非包含）：任一方向有重叠即视为落在簇区
+        if b.extmax.x < zx0 or b.extmin.x > zx1 or b.extmax.y < zy0 or b.extmin.y > zy1:
+            continue
+        msp.delete_entity(e)
+        n += 1
+    return n
+
+
 def delete_titleblock_grid(doc, tb):
     """raw-frame 回退专用：删标题栏矩形区内的线类实体（LINE/LWPOLYLINE/POLYLINE）。
 

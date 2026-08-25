@@ -266,6 +266,16 @@ def _process_multiframe(doc, template, targets, override, fit, tplctx=None):
         values, unmatched, unused = mapper.map_fields(tpl["fields"], fields, override)
         ndel = block_replace.delete_frame_border(doc, fb)
         ndel += block_replace.delete_title_strip(doc, fb)
+        # 簇区清理：标题栏 + 紧邻的明细栏/BOM 表格。delete_title_strip 只覆盖底
+        # 28% strip 区，92DZ1/装配体 类的「设备材料表/明细栏」在 strip 之上，必须
+        # 再扩到 [right 45% × bottom 55%] 簇区，删旧 BOM 的文字（cluster_text）和
+        # 网格线（cluster_grid），否则旧表头/表体压在新 HH_FRAME 标题栏上方相切。
+        _fx0, _fy0, _fx1, _fy1 = fb
+        _tb_strip = (_fx0 + 0.45 * (_fx1 - _fx0), _fy0,
+                     _fx1, _fy0 + 0.28 * (_fy1 - _fy0))
+        ndel += raw_replace.delete_titleblock_cluster_text(doc, _tb_strip, list(fb))
+        ndel += raw_replace.delete_titleblock_cluster_grid(doc, list(fb), tb=_tb_strip)
+        ndel += raw_replace.delete_titleblock_cluster_table(doc, list(fb), tb=_tb_strip)
         total_del += ndel
         region = {"bbox": fb, "confidence": 1.0, "method": "frame",
                   "source": "multiframe", "entity": None}
@@ -754,6 +764,11 @@ def main():
                             # #13：清「标题栏簇」（标题栏 + 紧邻继电器表/明细栏）残留文字，解决 92DZ1
                             # 类图旧继电器表文字残留 + 新框属性值混乱。内容层受 _CONTENT_LAYER_HINTS 保护。
                             n_cluster = raw_replace.delete_titleblock_cluster_text(doc, tb, outer)
+                            # #14：清「标题栏簇」区内的 ACAD_TABLE 原生明细栏/BOM（装配体类）。
+                            # 前述 cluster_text/cluster_grid 只删 TEXT/MTEXT/LINE/...，够不到
+                            # ACAD_TABLE 单实体 → 旧表压在新 HH_FRAME 标题栏上相切。
+                            # 仅删与簇区交叠的 ACAD_TABLE，真实绘图内容不受影响。
+                            n_cluster_tbl = raw_replace.delete_titleblock_cluster_table(doc, outer, tb=tb)
                             n_mark = raw_replace.delete_edge_markers(doc, outer, strip=10.0)
                             region = {"bbox": frame_box, "confidence": 1.0, "method": "frame",
                                       "source": "sheet", "entity": None}
@@ -761,7 +776,7 @@ def main():
                             _, written = block_replace.insert_template(
                                 doc, tpl, region, values, fit=args.fit or "min")
                             rec["written"] = list(dict.fromkeys(written))
-                            rec["deleted"] = n_edge + n_tb + n_grid + n_grid_ext + n_txt + n_tbg + n_cluster + n_mark
+                            rec["deleted"] = n_edge + n_tb + n_grid + n_grid_ext + n_txt + n_tbg + n_cluster + n_cluster_tbl + n_mark
                         rec["found"] = 1
                         rec["method"] = "raw-frame"
                         rec["mappings"] = [{"region": [round(x, 1) for x in outer],
