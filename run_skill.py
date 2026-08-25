@@ -27,6 +27,7 @@ import ezdxf
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 from lib import template_learn, finder, extract, mapper, block_replace, acad, logbook, raw_replace, acad_pipeline, acad_com, sheet, frame_gen, validators  # noqa
+from lib.text_decode import decode_values, decode_mtext  # noqa
 
 
 _V1_EXTRACT_FIELDS = finder.extract_frame_fields  # 别名，避免下面 replace_all 误伤
@@ -257,6 +258,11 @@ def _process_multiframe(doc, template, targets, override, fit, tplctx=None):
             if spec is not None:
                 tplctx.note(list(fb), spec, (spec.width, spec.height))
         fields = _extract_fields(doc, fb)
+        # 字段类型校验（高精确）：拒掉明显错位/标签当值/引用注记/占位文本，
+        # 与 raw-frame 路径（line 714）一致。92DZ1 类「标题栏为空」图纸，
+        # 提取器会把标签（描图/设计阶段/档 案 号）或引用注记（摘自华北…）当值回填，
+        # 校验不过则留空（不污染新标题栏）。
+        fields = {k: v for k, v in fields.items() if validators.validate(k, v)}
         values, unmatched, unused = mapper.map_fields(tpl["fields"], fields, override)
         ndel = block_replace.delete_frame_border(doc, fb)
         ndel += block_replace.delete_title_strip(doc, fb)
@@ -469,6 +475,9 @@ def _process_one_acad(app, src, doc, args, template, override, tplctx):
             old = _extract_fields(doc, outer)
             # 与 DXF 路径一致：用 validators 过滤明显错位的标签当值（如 DESIGN='标准化'）
             old = {k: v for k, v in old.items() if validators.validate(k, v)}
+            # #13：ODA 导出的中文常以 \M+HHHHH 转义（低 16 位即 GBK 码位），不解码则新标题栏
+            # 被写成乱码 → 用户看到的「属性值混乱」。提取后统一解码为真实中文。
+            old = decode_values(old)
             values, unmatched, unused = mapper.map_fields(
                 template["fields"], old, override)
             outer_f = [float(v) for v in outer]
@@ -486,7 +495,23 @@ def _process_one_acad(app, src, doc, args, template, override, tplctx):
                 frame_box = [_ext.extmin[0] - _pad, _ext.extmin[1] - _pad,
                              _ext.extmax[0] + _pad, _ext.extmax[1] + _pad]
             else:
-                frame_box = list(outer_f)
+                # #12：检出 outer 可能是内框/内容溢出框（装配图明细栏画在图框外、MudPump
+                # 子电路溢出 outer）。若真实内容 bbox 超出 outer，新框仍按 outer 插入会切过
+                # 内容/与零件表重合（用户反馈装配体「图框比例不对、和表重合」）。改用 outer
+                # 与内容 bbox 的并集作插入区（不加 pad——内容为纸面本身，模板自带 20mm 边距），
+                # 保证新框包裹全部内容。真实有框图 outer 已含全部内容时并集=outer，行为零变化。
+                _adn2 = _detect_ad_block_names(doc)
+                _ext2 = _extents_excluding_ads(doc, _adn2)
+                _ox0, _oy0, _ox1, _oy1 = outer_f
+                _cx0, _cy0, _cx1, _cy1 = (_ext2.extmin[0], _ext2.extmin[1],
+                                          _ext2.extmax[0], _ext2.extmax[1])
+                _TOL = 1.0
+                if (_cx0 < _ox0 - _TOL or _cy0 < _oy0 - _TOL or
+                        _cx1 > _ox1 + _TOL or _cy1 > _oy1 + _TOL):
+                    frame_box = [min(_ox0, _cx0), min(_oy0, _cy0),
+                                 max(_ox1, _cx1), max(_oy1, _cy1)]
+                else:
+                    frame_box = list(outer_f)
             # 无框大图：用标题栏读到的比例（如 1:100）反推真实纸面，避免 340 倍放大遮挡
             scale_hint = parse_scale(old.get("SCALE")) if no_frame else None
             tpl_dwg, tpl_size, spec = tplctx.for_frame(
@@ -660,7 +685,23 @@ def main():
                             frame_box = [_ext.extmin[0] - _pad, _ext.extmin[1] - _pad,
                                          _ext.extmax[0] + _pad, _ext.extmax[1] + _pad]
                         else:
-                            frame_box = list(outer)
+                            # #12：检出 outer 可能是内框/内容溢出框（装配图明细栏画在图框外、
+                            # MudPump 子电路溢出 outer）。内容 bbox 超出 outer 时，新框按 outer 插入会
+                            # 切过内容/与零件表重合。改用 outer 与内容 bbox 并集作插入区（不加 pad，
+                            # 内容为纸面本身、模板自带边距），保证新框包裹全部内容；outer 已含全部
+                            # 内容时并集=outer，行为零变化。
+                            _adn2 = _detect_ad_block_names(doc)
+                            _ext2 = _extents_excluding_ads(doc, _adn2)
+                            _ox0, _oy0, _ox1, _oy1 = [float(v) for v in outer]
+                            _cx0, _cy0, _cx1, _cy1 = (_ext2.extmin[0], _ext2.extmin[1],
+                                                  _ext2.extmax[0], _ext2.extmax[1])
+                            _TOL = 1.0
+                            if (_cx0 < _ox0 - _TOL or _cy0 < _oy0 - _TOL or
+                                    _cx1 > _ox1 + _TOL or _cy1 > _oy1 + _TOL):
+                                frame_box = [min(_ox0, _cx0), min(_oy0, _cy0),
+                                             max(_ox1, _cx1), max(_oy1, _cy1)]
+                            else:
+                                frame_box = list(outer)
                         # 先提取字段（含标题栏比例 SCALE），解析出图比例作为无框大图的幅面判定依据
                         old = extract.extract_fields(doc, {"bbox": tb, "method": "keyword", "entity": None})
                         # 强提取（finder：冒号式标题栏友好，补 DWG_NO/STAGE/DATE/DESIGN）
@@ -676,6 +717,9 @@ def main():
                         # （如 WEIGHT='圆柱齿轮'、SCALE='图名文本'、DESIGN='标准化'），
                         # 校验不过则留空（记 unmatched），不写入新标题栏污染数据
                         old = {k: v for k, v in old.items() if validators.validate(k, v)}
+                        # #13：ODA 导出的中文常是 \M+HHHHH 转义（低 16 位即 GBK 码位），不解码则新标题栏
+                        # 被写成乱码 → 用户看到的「属性值混乱」。提取后统一解码为真实中文。
+                        old = decode_values(old)
                         # 无框大图：用标题栏读到的比例（如 1:100）反推真实纸面，避免 340 倍放大遮挡
                         scale_hint = parse_scale(old.get("SCALE")) if no_frame else None
                         tpl, spec = tplctx.template_for(list(frame_box), no_frame=no_frame, scale_hint=scale_hint)
@@ -707,6 +751,9 @@ def main():
                             #     (按层名) 都够不到；这里在 tb 范围内无差别删线，与 #8
                             #     delete_titleblock_text 同口径。INSERT/HATCH 不删。
                             n_tbg = raw_replace.delete_titleblock_grid(doc, tb)
+                            # #13：清「标题栏簇」（标题栏 + 紧邻继电器表/明细栏）残留文字，解决 92DZ1
+                            # 类图旧继电器表文字残留 + 新框属性值混乱。内容层受 _CONTENT_LAYER_HINTS 保护。
+                            n_cluster = raw_replace.delete_titleblock_cluster_text(doc, tb, outer)
                             n_mark = raw_replace.delete_edge_markers(doc, outer, strip=10.0)
                             region = {"bbox": frame_box, "confidence": 1.0, "method": "frame",
                                       "source": "sheet", "entity": None}
@@ -714,7 +761,7 @@ def main():
                             _, written = block_replace.insert_template(
                                 doc, tpl, region, values, fit=args.fit or "min")
                             rec["written"] = list(dict.fromkeys(written))
-                            rec["deleted"] = n_edge + n_tb + n_grid + n_grid_ext + n_txt + n_tbg + n_mark
+                            rec["deleted"] = n_edge + n_tb + n_grid + n_grid_ext + n_txt + n_tbg + n_cluster + n_mark
                         rec["found"] = 1
                         rec["method"] = "raw-frame"
                         rec["mappings"] = [{"region": [round(x, 1) for x in outer],

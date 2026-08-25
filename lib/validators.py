@@ -48,6 +48,24 @@ _SCALE_OK = {"nts", "无", "不限", "按实", "比例见", "asshown", "scale1:1
 _TITLE_PREFIX = ("图号", "图名", "名称", "材料", "比例", "重量", "阶段", "版本",
                 "日期", "设计", "校对", "审核", "批准", "会签", "页码", "总页数")
 
+# TITLE 引用/注记判定：标题栏为空时，提取器会把「（摘自华北地区标准图戍2DQZ103页）」
+# 这类引用注记、或「详见 / 参见 / 引自…」说明当图名回填 → 用户看到的「属性值混乱」。
+# 这些文本绝不该作为图名，直接拒掉（留空，不污染新标题栏）。92DZ1 帧2 实测命中。
+_REF_NOTE_RE = re.compile(r"摘自|参见|详见|引自|见.*图")
+
+
+def _is_reference_note(v):
+    """值是否为引用/注记文本（如「（摘自华北地区标准图戍2DQZ103页）」「详见图集」）。"""
+    s = (v or "").strip()
+    if not s:
+        return False
+    if _REF_NOTE_RE.search(s):
+        return True
+    # 全角括号包裹且含 图/页/标准/集 —— 典型「（摘自…标准图…页）」引用注记
+    if s.startswith("（") and ("图" in s or "页" in s or "标准" in s or "集" in s):
+        return True
+    return False
+
 
 def _norm(s):
     return _QUOTE_RE.sub("", re.sub(r"\s+", "", str(s)).lower())
@@ -76,6 +94,9 @@ def validate(concept, value):
         # 仅用字段名别名拒值（图名/名称/零件名称/图样名称/件名…），
         # 不用 SW_TITLE_VOCAB（含 装配图/零件图 等合法图名）
         if nv in _TITLE_LABELS or nv in _TITLE_BAD_NORMS:
+            return False
+        # 引用/注记文本（「（摘自华北地区标准图戍2DQZ103页）」「详见图集」）绝不当图名
+        if _is_reference_note(v):
             return False
         # 形如「图号：BESS-LST-001」被误当图名
         if re.match(r"^(图号|图名|名称|材料|比例|重量|阶段|版本|日期|设计|校对|"

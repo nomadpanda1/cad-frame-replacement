@@ -196,6 +196,51 @@ def delete_titleblock_text(doc, tb):
     return n
 
 
+def delete_titleblock_cluster_text(doc, tb, outer):
+    """raw-frame 回退增强：清掉「标题栏簇」（标题栏 + 紧邻的继电器表/明细栏）区内全部
+    独立 TEXT/MTEXT，解决 92DZ1 类图「旧继电器表残留 + 新框属性值混乱」。
+
+    根因：detect_titleblock 只圈出右下角标题栏小方块；继电器表/端子表常位于其左/上方，
+    不在 tb 内，delete_titleblock_text 按 tb 删会漏 → 旧表文字残留在新框里。
+    修复：把删除区向右下角框架内扩展（框架右 0.45W × 下 0.55H，与 tb 合并，且限制在
+    框架内），在该区内无差别删 TEXT/MTEXT；但跳过 _CONTENT_LAYER_HINTS 内容层
+    （墙/窗/线/标注等真实绘图内容），避免误删原理图。INSERT/HATCH 不删。
+    """
+    if not outer:
+        return 0
+    xL, yB, xR, yT = outer
+    W = max(1e-6, xR - xL)
+    H = max(1e-6, yT - yB)
+    cx0 = xR - 0.45 * W
+    cy0 = yB
+    cx1 = xR
+    cy1 = yB + 0.55 * H
+    zx0 = max(min(tb[0], cx0), xL)
+    zy0 = max(min(tb[1], cy0), yB)
+    zx1 = min(max(tb[2], cx1), xR)
+    zy1 = min(max(tb[3], cy1), yT)
+    msp = doc.modelspace()
+    n = 0
+    for e in list(msp):
+        dt = e.dxftype()
+        if dt not in ("TEXT", "MTEXT"):
+            continue
+        layer = (e.dxf.layer or "").lower()
+        if layer in _CONTENT_LAYER_HINTS:
+            continue
+        try:
+            b = bbox_mod.extents([e])
+        except Exception:
+            continue
+        if not b or not b.has_data:
+            continue
+        eb = (b.extmin.x, b.extmin.y, b.extmax.x, b.extmax.y)
+        if eb[2] < zx0 or eb[0] > zx1 or eb[3] < zy0 or eb[1] > zy1:
+            continue
+        msp.delete_entity(e); n += 1
+    return n
+
+
 def delete_titleblock_grid(doc, tb):
     """raw-frame 回退专用：删标题栏矩形区内的线类实体（LINE/LWPOLYLINE/POLYLINE）。
 

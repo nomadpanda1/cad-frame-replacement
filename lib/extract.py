@@ -8,6 +8,7 @@
 import re
 from ezdxf import bbox as bbox_mod
 from .concepts import infer_concept, _norm, CONCEPT_ALIASES, SW_TITLE_VOCAB
+from .text_decode import decode_mtext
 
 
 def _clean(t):
@@ -85,7 +86,7 @@ def _extract_from_block(insert):
     out = {}
     for at in insert.attribs:
         tag = at.dxf.tag
-        val = (at.dxf.text or "").strip()
+        val = decode_mtext((at.dxf.text or "").strip())
         concept = infer_concept(tag) or tag.upper()
         out[concept] = val
     return out
@@ -106,7 +107,7 @@ def _extract_from_text(doc, bbox):
         dt = e.dxftype()
         if dt not in ("TEXT", "MTEXT"):
             continue
-        raw = e.text if dt == "MTEXT" else e.dxf.text
+        raw = decode_mtext(e.text if dt == "MTEXT" else e.dxf.text)
         raw = _clean(raw)
         if not raw:
             continue

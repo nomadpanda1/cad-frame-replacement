@@ -9,6 +9,7 @@ import bisect
 import re
 from ezdxf import bbox as bbox_mod
 from .concepts import SW_TITLE_VOCAB, FRAME_BLOCK_KEYWORDS, CONCEPT_ALIASES
+from .text_decode import decode_mtext
 
 
 def _norm(s):
@@ -381,7 +382,7 @@ def detect_titleblock(doc, outer):
         dt = e.dxftype()
         if dt not in ("TEXT", "MTEXT"):
             continue
-        raw = e.text if dt == "MTEXT" else e.dxf.text
+        raw = decode_mtext(e.text if dt == "MTEXT" else e.dxf.text)
         if not raw:
             continue
         n = _norm(raw)
@@ -424,7 +425,7 @@ def detect_titleblock(doc, outer):
             layer_norm = (e.dxf.layer or "").strip().lower()
             if layer_norm not in _TITLE_LAYER_ANCHOR:
                 continue
-            raw = e.text if dt == "MTEXT" else e.dxf.text
+            raw = decode_mtext(e.text if dt == "MTEXT" else e.dxf.text)
             if not raw:
                 continue
             n = _norm(raw)
@@ -471,7 +472,7 @@ def detect_titleblock(doc, outer):
             dt = e.dxftype()
             if dt not in ("TEXT", "MTEXT"):
                 continue
-            raw = e.text if dt == "MTEXT" else e.dxf.text
+            raw = decode_mtext(e.text if dt == "MTEXT" else e.dxf.text)
             if raw and re.fullmatch(r"[A-Za-z0-9]{1,2}", raw.strip()):
                 continue  # 跳过区号字母/数字，避免抬高上界
             try:
@@ -652,7 +653,7 @@ def _collect_items(doc, box):
         dt = e.dxftype()
         if dt not in ("TEXT", "MTEXT"):
             continue
-        raw = e.text if dt == "MTEXT" else e.dxf.text
+        raw = decode_mtext(e.text if dt == "MTEXT" else e.dxf.text)
         if not raw:
             continue
         try:
@@ -691,6 +692,9 @@ def _pick_title(items):
     cands = []
     for cx, cy, raw, h in items:
         if _is_note(raw):
+            continue
+        # 标签单元格（描图/设计/校对…）绝不当图名候选（92DZ1 帧3/4 曾把「描 图」当 TITLE）
+        if _is_pure_label(raw):
             continue
         if not any(k in raw for k in _TITLE_KW):
             continue
@@ -757,7 +761,7 @@ def _longest_in_region(doc, fx0, fy0, fx1, fy1):
         dt = e.dxftype()
         if dt not in ("TEXT", "MTEXT"):
             continue
-        raw = e.text if dt == "MTEXT" else e.dxf.text
+        raw = decode_mtext(e.text if dt == "MTEXT" else e.dxf.text)
         if not raw:
             continue
         try:
