@@ -21,6 +21,7 @@ import time
 import argparse
 import tempfile
 import shutil
+import re
 import ezdxf
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -42,6 +43,68 @@ def _extract_fields(doc, bbox):
     if os.environ.get("CFR_EXTRACT_V2") == "1" and fn is not None:
         return fn(doc, bbox)
     return _V1_EXTRACT_FIELDS(doc, bbox)
+
+
+def parse_scale(text):
+    """从标题栏比例文本解析出图比例分母（1:N 的 N），解析不出返回 None。
+
+    支持：'1:100' / '1：100' / '1/100' / '1: 100' / '100'；
+    对『不按比例 / NTS / 按图』等无比例标记返回 None（无法推断真实纸面）。
+    """
+    if not text:
+        return None
+    t = str(text).strip()
+    if not t:
+        return None
+    if re.search(r"不按比例|NTS|按图|AS\s*SHOWN|无比例|NOT\s*TO\s*SCALE",
+                 t, re.IGNORECASE):
+        return None
+    m = re.search(r"(\d+(?:\.\d+)?)\s*[:：/]\s*(\d+(?:\.\d+)?)", t)
+    if m:
+        den = float(m.group(2))
+        return den if den > 0 else None
+    m2 = re.search(r"(\d+(?:\.\d+)?)", t)
+    if m2:
+        v = float(m2.group(1))
+        return v if v > 0 else None
+    return None
+
+
+# 广告/水印检测：no_frame 路径要排除图框区域外的设计图库/水印/广告块，
+# 否则 extents 把它圈进来 → 新 HH_FRAME 把广告也包进新图框（用户反馈「原图纸广告在图框外面，替换的时候放里面了」）。
+# 典型场景：源图作者把「星欣设计图库」广告块放在图纸右侧图框外。
+_AD_BLOCK_KEYWORDS = ("图库", "设计图", "xingsc", "广告", "水印", "watermark", "logo", "签名", "sign", "seal")
+_AD_TEXT_KEYWORDS = ("图库", "QQ:", "www.", "TEL:", "Email:", "xingsc", "星欣")
+
+
+def _detect_ad_block_names(doc):
+    """检测水印/广告类块名。返回应从 extents 排除的块名集合。"""
+    names = set()
+    for b in doc.blocks:
+        bn = (b.name or "").lower()
+        for kw in _AD_BLOCK_KEYWORDS:
+            if kw.lower() in bn:
+                names.add(b.name)
+                break
+    return names
+
+
+def _extents_excluding_ads(doc, ad_names):
+    """计算 modelspace extents，但排除广告/水印 INSERT 和广告文本实体。
+    no_frame 分支的 frame_box 用这个 extents ± margin → 新框不会把图外广告圈进来。"""
+    entities = []
+    for e in doc.modelspace():
+        if e.dxftype() == "INSERT" and (e.dxf.name or "") in ad_names:
+            continue
+        if e.dxftype() in ("TEXT", "MTEXT"):
+            try:
+                t = (e.dxf.text if e.dxftype() == "TEXT" else e.plain_text()) or ""
+            except Exception:
+                t = ""
+            if any(kw in t for kw in _AD_TEXT_KEYWORDS):
+                continue
+        entities.append(e)
+    return ezdxf.bbox.extents(entities)
 
 
 def _count_entities(doc):
@@ -240,14 +303,16 @@ class TemplateCtx(object):
                                   # 供 ezdxf 路径按帧插入正确幅面的模板块
         self.log = []            # 记录每帧的幅面判定，写进报告便于复核
 
-    def for_frame(self, bbox, inner=None, no_frame=False):
+    def for_frame(self, bbox, inner=None, no_frame=False, scale_hint=None):
         """返回 (tpl_dwg_path, (tpl_w, tpl_h), spec)。
 
         inner 给出同一图框的内层框线 bbox 时，用其边距反推出图比例作为 hint，
         消解「A0@1:100 vs A2@1:200」这类数值等价但比例不同的歧义（见 sheet.scale_from_margins）。
-        no_frame=True 时降级到标准幅面（LLM/无框图的超大画布，避免标题栏被撑成「米粒」）。
+        no_frame=True 时降级到标准幅面（LLM/无框图的超大画布，避免标题栏被撑成「米粒」）；
+        scale_hint 给出标题栏里读到的出图比例（如 1:100）时，无框大图也能按真实比例
+        选对幅面，不再产生 340 倍放大、标题栏遮挡图纸的灾难。
         """
-        spec = sheet.guess_sheet_bbox(bbox, inner, no_frame=no_frame)
+        spec = sheet.guess_sheet_bbox(bbox, inner, no_frame=no_frame, scale_hint=scale_hint)
         if spec.name in self.cache:
             return self.cache[spec.name]
         dxf, size = frame_gen.ensure_template(
@@ -274,13 +339,13 @@ class TemplateCtx(object):
         self.cache[spec.name] = out
         return out
 
-    def template_for(self, bbox, inner=None, no_frame=False):
+    def template_for(self, bbox, inner=None, no_frame=False, scale_hint=None):
         """ezdxf 路径用：返回 (template_dict, spec)。
 
         template_dict 已按检出框比例从 --template 重定向出对应幅面并 learn 好，
         可直接喂给 block_replace.insert_template / mapper.map_fields。
         """
-        _, _, spec = self.for_frame(bbox, inner, no_frame=no_frame)
+        _, _, spec = self.for_frame(bbox, inner, no_frame=no_frame, scale_hint=scale_hint)
         return self.dict_cache.get(spec.name), spec
 
     def note(self, bbox, spec, size):
@@ -409,10 +474,26 @@ def _process_one_acad(app, src, doc, args, template, override, tplctx):
             outer_f = [float(v) for v in outer]
             # 无真框（LLM/无框图的超大画布，且无非块式标题栏）：降级到标准幅面
             no_frame = (outer[2] - outer[0]) * (outer[3] - outer[1]) > sheet.NO_FRAME_AREA
-            tpl_dwg, tpl_size, spec = tplctx.for_frame(outer_f, inner0, no_frame=no_frame)
-            tplctx.note(outer_f, spec, tpl_size)
+            # #10（与 ezdxf 路径对齐）：no_frame=True 时，detect 的 outer 只是「内容回退矩形」，
+            # 真实内容 bbox 可能更大（右侧控制子电路溢出 outer）。若仍用 outer 当插入框，
+            # 新 HH_FRAME 右/下边框会切过内容/连线（用户反馈「图框与电路图重合」）。
+            # 改用 ezdxf 全内容 bbox + 20mm 边距作为新框区域——边框画在所有内容外侧。
+            # 真实有框图（no_frame=False）仍用 outer，行为零变化。
+            if no_frame:
+                _ad_names = _detect_ad_block_names(doc)
+                _ext = _extents_excluding_ads(doc, _ad_names)
+                _pad = 20.0
+                frame_box = [_ext.extmin[0] - _pad, _ext.extmin[1] - _pad,
+                             _ext.extmax[0] + _pad, _ext.extmax[1] + _pad]
+            else:
+                frame_box = list(outer_f)
+            # 无框大图：用标题栏读到的比例（如 1:100）反推真实纸面，避免 340 倍放大遮挡
+            scale_hint = parse_scale(old.get("SCALE")) if no_frame else None
+            tpl_dwg, tpl_size, spec = tplctx.for_frame(
+                list(frame_box), inner0, no_frame=no_frame, scale_hint=scale_hint)
+            tplctx.note(list(frame_box), spec, tpl_size)
             plan["frames"].append({
-                "frame": outer_f,
+                "frame": list(frame_box),
                 "titleblock": [float(v) for v in tb],
                 "tpl_dwg": tpl_dwg,
                 "tpl_size": list(tpl_size),
@@ -573,16 +654,14 @@ def main():
                         #      bbox + margin 作为新框区域——边框画在所有内容外侧，含右
                         #      侧溢出子电路，对真实有框图无影响（no_frame=False 不进此分支）。
                         if no_frame:
-                            _ext = ezdxf.bbox.extents(doc.modelspace())
+                            _ad_names = _detect_ad_block_names(doc)
+                            _ext = _extents_excluding_ads(doc, _ad_names)
                             _pad = 20.0  # 20mm=GB/T 14689 A0-A3 内框边距余量，确保内容在双线内框内侧
                             frame_box = [_ext.extmin[0] - _pad, _ext.extmin[1] - _pad,
                                          _ext.extmax[0] + _pad, _ext.extmax[1] + _pad]
                         else:
                             frame_box = list(outer)
-                        tpl, spec = tplctx.template_for(list(frame_box), no_frame=no_frame)
-                        if spec is not None:
-                            tplctx.note(list(frame_box), spec, (spec.width, spec.height))
-                        # 弱提取（extract：SW 单元式标题栏友好，正确抓 材料/比例/图名）
+                        # 先提取字段（含标题栏比例 SCALE），解析出图比例作为无框大图的幅面判定依据
                         old = extract.extract_fields(doc, {"bbox": tb, "method": "keyword", "entity": None})
                         # 强提取（finder：冒号式标题栏友好，补 DWG_NO/STAGE/DATE/DESIGN）
                         # —— 高召回融合：弱为基础，强仅在弱未覆盖的概念上补充，避免强覆盖弱的正确值
@@ -597,6 +676,11 @@ def main():
                         # （如 WEIGHT='圆柱齿轮'、SCALE='图名文本'、DESIGN='标准化'），
                         # 校验不过则留空（记 unmatched），不写入新标题栏污染数据
                         old = {k: v for k, v in old.items() if validators.validate(k, v)}
+                        # 无框大图：用标题栏读到的比例（如 1:100）反推真实纸面，避免 340 倍放大遮挡
+                        scale_hint = parse_scale(old.get("SCALE")) if no_frame else None
+                        tpl, spec = tplctx.template_for(list(frame_box), no_frame=no_frame, scale_hint=scale_hint)
+                        if spec is not None:
+                            tplctx.note(list(frame_box), spec, (spec.width, spec.height))
                         values, unmatched, unused = mapper.map_fields(tpl["fields"], old, override)
                         if args.dry_run:
                             rec["written"] = [f["tag"] for f, v in zip(tpl["fields"], values) if v]

@@ -229,10 +229,14 @@ def guess_sheet(width, height, scale_hint=None, no_frame=False):
         name, cw, ch, s = best
         return SheetSpec(name, cw, ch, s, True, ratio)
 
-    # 无真框（LLM/无框图的超大画布）：降级到最接近的标准幅面。
-    # 标题栏保持 GB/T 正常尺寸，fit=max 缩放后也不会被撑成「米粒」。
+    # 无真框（LLM/无框图的超大画布）：按真实出图比例降级到标准幅面。
+    # 关键修复：旧逻辑无脑降级到最小 A 幅面 + 1:1，导致大图（如强电平面
+    # 101273×59440 图形单位）被放大 ~340 倍、标题栏占满图纸、把电路图挡住。
+    # 现在优先用标题栏里读到的出图比例（scale_hint，如 1:100）反推真实纸面，
+    # 套「能完整容纳该纸面的最小标准幅面」，标题栏保持 GB/T 标准 180mm，
+    # 插入缩放仅 ~85~120 倍（= content/纸面mm），不再遮挡图纸。
     if no_frame:
-        return _nearest_standard(ratio)
+        return _guess_frameless(w, h, scale_hint)
 
     # 非标幅面：保留精确比例
     if scale_hint:
@@ -265,14 +269,82 @@ def _normalize_short(short_du):
     return best
 
 
-def guess_sheet_bbox(bbox, inner=None, no_frame=False):
+def _guess_frameless(width, height, scale_hint):
+    """无真框（LLM/无框图超大画布）的幅面判定。
+
+    与 _nearest_standard 的根本区别：_nearest_standard 不看比例、永远按 1:1 把内容
+    塞进「比例最接近」的最小 A 幅面，遇到大图就产生灾难性放大（强电平面 340 倍、
+    标题栏占满图纸）。本函数：
+
+      * 若拿到标题栏出图比例 scale_hint（如 1:100），按 content/scale 算出真实纸面，
+        套「能完整容纳该纸面的最小标准幅面」，标题栏保持 GB/T 标准 180mm，
+        插入缩放仅 ~85~120 倍（= content/纸面mm），不再遮挡图纸。
+      * 若没拿到比例，在所有标准出图比例里挑一个让内容恰好套进标准幅面的
+        （优先贴合最紧；贴合相近时优先大纸面=最小分母，标题栏占比最小、最不易遮挡），
+        同样杜绝放大灾难。
+
+    width/height 仍是图形单位下的内容 bbox 尺寸。
+    """
+    w = float(width)
+    h = float(height)
+    ratio = w / h
+
+    def best_sheet_for(pw, ph):
+        """返回能完整容纳 (pw, ph) 的最小标准幅面 (name, cw, ch)，可旋转；无则 None。"""
+        best = None
+        best_waste = 1e18
+        for name, cw, ch in _candidates():
+            for a, b in ((cw, ch), (ch, cw)):   # 允许横/竖两种朝向
+                if a + 1e-6 >= pw and b + 1e-6 >= ph:
+                    waste = (a * b) / (pw * ph)
+                    if waste < best_waste:
+                        best_waste = waste
+                        best = (name, a, b)
+        return best
+
+    if scale_hint:
+        s = float(scale_hint)
+        if s > 0:
+            paper = (w / s, h / s)
+            hit = best_sheet_for(*paper)
+            if hit:
+                name, cw, ch = hit
+                return SheetSpec(name, cw, ch, s, True, cw / ch)
+        # 连最大加长幅面都装不下（比例过小）——退回按 ratio 的最近标准幅面
+        return _nearest_standard(ratio)
+
+    # 无比例提示：在所有标准出图比例里找一个能让内容套进标准幅面的，
+    # 优先「贴合最紧」，贴合相近时优先大纸面（小分母，标题栏占比小、易读）。
+    best = None
+    best_score = 1e18
+    for s in PLOT_SCALES:
+        paper = (w / s, h / s)
+        hit = best_sheet_for(*paper)
+        if not hit:
+            continue
+        name, cw, ch = hit
+        waste = (cw * ch) / (paper[0] * paper[1])
+        score = waste + s * 1e-6   # waste 相同时取更大纸面（更小 s）
+        if score < best_score:
+            best_score = score
+            best = (name, cw, ch, s)
+    if best:
+        name, cw, ch, s = best
+        return SheetSpec(name, cw, ch, s, True, cw / ch)
+    return _nearest_standard(ratio)
+
+
+def guess_sheet_bbox(bbox, inner=None, no_frame=False, scale_hint=None):
     """bbox = (x0, y0, x1, y1) 版本的 guess_sheet。
 
     inner 给出同一个图框的内层框线 bbox 时，用它的边距反推出图比例作为 hint。
     no_frame=True 时降级到标准幅面（见 guess_sheet 同名参数）。
+    scale_hint 为标题栏读到的出图比例（如 1:100），无框大图据此按真实比例选幅面。
     """
     x0, y0, x1, y1 = [float(v) for v in bbox]
     hint = None
     if inner:
         hint = scale_from_margins([x0, y0, x1, y1], [float(v) for v in inner])
+    if hint is None:
+        hint = scale_hint
     return guess_sheet(x1 - x0, y1 - y0, scale_hint=hint, no_frame=no_frame)
