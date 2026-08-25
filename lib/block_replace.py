@@ -5,6 +5,7 @@
 """
 import ezdxf
 from ezdxf import bbox as bbox_mod
+from . import raw_replace as _rr
 from .concepts import infer_concept
 
 
@@ -127,7 +128,13 @@ def delete_title_strip(doc, frame_bbox, strip_ratio=0.28):
     """删除某图框右下角标题栏区域内的实体（旧标题栏线+文本），保留图内几何。返回删除数。
 
     白名单策略，避免误删图内尺寸线/几何：
-      - 文本类（TEXT/MTEXT/ATTDEF）：标题栏文字，直接删
+      - 文本类（TEXT/MTEXT/ATTDEF）：标题栏文字。删除条件：插入点落在标题区内
+        且图层不在 _CONTENT_LAYER_HINTS（墙/窗/线/标注等内容层白名单）。早期用
+        ``_fully_in_zone`` 校验整个 bbox 必须在区内，92DZ1 类图纸的 PUB_TEXT 标题栏
+        文字字号较大，bbox 顶部刚好超出 strip 顶部（zy1+1）就被漏删，旧标题栏
+        「档案号/设计阶段/图号/工程编号 + 长标题 + 公司名」叠加在新 HH_FRAME
+        标题栏之上（用户反馈「还是不对」）。改用「插入点 + 内容层白名单」后能
+        可靠清理，且不会误删原理图里的设备标签（它们通常在 y>zy1）。
       - 尺寸标注/引线（DIMENSION/LEADER）：绝不删（这是图内标注，不是标题栏）
       - 圆/弧/填充/图块等（ARC/CIRCLE/HATCH/INSERT…）：绝不删，避免误伤图内几何
       - 线类（LINE/LWPOLYLINE/POLYLINE）：
@@ -145,15 +152,19 @@ def delete_title_strip(doc, frame_bbox, strip_ratio=0.28):
     n = 0
     for e in list(msp):
         dt = e.dxftype()
-        # 1) 文本类：标题栏内容，安全删除
+        # 1) 文本类：插入点在标题区内 且 图层非内容层 → 删
         if dt in _TITLE_TEXT:
             try:
-                b = bbox_mod.extents([e])
+                ip = e.dxf.insert
             except Exception:
                 continue
-            if b and b.has_data and _fully_in_zone(b, fx0, fy0, fx1, zy1, zx0):
-                msp.delete_entity(e)
-                n += 1
+            if not (zx0 <= ip.x <= fx1 and fy0 <= ip.y <= zy1):
+                continue
+            layer = (e.dxf.layer or "").lower()
+            if layer in _rr._CONTENT_LAYER_HINTS:
+                continue  # 内容层白名单：保护 wall/wire/window/dj/...
+            msp.delete_entity(e)
+            n += 1
             continue
         # 2) 尺寸标注/几何图元：绝不删除
         if dt in _TITLE_PRESERVE:
