@@ -712,6 +712,36 @@ def main():
                                              max(_ox1, _cx1), max(_oy1, _cy1)]
                             else:
                                 frame_box = list(outer)
+                        # #15（v2 修订）：明细栏净距门控——源里 ACAD_TABLE（明细栏）压在
+                        # 标题栏正上方、与新标题栏顶 < 25mm 时，frame_box 底边下扩使其
+                        # ≥ 25mm 净距。判定：① BOM 在标题栏 x 区（x_max > 0.55*W，
+                        # 排除左侧表）② BOM.bottom - 标题栏顶估 < 25mm。标题栏顶估
+                        # = frame_y0 + 60mm（HH_FRAME 标题栏物理高约 60mm，锚底）。
+                        # 92DZ1 等 1:100 大图走 multiframe 路径不进此处；no_frame 分支
+                        # 也跳过。修复 2026-08-25 装配体"明细栏贴标题栏"缺陷 G。
+                        if not no_frame:
+                            _bom_min_clear = 25.0
+                            _tb_top_est = frame_box[1] + 60.0
+                            _fw = frame_box[2] - frame_box[0]
+                            _tb_zone_x0 = frame_box[0] + 0.55 * _fw
+                            for _e in doc.modelspace():
+                                if _e.dxftype() != "ACAD_TABLE":
+                                    continue
+                                try:
+                                    _bb = ezdxf.bbox.extents([_e])
+                                except Exception:
+                                    continue
+                                if _bb is None:
+                                    continue
+                                if _bb.extmax[0] < _tb_zone_x0:
+                                    continue
+                                _gap = _bb.extmin[1] - _tb_top_est
+                                if _gap < _bom_min_clear:
+                                    _ext = _bom_min_clear - _gap
+                                    frame_box[1] -= _ext
+                                    print("   [BOM clearance] BOM 底距标题栏顶 %.1fmm<%.0fmm, frame_box 下扩 %.1fmm" % (
+                                        _gap, _bom_min_clear, _ext))
+                                break
                         # 先提取字段（含标题栏比例 SCALE），解析出图比例作为无框大图的幅面判定依据
                         old = extract.extract_fields(doc, {"bbox": tb, "method": "keyword", "entity": None})
                         # 强提取（finder：冒号式标题栏友好，补 DWG_NO/STAGE/DATE/DESIGN）
