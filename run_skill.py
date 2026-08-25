@@ -697,26 +697,21 @@ def main():
                         else:
                             # #12：检出 outer 可能是内框/内容溢出框（装配图明细栏画在图框外、
                             # MudPump 子电路溢出 outer）。内容 bbox 超出 outer 时，新框按 outer 插入会
-                            # 切过内容/与零件表重合。改用 outer 与内容 bbox 并集作插入区，
-                            # #15：再向上预留 ~56mm（GB/T 14689 标题栏高度），让新框底部标题栏
-                            # 落在源 outer 起 y 之下，避免明细栏/BOM 与新标题栏紧贴（用户反馈
-                            # 「替换的图框会和明细栏整表有重合」——源 outer 跟新框 1:1 命中时
-                            # 新标题栏顶与 BOM 底仅 6mm 间隙，几乎贴边）。
+                            # 切过内容/与零件表重合。改用 outer 与内容 bbox 并集作插入区（不加 pad，
+                            # 内容为纸面本身、模板自带边距），保证新框包裹全部内容；outer 已含全部
+                            # 内容时并集=outer，行为零变化。
                             _adn2 = _detect_ad_block_names(doc)
                             _ext2 = _extents_excluding_ads(doc, _adn2)
                             _ox0, _oy0, _ox1, _oy1 = [float(v) for v in outer]
                             _cx0, _cy0, _cx1, _cy1 = (_ext2.extmin[0], _ext2.extmin[1],
                                                   _ext2.extmax[0], _ext2.extmax[1])
                             _TOL = 1.0
-                            _TB_RESERVE = 56.0  # GB/T 14689 标题栏高度
                             if (_cx0 < _ox0 - _TOL or _cy0 < _oy0 - _TOL or
                                     _cx1 > _ox1 + _TOL or _cy1 > _oy1 + _TOL):
-                                # 内容溢出 outer：用 (outer ∪ content)，顶部留 _TB_RESERVE mm 给标题栏
-                                frame_box = [min(_ox0, _cx0), min(_oy0, _cy0) - _TB_RESERVE,
+                                frame_box = [min(_ox0, _cx0), min(_oy0, _cy0),
                                              max(_ox1, _cx1), max(_oy1, _cy1)]
                             else:
-                                # 内容未溢出：用 outer，顶部同样预留
-                                frame_box = [_ox0, _oy0 - _TB_RESERVE, _ox1, _oy1]
+                                frame_box = list(outer)
                         # 先提取字段（含标题栏比例 SCALE），解析出图比例作为无框大图的幅面判定依据
                         old = extract.extract_fields(doc, {"bbox": tb, "method": "keyword", "entity": None})
                         # 强提取（finder：冒号式标题栏友好，补 DWG_NO/STAGE/DATE/DESIGN）
