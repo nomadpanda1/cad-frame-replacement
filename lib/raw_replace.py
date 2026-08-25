@@ -353,6 +353,14 @@ def delete_titleblock_cluster_table(doc, outer, tb=None):
         zy1 = min(max(tb[3], cy1), yT)
     else:
         zx0, zy0, zx1, zy1 = cx0, cy0, cx1, cy1
+    # ACAD_TABLE（明细栏/BOM 原生表）属图纸真实内容，保留不删。
+    # 装配图/零件图的明细栏是必要内容（列出组成件），误删=丢失信息；
+    # 仅当该表「完全位于标题栏微区 tb 内」（即它本就是旧标题栏的一部分、
+    # 而非独立明细栏）时才删除。常规独立明细栏在 tb 上方/左侧，保持保留。
+    # 注：92DZ1 等住宅电气图的旧「设备材料表」为 LWPOLYLINE+TEXT（非 ACAD_TABLE），
+    # 仍由 cluster_grid/cluster_text 清理，不受此处影响。
+    if tb is None:
+        return 0
     msp = doc.modelspace()
     n = 0
     for e in list(msp):
@@ -364,11 +372,10 @@ def delete_titleblock_cluster_table(doc, outer, tb=None):
             continue
         if not b or not b.has_data:
             continue
-        # 交叠判定（非包含）：任一方向有重叠即视为落在簇区
-        if b.extmax.x < zx0 or b.extmin.x > zx1 or b.extmax.y < zy0 or b.extmin.y > zy1:
-            continue
-        msp.delete_entity(e)
-        n += 1
+        # 仅当表格整体落在 tb 微区内才视为旧标题栏内嵌表而删除
+        if b.extmin.x >= tb[0] and b.extmax.x <= tb[2] and b.extmin.y >= tb[1] and b.extmax.y <= tb[3]:
+            msp.delete_entity(e)
+            n += 1
     return n
 
 
