@@ -15,23 +15,27 @@ from .text_decode import decode_mtext as _decode_mtext
 # 簇区内若含以下任一词，视为真 BOM，整段保留（cluster_text/cluster_grid 跳过清理）。
 # 92DZ1 / 装配体 标题栏由 ATTDEF/块组成，簇区 TEXT 扫描不会命中，零回归。
 _BOM_HEADER_WORDS = frozenset({
-    # 中文 BOM 列头
+    # 中文 BOM 真正特有列头词（设备材料表里有的，标题栏不会单独出现的）
     "名称", "型号规格", "型号", "规格", "数量", "单位", "备注",
     "设备名称", "材料名称", "设备容量", "电缆型号", "电缆型号及规格",
     "进线回路编号", "出线回路编号", "回路编号", "配电箱编号",
     "低压配电柜编号", "低压配电柜型号", "配电箱型号及规格",
-    "栋数", "室别", "层数",
-    "材料", "重量", "代号", "编号", "项目号",
-    # 英文 BOM 列头（外资/出口图常见）
+    # 英文 BOM 真正特有列头词（外资/出口图常见）
     "Item", "Name", "Type", "Model", "Spec", "Qty", "Quantity",
-    "Material", "Description", "Part No", "Part Number",
+    "Description", "Part No", "Part Number", "Specification",
 })
+# 判定阈值：≥ 2 个不同 BOM 词同时命中才算 BOM 表。
+# 单个标题栏标签词（"会签/批准/校对/审核/编号"）不会同时出现 ≥2 个 BOM 词，
+# 防止旧标题栏残留（用户反馈"旧图框删不干净"）。
+_BOM_MIN_HITS = 2
 
 
 def _region_has_bom_header(zx0, zy0, zx1, zy1, msp):
-    """扫描指定矩形区域内 TEXT/MTEXT 是否含 BOM 设备材料表列头词。
-    用于在 cluster_text/cluster_grid 开头判定"是否整段保留"。
+    """扫描指定矩形区域内 TEXT/MTEXT，统计 BOM 列头词命中数。
+    必须 ≥ _BOM_MIN_HITS 个不同词命中，才认作 BOM 表、整段保留。
+    防止单个标题栏标签词（"会签/批准/校对"）误触发导致旧标题栏残留。
     """
+    seen = set()
     for e in msp:
         if e.dxftype() not in ("TEXT", "MTEXT"):
             continue
@@ -56,7 +60,9 @@ def _region_has_bom_header(zx0, zy0, zx1, zy1, msp):
             continue
         for w in _BOM_HEADER_WORDS:
             if w in s_norm:
-                return True
+                seen.add(w)
+                if len(seen) >= _BOM_MIN_HITS:
+                    return True
     return False
 
 
