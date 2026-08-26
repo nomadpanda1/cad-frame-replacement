@@ -143,7 +143,10 @@ def _spans_beyond(eb, tb, margin):
 _TITLE_LABEL_RE = re.compile(
     r"(图名|图号|比例|日期|设计|审核|制图|校对|图别|专业|负责人|审定|"
     r"会签|页码|张次|密级|校核|批准|审查|描图|建设单位|制图日期|设计阶段|"
-    r"工程名称|项目名称|设计号|图幅|第.{1,3}张|共.{1,3}张)"
+    r"工程名称|项目名称|设计号|图幅|第.{1,3}张|共.{1,3}张|"
+    # 2026-08-26 补：CNG 类旧会签栏标签（房间号/档案号/项目号）原本不在词表，
+    # 加进去才能被 layer-0 守卫正确识别为旧标题栏文本。
+    r"室别|建筑室|项目号|档案号)"
 )
 
 # 图框/标题栏图层（不含 0：layer 0 上多为真实绘图内容）
@@ -314,7 +317,11 @@ def delete_titleblock_cluster_text(doc, tb, outer):
             # 仅命中标题栏标签（图名/图号…）的旧文本才删，避免与新 HH_FRAME 重叠。
             if _is_zero_layer(layer):
                 _txt = (e.text if dt == "MTEXT" else e.dxf.text) or ""
-                if not _TITLE_LABEL_RE.search(_txt):
+                # 2026-08-26 补：旧会签栏中文标签常带空格对齐（"制  图"/"校  对"/
+                # "设  计"/"审  核"），正则匹配前先去除空白，让"制图"/"校对"等能
+                # 命中 _TITLE_LABEL_RE，否则会被误判为"非标题栏文本"而保留。
+                _txt_compact = re.sub(r'\s+', '', _txt)
+                if not _TITLE_LABEL_RE.search(_txt_compact):
                     continue
         try:
             b = bbox_mod.extents([e])

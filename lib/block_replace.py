@@ -169,7 +169,11 @@ def delete_title_strip(doc, frame_bbox, strip_ratio=0.28):
             # 框线/标签多在命名图框层，由 delete_old_frame_grid 等按层名清除。
             if _rr._is_zero_layer(layer):
                 _txt = (e.text if dt == "MTEXT" else e.dxf.text) or ""
-                if not _rr._TITLE_LABEL_RE.search(_txt):
+                # 2026-08-26：旧会签栏中文标签常带空格对齐（"制  图"/"校  对"/
+                # "设  计"/"审  核"），去空格后再正则匹配，否则"制图"在
+                # "制  图"里搜不到会被守卫误判为"非标题栏文本"而保留。
+                _txt_compact = _txt.replace(' ', '').replace('\t', '').replace('\n', '')
+                if not _rr._TITLE_LABEL_RE.search(_txt_compact):
                     continue
             msp.delete_entity(e)
             n += 1
