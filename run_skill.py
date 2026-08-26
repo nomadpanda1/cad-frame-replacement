@@ -286,6 +286,13 @@ def _process_multiframe(doc, template, targets, override, fit, tplctx=None):
         # "1"/0/图框族 残留一律按 bbox 内非白名单原则清掉。
         n_stale = raw_replace.delete_stale_grid_in_frame_inserts(doc, [list(fb)])
         total_del += n_stale
+        # 缺陷 J（2026-08-26 v6）：(5)/(6).dxf 反馈「白色框」——v5 只清 layer "1"，
+        # 实际白色栅格在 layer 0 + color=7 explicit（金标准删 51 LINE+28 LWPOLYLINE）。
+        # 簇区 = frame 右下 (右 60% × 下 28%) + tb，与 cluster_* 同口径；multiframe
+        # 路径无独立 tb 检测，**不能**传 tb=outer（会让 min(tb[0], cx0) 把整个 outer
+        # bbox 摊开成删除区→误伤真电路）。仅传 outer 让函数用 tight cluster 区域。
+        n_white = raw_replace.delete_white_grid_in_cluster_area(doc, outer=list(fb))
+        total_del += n_white
         all_written += written
         mappings.append({"region": [round(v, 1) for v in fb], "extracted": fields,
                          "unmatched": unmatched, "unused": unused, "written": written})
@@ -821,8 +828,12 @@ def main():
                             # 源图残留的旧图框栅格（同 _process_multiframe 注释）。
                             n_stale = raw_replace.delete_stale_grid_in_frame_inserts(
                                 doc, [list(frame_box)])
+                            # 缺陷 J（v6）：清簇区内 color=7 显式白色线（layer 0 上
+                            # 旧图框栅格）。raw-frame 路径有 outer/tb 完整 bbox。
+                            n_white = raw_replace.delete_white_grid_in_cluster_area(
+                                doc, outer=list(outer), tb=list(tb) if tb else None)
                             rec["written"] = list(dict.fromkeys(written))
-                            rec["deleted"] = n_edge + n_edge_ticks + n_tb + n_grid + n_grid_ext + n_txt + n_tbg + n_cluster + n_cluster_tbl + n_mark + n_stale
+                            rec["deleted"] = n_edge + n_edge_ticks + n_tb + n_grid + n_grid_ext + n_txt + n_tbg + n_cluster + n_cluster_tbl + n_mark + n_stale + n_white
                         rec["found"] = 1
                         rec["method"] = "raw-frame"
                         rec["mappings"] = [{"region": [round(x, 1) for x in outer],
@@ -888,6 +899,12 @@ def main():
                 n_stale = raw_replace.delete_stale_grid_in_frame_inserts(
                     doc, [list(r["bbox"])])
                 total_del += n_stale
+                # 缺陷 J（v6）：清簇区内 color=7 显式白色线（layer 0 旧图框栅格）。
+                # block 路径用 r["bbox"] 既当 outer，又当 tb 传入会把删除区摊成全
+                # bbox→误伤。仅传 outer 用 tight cluster 区域。
+                n_white = raw_replace.delete_white_grid_in_cluster_area(
+                    doc, outer=list(r["bbox"]))
+                total_del += n_white
                 all_written += written
                 print("   替换: 删 %d 旧实体, 回填 %d 字段 -> %s" % (ndel, len(written), written))
 

@@ -352,6 +352,94 @@ def delete_stale_grid_in_frame_inserts(doc, frame_bboxes,
     return n
 
 
+def delete_white_grid_in_cluster_area(doc, outer, tb=None,
+                                       target_colors=(7,),
+                                       target_types=("LINE", "LWPOLYLINE", "POLYLINE"),
+                                       exclude_layer_prefixes=("HH_TITLE", "$TD_AUDIT", "$TD_"),
+                                       right_share=0.60, bottom_share=0.28):
+    """清理「标题栏簇」区内、明确白色 (color=7 explicit) 的 LINE/LWPOLYLINE/POLYLINE。
+
+    2026-08-26（缺陷 J，v6）：用户在 (5).dxf / (6).dxf 反馈「白色框」未消——经对比
+    金标准 8/19 删了 51 ('LINE','0',7) + 28 ('LWPOLYLINE','0',7) = 79 条 layer 0
+    上的**显式白色**线类（v5 删的是 layer '1'，(5).dxf 已经没有 layer '1'）。
+
+    根因：源 DXF 把旧图框栅格打散到 layer 0 上并强制设 color=7（白）。AutoCAD 把
+    color=7 实体渲染为白线，叠加在新 HH_FRAME 之上的格线呈现「白框」。
+
+    删除区 = 标题栏所在「右下角」矩形（默认 right 60% × bottom 28%，与
+    delete_title_strip 同口径「strip = 右 55% × 底 28%」外加更宽的 x 范围以容纳
+    A0 类大图标题栏的更宽布局——A0X2 旧标题栏占右 54% × 底 27%，A3X3 旧标题栏
+    占右 24% × 底 23%；right 60% × bottom 28% 全部覆盖）。当提供 `tb` 时，
+    进一步取删除区与 tb 的并集（确保 detect_titleblock 圈到的小标题栏区也覆盖）。
+
+    安全护栏：
+      - 仅命中 entity 显式 `color in target_colors`（默认 7）—— 真电路/设备线
+        即使在 layer 0 通常 BYLAYER (256) 或 magenta (6) / green (3) 等，
+        不会被误伤。
+      - 仅命中 LINE / LWPOLYLINE / POLYLINE，不删 TEXT/MTEXT（避免误删新 HH_FRAME
+        字段值 `msp.add_text` 写的白字）。
+      - 跳过 exclude_layer_prefixes（HH_TITLE / $TD_AUDIT / $TD_），
+        防御新模板/审计层被错删。
+      - 仅删 entity 落在簇区内（与右上的原理图/CAD 内容天然隔开）。
+    """
+    if not outer:
+        return 0
+    xL, yB, xR, yT = outer
+    W = max(1e-6, xR - xL)
+    H = max(1e-6, yT - yB)
+    cx0 = xR - right_share * W
+    cy0 = yB
+    cx1 = xR
+    cy1 = yB + bottom_share * H
+    if tb and len(tb) == 4:
+        zx0 = max(min(tb[0], cx0), xL)
+        zy0 = max(min(tb[1], cy0), yB)
+        zx1 = min(max(tb[2], cx1), xR)
+        zy1 = min(max(tb[3], cy1), yT)
+    else:
+        zx0, zy0, zx1, zy1 = cx0, cy0, cx1, cy1
+    color_set = set(int(c) for c in target_colors)
+    type_set = set(target_types)
+    excl = tuple(p.lower() for p in exclude_layer_prefixes)
+    msp = doc.modelspace()
+    n = 0
+    by_color = Counter()
+    by_layer = Counter()
+    for e in list(msp):
+        dt = e.dxftype()
+        if dt not in type_set:
+            continue
+        color_raw = e.dxf.get("color", 256)
+        try:
+            color = int(color_raw) if color_raw is not None else 256
+        except (TypeError, ValueError):
+            color = 256
+        if color not in color_set:
+            continue
+        layer_lc = (e.dxf.layer or "").strip().lower()
+        if any(layer_lc.startswith(p) for p in excl):
+            continue
+        try:
+            b = bbox_mod.extents([e])
+        except Exception:
+            continue
+        if not (b and b.has_data):
+            continue
+        eb = (b.extmin.x, b.extmin.y, b.extmax.x, b.extmax.y)
+        if eb[2] < zx0 or eb[0] > zx1 or eb[3] < zy0 or eb[1] > zy1:
+            continue
+        msp.delete_entity(e)
+        n += 1
+        by_color[color] += 1
+        by_layer[layer_lc or "<empty>"] += 1
+    if n:
+        try:
+            print(f"[white_grid] 清理簇区内白色(color=7)旧栅格 {n} 条，按色：{dict(by_color)} 按层：{dict(by_layer)}")
+        except Exception:
+            pass
+    return n
+
+
 def delete_titleblock_text(doc, tb):
     """raw-frame 回退专用：删标题栏矩形区内所有独立 TEXT/MTEXT。
 
