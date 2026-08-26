@@ -168,14 +168,18 @@ def delete_title_strip(doc, frame_bbox, strip_ratio=0.28):
             # （图名/图号/比例…）时才删，避免与新 HH_FRAME 标题栏重叠。旧标题栏
             # 框线/标签多在命名图框层，由 delete_old_frame_grid 等按层名清除。
             if _rr._is_zero_layer(layer):
-                _txt = (e.text if dt == "MTEXT" else e.dxf.text) or ""
                 # 2026-08-26：旧会签栏中文标签常带空格对齐（"制  图"/"校  对"/
                 # "设  计"/"审  核"），去空格后再正则匹配，否则"制图"在
                 # "制  图"里搜不到会被守卫误判为"非标题栏文本"而保留。
                 # 2026-08-26 v3 补：cluster/strip 区 layer 0 上的「旧标题栏
                 # 字段值」（如 10kV主接线图、平面布置图）也属于旧图框内容，
                 # 单独检查 _TITLE_VALUE_RE 命中则放行删除。
-                _txt_compact = _txt.replace(' ', '').replace('\t', '').replace('\n', '')
+                # 2026-08-26 v4：源 DXF 中文标签全部以 \M+5XXXX (GBK) 转义码存储
+                # （如 \M+5D6C6\M+5CDBC = 制图），不解码正则永远匹配不到 → 守卫
+                # 误判保留。`_rr._decode_mtext_mplus()` 把 \M+5XXXX 还原成中文再匹配。
+                _txt = (e.text if dt == "MTEXT" else e.dxf.text) or ""
+                _txt_dec = _rr._decode_mtext_mplus(_txt)
+                _txt_compact = _txt_dec.replace(' ', '').replace('\t', '').replace('\n', '')
                 if not (_rr._TITLE_LABEL_RE.search(_txt_compact)
                         or _rr._TITLE_VALUE_RE.search(_txt_compact)):
                     continue

@@ -141,11 +141,38 @@ def _spans_beyond(eb, tb, margin):
 # 标题栏字段标签词：旧标题栏的 图名/图号/比例/日期… 文本落在此区，应清掉；
 # 这些是明确的标题栏标签词，几乎不会出现在真实绘图内容里，正则命中即可安全删除。
 # 2026-08-26 补：旧会签栏标签（房间号/档案号/项目号）原本不在词表。
+# 2026-08-26 v4：解码 AutoCAD MTEXT `\M+5XXXX` GBK 转义码后再做标签匹配。
+# 旧图框全部中文标签以这种 5-char HEX 模式存储（如 `\M+5D6C6\M+5CDBC` = `制图`），
+# 不解码则 `_TITLE_LABEL_RE.search("\\M+5D6C6\\M+5CDBC")` 永远匹配不到"制图"，
+# 守卫把旧标题栏标签误判为"非标题栏文本"完整保留（CNG 实测：制图/校对/设计/审核/审定
+# /批准/阶段/档案号/批准 等全部残留 → 用户反馈"完全没有改进"）。
+def _decode_mtext_mplus(s):
+    """AutoCAD MTEXT \M+XYYYY 解码成中文（GBK）。
+
+    格式: `\M+` 后跟一个 nibble 字符（编码表标记）+ 4 位 hex（GBK 2 字节）= 1 个汉字。
+    例子: \\M+5D6C6\\M+5CDBC -> 档图。
+    普通数字层/命名层无 \\M+ 时此函数为 no-op，开销极低。
+    """
+    if not s or "\\M+" not in s:
+        return s
+    return re.sub(
+        r"\\M\+([0-9A-Fa-f]+)",
+        lambda m: (
+            bytes.fromhex(m.group(1)[1:]).decode("gbk", "replace")
+            if (len(m.group(1)) - 1) % 2 == 0
+            else m.group(0)
+        ),
+        s,
+    )
+
+
+# 2026-08-26 v4：扩展正文/标签词表，配合解码后命中。如漏掉"建设"/"工程"/"厂家"
+# 之类也建议加上；当前先确保 8/26 CNG 标注全部命中。
 _TITLE_LABEL_RE = re.compile(
     r"(图名|图号|比例|日期|设计|审核|制图|校对|图别|专业|负责人|审定|"
     r"会签|页码|张次|密级|校核|批准|审查|描图|建设单位|制图日期|设计阶段|"
     r"工程名称|项目名称|设计号|图幅|第.{1,3}张|共.{1,3}张|"
-    r"室别|建筑室|项目号|档案号|阶段)"
+    r"室别|建筑室|项目号|档案号|阶段|初步|建设|厂家|署名|会签栏)"
 )
 # 2026-08-26 补：cluster 区内「旧标题栏字段值」（非 ATTRIB、非块内文字，而是
 # 散落在 layer 0 / 数字层的旧标题内容）模式。CNG 例子里 A3X3 #3 的源标题值
@@ -328,9 +355,13 @@ def delete_titleblock_cluster_text(doc, tb, outer):
             # 2026-08-26 v3 补：cluster 区 layer 0 上的「旧标题栏字段值」
             # （如 10kV主接线图、平面布置图）不在标签词表里，按标签正则匹配
             # 不到会被守卫保留；单独检查 _TITLE_VALUE_RE 命中则放行删除。
-            if _is_zero_layer(layer):
+            # 2026-08-26 v4：源 DXF 中文标签全部以 \M+5XXXX (GBK) 转义码存储
+            # （如 \M+5D6C6\M+5CDBC = 制图），不解码正则永远匹配不到→守卫误判
+            # 保留。`_decode_mtext_mplus()` 把 \M+5XXXX 还原成中文再匹配。
+            if layer == "0" or layer.isdigit():
                 _txt = (e.text if dt == "MTEXT" else e.dxf.text) or ""
-                _txt_compact = re.sub(r'\s+', '', _txt)
+                _txt_dec = _decode_mtext_mplus(_txt)
+                _txt_compact = re.sub(r"\s+", "", _txt_dec)
                 if not (_TITLE_LABEL_RE.search(_txt_compact)
                         or _TITLE_VALUE_RE.search(_txt_compact)):
                     continue
