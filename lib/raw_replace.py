@@ -9,63 +9,6 @@ from ezdxf import bbox as bbox_mod
 from .text_decode import decode_mtext as _decode_mtext
 
 
-# 设备材料表 / BOM 列头词（2026-08-26 沉淀）
-# CNG 类带 BOM 的图，BOM 表常落在簇区（标题栏右 45% × 底 55%）内，被
-# cluster_text/cluster_grid 当成「旧标题栏」整张清掉 → 用户反馈"原图内容被删"。
-# 簇区内若含以下任一词，视为真 BOM，整段保留（cluster_text/cluster_grid 跳过清理）。
-# 92DZ1 / 装配体 标题栏由 ATTDEF/块组成，簇区 TEXT 扫描不会命中，零回归。
-_BOM_HEADER_WORDS = frozenset({
-    # 中文 BOM 真正特有列头词（设备材料表里有的，标题栏不会单独出现的）
-    "名称", "型号规格", "型号", "规格", "数量", "单位", "备注",
-    "设备名称", "材料名称", "设备容量", "电缆型号", "电缆型号及规格",
-    "进线回路编号", "出线回路编号", "回路编号", "配电箱编号",
-    "低压配电柜编号", "低压配电柜型号", "配电箱型号及规格",
-    # 英文 BOM 真正特有列头词（外资/出口图常见）
-    "Item", "Name", "Type", "Model", "Spec", "Qty", "Quantity",
-    "Description", "Part No", "Part Number", "Specification",
-})
-# 判定阈值：≥ 2 个不同 BOM 词同时命中才算 BOM 表。
-# 单个标题栏标签词（"会签/批准/校对/审核/编号"）不会同时出现 ≥2 个 BOM 词，
-# 防止旧标题栏残留（用户反馈"旧图框删不干净"）。
-_BOM_MIN_HITS = 2
-
-
-def _region_has_bom_header(zx0, zy0, zx1, zy1, msp):
-    """扫描指定矩形区域内 TEXT/MTEXT，统计 BOM 列头词命中数。
-    必须 ≥ _BOM_MIN_HITS 个不同词命中，才认作 BOM 表、整段保留。
-    防止单个标题栏标签词（"会签/批准/校对"）误触发导致旧标题栏残留。
-    """
-    seen = set()
-    for e in msp:
-        if e.dxftype() not in ("TEXT", "MTEXT"):
-            continue
-        try:
-            b = bbox_mod.extents([e])
-        except Exception:
-            continue
-        if not b or not b.has_data:
-            continue
-        if b.extmax.x < zx0 or b.extmin.x > zx1 or b.extmax.y < zy0 or b.extmin.y > zy1:
-            continue
-        try:
-            raw = e.text if e.dxftype() == "MTEXT" else getattr(e.dxf, "text", "") or ""
-        except Exception:
-            continue
-        if not raw:
-            continue
-        s = _decode_mtext(raw)
-        # 归一化：去全/半角冒号、空白
-        s_norm = "".join(s.split()).replace(":", "").replace("：", "")
-        if not s_norm:
-            continue
-        for w in _BOM_HEADER_WORDS:
-            if w in s_norm:
-                seen.add(w)
-                if len(seen) >= _BOM_MIN_HITS:
-                    return True
-    return False
-
-
 def sheet_extents(doc):
     ext = bbox_mod.extents(doc.modelspace())
     if not ext or not ext.has_data:
@@ -233,6 +176,16 @@ _CONTENT_LAYER_HINTS = frozenset({
 })
 
 
+def _is_zero_layer(layer):
+    """图层感知守卫：layer 0 与纯数字层（下载/第三方 DWG 常把真实绘图内容堆在这些层）
+    视为受保护内容层。清理函数默认不删其上的 TEXT/MTEXT/线类，避免误删设备材料表等
+    真实内容；只有明确属于旧标题栏结构（ATTDEF/ATTRIB、或命中 _TITLE_LABEL_RE 的
+    标题标签）才例外删除。旧标题栏框线/网格通常落在命名图框层（TK/图框/PUB_TEXT…），
+    由 delete_old_frame_grid / delete_frame_lines 按层名/几何清除，不依赖 0 层。"""
+    l = (layer or "").strip()
+    return l == "0" or (l.isdigit() and l != "")
+
+
 def delete_titleblock(doc, tb, maxdim=None):
     """删标题栏区域内「旧标题栏自身」实体，保留真实绘图内容。
 
@@ -343,10 +296,6 @@ def delete_titleblock_cluster_text(doc, tb, outer):
     zx1 = min(max(tb[2], cx1), xR)
     zy1 = min(max(tb[3], cy1), yT)
     msp = doc.modelspace()
-    # 2026-08-26 BOM 白名单：簇区内若含 BOM 列头词，整段保留（不删任何 TEXT）。
-    # 否则 CNG 类"设备材料表"会被当成旧标题栏清掉，导致原图 BOM 丢失。
-    if _region_has_bom_header(zx0, zy0, zx1, zy1, msp):
-        return 0
     n = 0
     for e in list(msp):
         dt = e.dxftype()
@@ -361,6 +310,12 @@ def delete_titleblock_cluster_text(doc, tb, outer):
             layer = (e.dxf.layer or "").lower()
             if layer in _CONTENT_LAYER_HINTS:
                 continue
+            # 图层感知：layer 0 / 数字层上的真实绘图内容（如设备材料表）绝不误删；
+            # 仅命中标题栏标签（图名/图号…）的旧文本才删，避免与新 HH_FRAME 重叠。
+            if _is_zero_layer(layer):
+                _txt = (e.text if dt == "MTEXT" else e.dxf.text) or ""
+                if not _TITLE_LABEL_RE.search(_txt):
+                    continue
         try:
             b = bbox_mod.extents([e])
         except Exception:
@@ -403,11 +358,8 @@ def delete_titleblock_cluster_grid(doc, outer, tb=None):
         zy1 = min(max(tb[3], cy1), yT)
     else:
         zx0, zy0, zx1, zy1 = cx0, cy0, cx1, cy1
-    # 2026-08-26 BOM 白名单：与 cluster_text 同口径——簇区含 BOM 列头则整段保留。
     long_th = max(W, H) * 0.45
     msp = doc.modelspace()
-    if _region_has_bom_header(zx0, zy0, zx1, zy1, msp):
-        return 0
     n = 0
     for e in list(msp):
         dt = e.dxftype()
@@ -415,6 +367,9 @@ def delete_titleblock_cluster_grid(doc, outer, tb=None):
             continue
         layer = (e.dxf.layer or "").lower()
         if layer in _CONTENT_LAYER_HINTS:
+            continue
+        # 图层感知：layer 0 / 数字层上的真实内容（设备材料表网格等）跳过，不误删
+        if _is_zero_layer(layer):
             continue
         try:
             b = bbox_mod.extents([e])

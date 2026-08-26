@@ -149,12 +149,6 @@ def delete_title_strip(doc, frame_bbox, strip_ratio=0.28):
     # 长线阈值：超过此长度视为"几何/尺寸线"而非标题栏格线
     long_th = max(W, H) * 0.55
     msp = doc.modelspace()
-    # 2026-08-26 BOM 白名单（与 raw_replace.cluster_text/cluster_grid 同源）：
-    # strip 内若含设备材料表列头词，整段保留（不删任何文字/格线）。
-    # 否则 CNG 类把 BOM 表当旧标题栏清掉，导致原图 BOM 整张丢失（用户反馈
-    # "感觉把原图纸的内容都删除了"）。
-    if _rr._region_has_bom_header(zx0, fy0, fx1, zy1, msp):
-        return 0
     n = 0
     for e in list(msp):
         dt = e.dxftype()
@@ -169,6 +163,14 @@ def delete_title_strip(doc, frame_bbox, strip_ratio=0.28):
             layer = (e.dxf.layer or "").lower()
             if layer in _rr._CONTENT_LAYER_HINTS:
                 continue  # 内容层白名单：保护 wall/wire/window/dj/...
+            # 图层感知（2026-08-26 治本）：layer 0 / 数字层上的真实绘图内容
+            # （如下载图的设备材料表、标注）绝不误删；仅当文本明显是旧标题栏标签
+            # （图名/图号/比例…）时才删，避免与新 HH_FRAME 标题栏重叠。旧标题栏
+            # 框线/标签多在命名图框层，由 delete_old_frame_grid 等按层名清除。
+            if _rr._is_zero_layer(layer):
+                _txt = (e.text if dt == "MTEXT" else e.dxf.text) or ""
+                if not _rr._TITLE_LABEL_RE.search(_txt):
+                    continue
             msp.delete_entity(e)
             n += 1
             continue
@@ -177,6 +179,10 @@ def delete_title_strip(doc, frame_bbox, strip_ratio=0.28):
             continue
         # 3) 线类：只删闭合矩形(标题框)或短线段(格线)，长线跳过
         if dt in ("LINE", "LWPOLYLINE", "POLYLINE"):
+            # 图层感知：layer 0 / 数字层上的线类（设备材料表网格、真实几何）跳过，
+            # 不误删；旧标题栏框线在命名图框层，由 delete_old_frame_grid 清除。
+            if _rr._is_zero_layer((e.dxf.layer or "")):
+                continue
             try:
                 b = bbox_mod.extents([e])
             except Exception:
