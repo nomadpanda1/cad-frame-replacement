@@ -149,6 +149,12 @@ def delete_title_strip(doc, frame_bbox, strip_ratio=0.28):
     # 长线阈值：超过此长度视为"几何/尺寸线"而非标题栏格线
     long_th = max(W, H) * 0.55
     msp = doc.modelspace()
+    # 2026-08-26 BOM 白名单（与 raw_replace.cluster_text/cluster_grid 同源）：
+    # strip 内若含设备材料表列头词，整段保留（不删任何文字/格线）。
+    # 否则 CNG 类把 BOM 表当旧标题栏清掉，导致原图 BOM 整张丢失（用户反馈
+    # "感觉把原图纸的内容都删除了"）。
+    if _rr._region_has_bom_header(zx0, fy0, fx1, zy1, msp):
+        return 0
     n = 0
     for e in list(msp):
         dt = e.dxftype()

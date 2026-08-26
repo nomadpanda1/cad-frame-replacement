@@ -6,6 +6,58 @@
 """
 import re
 from ezdxf import bbox as bbox_mod
+from .text_decode import decode_mtext as _decode_mtext
+
+
+# 设备材料表 / BOM 列头词（2026-08-26 沉淀）
+# CNG 类带 BOM 的图，BOM 表常落在簇区（标题栏右 45% × 底 55%）内，被
+# cluster_text/cluster_grid 当成「旧标题栏」整张清掉 → 用户反馈"原图内容被删"。
+# 簇区内若含以下任一词，视为真 BOM，整段保留（cluster_text/cluster_grid 跳过清理）。
+# 92DZ1 / 装配体 标题栏由 ATTDEF/块组成，簇区 TEXT 扫描不会命中，零回归。
+_BOM_HEADER_WORDS = frozenset({
+    # 中文 BOM 列头
+    "名称", "型号规格", "型号", "规格", "数量", "单位", "备注",
+    "设备名称", "材料名称", "设备容量", "电缆型号", "电缆型号及规格",
+    "进线回路编号", "出线回路编号", "回路编号", "配电箱编号",
+    "低压配电柜编号", "低压配电柜型号", "配电箱型号及规格",
+    "栋数", "室别", "层数",
+    "材料", "重量", "代号", "编号", "项目号",
+    # 英文 BOM 列头（外资/出口图常见）
+    "Item", "Name", "Type", "Model", "Spec", "Qty", "Quantity",
+    "Material", "Description", "Part No", "Part Number",
+})
+
+
+def _region_has_bom_header(zx0, zy0, zx1, zy1, msp):
+    """扫描指定矩形区域内 TEXT/MTEXT 是否含 BOM 设备材料表列头词。
+    用于在 cluster_text/cluster_grid 开头判定"是否整段保留"。
+    """
+    for e in msp:
+        if e.dxftype() not in ("TEXT", "MTEXT"):
+            continue
+        try:
+            b = bbox_mod.extents([e])
+        except Exception:
+            continue
+        if not b or not b.has_data:
+            continue
+        if b.extmax.x < zx0 or b.extmin.x > zx1 or b.extmax.y < zy0 or b.extmin.y > zy1:
+            continue
+        try:
+            raw = e.text if e.dxftype() == "MTEXT" else getattr(e.dxf, "text", "") or ""
+        except Exception:
+            continue
+        if not raw:
+            continue
+        s = _decode_mtext(raw)
+        # 归一化：去全/半角冒号、空白
+        s_norm = "".join(s.split()).replace(":", "").replace("：", "")
+        if not s_norm:
+            continue
+        for w in _BOM_HEADER_WORDS:
+            if w in s_norm:
+                return True
+    return False
 
 
 def sheet_extents(doc):
@@ -285,6 +337,10 @@ def delete_titleblock_cluster_text(doc, tb, outer):
     zx1 = min(max(tb[2], cx1), xR)
     zy1 = min(max(tb[3], cy1), yT)
     msp = doc.modelspace()
+    # 2026-08-26 BOM 白名单：簇区内若含 BOM 列头词，整段保留（不删任何 TEXT）。
+    # 否则 CNG 类"设备材料表"会被当成旧标题栏清掉，导致原图 BOM 丢失。
+    if _region_has_bom_header(zx0, zy0, zx1, zy1, msp):
+        return 0
     n = 0
     for e in list(msp):
         dt = e.dxftype()
@@ -341,8 +397,11 @@ def delete_titleblock_cluster_grid(doc, outer, tb=None):
         zy1 = min(max(tb[3], cy1), yT)
     else:
         zx0, zy0, zx1, zy1 = cx0, cy0, cx1, cy1
+    # 2026-08-26 BOM 白名单：与 cluster_text 同口径——簇区含 BOM 列头则整段保留。
     long_th = max(W, H) * 0.45
     msp = doc.modelspace()
+    if _region_has_bom_header(zx0, zy0, zx1, zy1, msp):
+        return 0
     n = 0
     for e in list(msp):
         dt = e.dxftype()
