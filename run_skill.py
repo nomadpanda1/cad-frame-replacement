@@ -280,6 +280,12 @@ def _process_multiframe(doc, template, targets, override, fit, tplctx=None):
         region = {"bbox": fb, "confidence": 1.0, "method": "frame",
                   "source": "multiframe", "entity": None}
         _, written = block_replace.insert_template(doc, tpl, region, values, fit=fit)
+        # 缺陷 I（2026-08-26）：HH_FRAME INSERT 后清 bbox 内源图残留的旧图框栅格
+        # （layer "1" 上 16 LWPOLYLINE+13 LINE / frame 等）。新模板自带几何层
+        # 在白名单 (HH_TITLE/$TD_AUDIT/$TD_)，不会被误删；源图自身 layer
+        # "1"/0/图框族 残留一律按 bbox 内非白名单原则清掉。
+        n_stale = raw_replace.delete_stale_grid_in_frame_inserts(doc, [list(fb)])
+        total_del += n_stale
         all_written += written
         mappings.append({"region": [round(v, 1) for v in fb], "extracted": fields,
                          "unmatched": unmatched, "unused": unused, "written": written})
@@ -452,7 +458,7 @@ def _process_one_acad(app, src, doc, args, template, override, tplctx):
                 print("     [%d] 置信度 %.2f 方法=%s 源=%s bbox=%s" % (
                     i, r["confidence"], r["method"], r["source"],
                     [round(x, 1) for x in r["bbox"]]))
-                old = _extract_fields(doc, r["bbox"])
+                old = extract.extract_fields(doc, r)
                 values, unmatched, unused = mapper.map_fields(
                     template["fields"], old, override)
                 bb = [float(v) for v in r["bbox"]]
@@ -743,12 +749,8 @@ def main():
                                         _gap, _bom_min_clear, _ext))
                                 break
                         # 先提取字段（含标题栏比例 SCALE），解析出图比例作为无框大图的幅面判定依据
-                        # 2026-08-26：统一走 _extract_fields（v1，已加列头/标签护栏），替代弱提取器
-                        # extract.extract_fields——弱提取器 _extract_from_text 无列头护栏，会把「型号规格」
-                        # 「档案号:」等列头/标签误当值（CNG 电气系统图 STAGE='档案号:'、TITLE='型号规格'）。
-                        # v1 经 08-26 增强后在列头多/材料表类图上正确，且 92DZ1 等图零退化。
-                        old = _extract_fields(doc, tb)
-                        # 强提取补充（finder v1 在 frame_box 全区域再扫一遍，仅补 tb 内未覆盖的概念）
+                        old = extract.extract_fields(doc, {"bbox": tb, "method": "keyword", "entity": None})
+                        # 强提取补充
                         try:
                             strong = _extract_fields(doc, outer)
                             for k, v in strong.items():
@@ -815,8 +817,12 @@ def main():
                             # #3：尊重 GUI「缩放」选择（args.fit），不再写死 "max"
                             _, written = block_replace.insert_template(
                                 doc, tpl, region, values, fit=args.fit or "min")
+                            # 缺陷 I（2026-08-26）：HH_FRAME INSERT 后清 bbox 内
+                            # 源图残留的旧图框栅格（同 _process_multiframe 注释）。
+                            n_stale = raw_replace.delete_stale_grid_in_frame_inserts(
+                                doc, [list(frame_box)])
                             rec["written"] = list(dict.fromkeys(written))
-                            rec["deleted"] = n_edge + n_edge_ticks + n_tb + n_grid + n_grid_ext + n_txt + n_tbg + n_cluster + n_cluster_tbl + n_mark
+                            rec["deleted"] = n_edge + n_edge_ticks + n_tb + n_grid + n_grid_ext + n_txt + n_tbg + n_cluster + n_cluster_tbl + n_mark + n_stale
                         rec["found"] = 1
                         rec["method"] = "raw-frame"
                         rec["mappings"] = [{"region": [round(x, 1) for x in outer],
@@ -868,7 +874,7 @@ def main():
                 tpl, spec = tplctx.template_for(r["bbox"])
                 if spec is not None:
                     tplctx.note(list(r["bbox"]), spec, (spec.width, spec.height))
-                old = _extract_fields(doc, r["bbox"])
+                old = extract.extract_fields(doc, r)
                 values, unmatched, unused = mapper.map_fields(tpl["fields"], old, override)
                 mappings.append({"region": [round(x, 1) for x in r["bbox"]],
                                   "extracted": old, "unmatched": unmatched, "unused": unused})
@@ -877,6 +883,11 @@ def main():
                 ndel = block_replace.delete_old(doc, r, margin=args.margin)
                 total_del += ndel
                 _, written = block_replace.insert_template(doc, tpl, r, values, fit=args.fit)
+                # 缺陷 I（2026-08-26）：HH_FRAME INSERT 后清 bbox 内源图残留的旧图框
+                # 栅格（layer "1" 上 16+13 条 / frame）。同 _process_multiframe 注释。
+                n_stale = raw_replace.delete_stale_grid_in_frame_inserts(
+                    doc, [list(r["bbox"])])
+                total_del += n_stale
                 all_written += written
                 print("   替换: 删 %d 旧实体, 回填 %d 字段 -> %s" % (ndel, len(written), written))
 

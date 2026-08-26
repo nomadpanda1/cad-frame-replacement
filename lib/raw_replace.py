@@ -5,6 +5,7 @@
 使 exe 也能处理这类图纸。此处不依赖 matplotlib，避免污染冻结 exe。
 """
 import re
+from collections import Counter
 from ezdxf import bbox as bbox_mod
 from .text_decode import decode_mtext as _decode_mtext
 
@@ -279,6 +280,75 @@ def delete_old_frame_grid(doc):
         if dt in ("LINE", "LWPOLYLINE", "POLYLINE", "TEXT", "MTEXT"):
             msp.delete_entity(e); n += 1
         # INSERT / HATCH / DIMENSION 等真实标注一律保留
+    return n
+
+
+def delete_stale_grid_in_frame_inserts(doc, frame_bboxes,
+                                       stale_layers=("1",),
+                                       allowed_layer_prefixes=("HH_TITLE", "$TD_AUDIT", "$TD_")):
+    """清理每个 HH_FRAME INSERT bbox 内、明确属于旧图框栅格的 LINE/LWPOLYLINE/POLYLINE。
+
+    2026-08-26（缺陷 I）：CNG 电气系统图（4.dxf）源在每个 HH_FRAME INSERT
+    区域内的 layer "1" 上残留 16 个 LWPOLYLINE + 13 个 LINE（共 29 条/frame），
+    这是 AutoCAD 打散导出的旧图框栅格骨架（会签栏 / 标题栏外框）。AutoCAD
+    渲染 layer "1" 描边为白线，叠加在新 HH_FRAME 之上的格线呈现「白色框」。
+    `delete_titleblock_grid` 按 tb 矩形删（tb 圈远小于 frame bbox）；
+    `delete_old_frame_grid` 只清 `_TITLE_LAYERS`（不识 layer "1"）；
+    `delete_old_frame_grid_extended` 只清 0 层长直线（layer "1" / 短线够不到）。
+    三者都漏，金标（gold）文件把 layer "1" 整层删除，v4 没这个动作。
+
+    修法：传入 `stale_layers`（默认 `("1",)`）作为「明确属于旧图框栅格的图层
+    清单」，凡 frame bbox 内、layer 在 stale_layers 集合里、且不在白名单前缀
+    （HH_TITLE / $TD_AUDIT / $TD_）的 LINE/LWPOLYLINE/POLYLINE 一律删。
+    其它层（含内容层 layer "0" / 数字层）一律不碰，避免误删真实绘图几何。
+
+    风险与可控性：
+      - 默认 stale_layers=("1",) 仅命中 layer "1"，对多数图纸无影响
+        （其他图纸的 layer "1" 一般不与 HH_FRAME bbox 重叠 = 无删）；
+      - CNG 类源 layer "1" 仅出现在 HH_FRAME bbox 内 = 旧图框栅格全清。
+      - 如未来发现某图纸 layer "2/3..." 也属同类残留，把图层名追加到
+        stale_layers 即可，无需再改函数本体。
+    """
+    msp = doc.modelspace()
+    stale_set = set(l.lower() for l in stale_layers)
+    allowed = tuple(a.lower() for a in allowed_layer_prefixes)
+    n = 0
+    deleted_layers = Counter()
+    for fb in frame_bboxes or []:
+        if not fb or len(fb) != 4:
+            continue
+        x0, y0, x1, y1 = (float(v) for v in fb)
+        for e in list(msp):
+            dt = e.dxftype()
+            if dt not in ("LINE", "LWPOLYLINE", "POLYLINE"):
+                continue
+            layer_raw = (e.dxf.layer or "").strip()
+            layer_lc = layer_raw.lower()
+            # 必须严格属于 stale_layers 集合（仅旧图框栅格典型图层）
+            if layer_lc not in stale_set:
+                continue
+            # 白名单前缀（HH_TITLE/$TD_AUDIT/$TD_）一律跳过（防御）
+            if any(layer_lc.startswith(pre) for pre in allowed):
+                continue
+            try:
+                b = bbox_mod.extents([e])
+            except Exception:
+                continue
+            if not (b and b.has_data):
+                continue
+            # 必须严格落在 frame bbox 内（与 delete_frame_border 同口径）
+            if b.extmin.x < x0 - 0.5 or b.extmax.x > x1 + 0.5:
+                continue
+            if b.extmin.y < y0 - 0.5 or b.extmax.y > y1 + 0.5:
+                continue
+            msp.delete_entity(e)
+            n += 1
+            deleted_layers[layer_raw or "<empty>"] += 1
+    if n:
+        try:
+            print(f"[stale_grid] 清理 frame bbox 内旧图框栅格 {n} 条，按层：{dict(deleted_layers)}")
+        except Exception:
+            pass
     return n
 
 
