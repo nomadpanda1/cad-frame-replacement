@@ -733,7 +733,7 @@ def _title_from_label(items):
                 continue
             if al in n and (":" in raw or "：" in raw):
                 val = re.split(r"[:：]", raw, maxsplit=1)[-1].strip()
-                if val:
+                if val and not _is_pure_label(val):
                     return val
     for cx, cy, raw, h in items:
         if _norm(raw) in [a for a in CONCEPT_ALIASES.get("TITLE", []) if a]:
@@ -747,7 +747,7 @@ def _title_from_label(items):
                     if dx < best_dx:
                         best_dx = dx
                         best = raw2
-            if best:
+            if best and not _is_pure_label(best):
                 return best
     return None
 
@@ -794,8 +794,13 @@ for _v in SW_TITLE_VOCAB:
 
 
 def _is_pure_label(raw):
-    """文本本身是否就是标题栏字段标签（列头），不应作为字段值。"""
-    return _norm(raw) in _LABEL_NORM_SET
+    """文本本身是否就是标题栏字段标签（列头），不应作为字段值。
+
+    2026-08-26 增强：先去冒号（「档案号:」→「档案号」）再比对，使带冒号的列头/
+    字段名标签也能被识别跳过（修复 STAGE 误抓「档案号:」等跨字段误判）。
+    """
+    s = _norm(raw).replace(":", "").replace("：", "")
+    return s in _LABEL_NORM_SET
 
 
 _QUOTE_CHARS = ['"', "'", "“", "”", "‘", "’", "「", "」", "『", "』"]
@@ -1079,12 +1084,17 @@ def find_titleblocks(doc, margin_ratio=0.02):
 
 _TB_COLHEAD = {
     "名称", "型号规格", "型号", "规格", "单位", "数量", "备注", "编号", "进线编号",
+    "共张", "第张", "共页", "第页", "共 张", "第 张",
     "进线回路编号", "出线回路编号", "回路编号", "配电箱编号", "低压配电柜编号",
     "低压配电柜型号", "配电箱型号及规格", "设备容量", "电缆型号及规格", "用途", "栋数",
     "档案号", "项目号", "室别", "比例", "阶段", "日期", "材料", "重量", "版本",
     "设计", "制图", "校对", "审核", "批准", "会签", "标准化", "图名", "图号",
 }
 _TB_LABEL_SET_V2 = set(_LABEL_NORM_SET) | {_norm(x) for x in _TB_COLHEAD}
+# 增强（2026-08-26）：v1 的 _is_pure_label 一并覆盖列头词，修复「列头/字段名当值」
+# 误判（CNG 类带材料表图：STAGE 误抓「档案号:」、TITLE 误抓「型号规格」列头）。
+# 仅扩展标签集合，不改 v1 的多级标题兜底与 ATTDEF 覆盖，92DZ1 等图不退化。
+_LABEL_NORM_SET |= {_norm(x) for x in _TB_COLHEAD}
 
 
 def _is_pure_label_v2(raw):

@@ -452,7 +452,7 @@ def _process_one_acad(app, src, doc, args, template, override, tplctx):
                 print("     [%d] 置信度 %.2f 方法=%s 源=%s bbox=%s" % (
                     i, r["confidence"], r["method"], r["source"],
                     [round(x, 1) for x in r["bbox"]]))
-                old = extract.extract_fields(doc, r)
+                old = _extract_fields(doc, r["bbox"])
                 values, unmatched, unused = mapper.map_fields(
                     template["fields"], old, override)
                 bb = [float(v) for v in r["bbox"]]
@@ -743,9 +743,12 @@ def main():
                                         _gap, _bom_min_clear, _ext))
                                 break
                         # 先提取字段（含标题栏比例 SCALE），解析出图比例作为无框大图的幅面判定依据
-                        old = extract.extract_fields(doc, {"bbox": tb, "method": "keyword", "entity": None})
-                        # 强提取（finder：冒号式标题栏友好，补 DWG_NO/STAGE/DATE/DESIGN）
-                        # —— 高召回融合：弱为基础，强仅在弱未覆盖的概念上补充，避免强覆盖弱的正确值
+                        # 2026-08-26：统一走 _extract_fields（v1，已加列头/标签护栏），替代弱提取器
+                        # extract.extract_fields——弱提取器 _extract_from_text 无列头护栏，会把「型号规格」
+                        # 「档案号:」等列头/标签误当值（CNG 电气系统图 STAGE='档案号:'、TITLE='型号规格'）。
+                        # v1 经 08-26 增强后在列头多/材料表类图上正确，且 92DZ1 等图零退化。
+                        old = _extract_fields(doc, tb)
+                        # 强提取补充（finder v1 在 frame_box 全区域再扫一遍，仅补 tb 内未覆盖的概念）
                         try:
                             strong = _extract_fields(doc, outer)
                             for k, v in strong.items():
@@ -865,7 +868,7 @@ def main():
                 tpl, spec = tplctx.template_for(r["bbox"])
                 if spec is not None:
                     tplctx.note(list(r["bbox"]), spec, (spec.width, spec.height))
-                old = extract.extract_fields(doc, r)
+                old = _extract_fields(doc, r["bbox"])
                 values, unmatched, unused = mapper.map_fields(tpl["fields"], old, override)
                 mappings.append({"region": [round(x, 1) for x in r["bbox"]],
                                   "extracted": old, "unmatched": unmatched, "unused": unused})
