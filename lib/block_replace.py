@@ -172,8 +172,12 @@ def delete_title_strip(doc, frame_bbox, strip_ratio=0.28):
                 # 2026-08-26：旧会签栏中文标签常带空格对齐（"制  图"/"校  对"/
                 # "设  计"/"审  核"），去空格后再正则匹配，否则"制图"在
                 # "制  图"里搜不到会被守卫误判为"非标题栏文本"而保留。
+                # 2026-08-26 v3 补：cluster/strip 区 layer 0 上的「旧标题栏
+                # 字段值」（如 10kV主接线图、平面布置图）也属于旧图框内容，
+                # 单独检查 _TITLE_VALUE_RE 命中则放行删除。
                 _txt_compact = _txt.replace(' ', '').replace('\t', '').replace('\n', '')
-                if not _rr._TITLE_LABEL_RE.search(_txt_compact):
+                if not (_rr._TITLE_LABEL_RE.search(_txt_compact)
+                        or _rr._TITLE_VALUE_RE.search(_txt_compact)):
                     continue
             msp.delete_entity(e)
             n += 1
