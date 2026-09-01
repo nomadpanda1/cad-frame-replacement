@@ -38,48 +38,131 @@ def _is_closed(e):
             return False
 
 
-def delete_frame_border(doc, frame_bbox, tol=2.5, inner_ratio=0.8):
-    """删除与 frame_bbox 重合的闭合矩形边框（旧图框线），返回删除数。
+def _delete_line_rect(msp, lines, frame_bbox, tol=2.5):
+    """删除由 4 段 LINE 近似拼成、且每条都贯穿整条外框边的旧图框。
 
-    仅匹配 bbox 与该帧基本重合的 LWPOLYLINE/POLYLINE，不影响图内几何——这是逐框替换的
-    关键：只去掉该子图的旧边框，保留其内部的零件几何。
-
-    inner_ratio：工程图框常画成"外框 + 内框"两条矩形（CNG 图外框 84100×59400 里面还套
-    一条 80600×57400），只删外框会留下一圈内框残线压在新图框上。故一并删除被 frame_bbox
-    包含、且面积占比 >= inner_ratio 的闭合矩形。设为 None 可关闭该行为。
+    仅当四边各有一条「跨度 >= 50% 边长」的 LINE 时才删——全框矩形几何是明确的旧框，
+    不会误删只贴在边上的内容短线段/标注线（零误删）。
     """
     x0, y0, x1, y1 = frame_bbox
-    outer_area = max((x1 - x0) * (y1 - y0), 1e-9)
-    msp = doc.modelspace()
-    n = 0
-    for e in list(msp):
-        dt = e.dxftype()
-        if dt not in ("LWPOLYLINE", "POLYLINE"):
-            continue
+    W = x1 - x0; H = y1 - y0
+    atol = max(tol, abs(W) * 0.01, abs(H) * 0.01, 50.0)
+    half_w, half_h = 0.5 * W, 0.5 * H
+    groups = {"L": [], "R": [], "T": [], "B": []}
+    for e in lines:
         try:
-            if dt == "LWPOLYLINE":
-                pts = [(p[0], p[1]) for p in e.get_points()]
-            else:
-                pts = [(v.dxf.location.x, v.dxf.location.y) for v in e.vertices()]
+            s, e2 = e.dxf.start, e.dxf.end
         except Exception:
             continue
-        if not pts:
-            continue
-        if not (_is_closed(e) or pts[0] == pts[-1]):
-            continue
-        xs = [p[0] for p in pts]
-        ys = [p[1] for p in pts]
-        r = (min(xs), min(ys), max(xs), max(ys))
-        hit = (abs(r[0] - x0) < tol and abs(r[1] - y0) < tol and
-               abs(r[2] - x1) < tol and abs(r[3] - y1) < tol)
-        if not hit and inner_ratio is not None:
-            inside = (r[0] >= x0 - tol and r[1] >= y0 - tol and
-                      r[2] <= x1 + tol and r[3] <= y1 + tol)
-            if inside and (r[2] - r[0]) * (r[3] - r[1]) >= outer_area * inner_ratio:
+        if abs(s.x - x0) < atol and abs(e2.x - x0) < atol and abs(s.y - e2.y) >= half_h:
+            groups["L"].append(e); continue
+        if abs(s.x - x1) < atol and abs(e2.x - x1) < atol and abs(s.y - e2.y) >= half_h:
+            groups["R"].append(e); continue
+        if abs(s.y - y0) < atol and abs(e2.y - y0) < atol and abs(s.x - e2.x) >= half_w:
+            groups["B"].append(e); continue
+        if abs(s.y - y1) < atol and abs(e2.y - y1) < atol and abs(s.x - e2.x) >= half_w:
+            groups["T"].append(e); continue
+    if groups["L"] and groups["R"] and groups["T"] and groups["B"]:
+        n = 0
+        for ed in groups.values():
+            for e in ed:
+                msp.delete_entity(e); n += 1
+        return n
+    return 0
+
+
+def delete_frame_border(doc, frame_bbox, tol=2.5, inner_ratio=0.8,
+                        record_cells=True):
+    """删除与 frame_bbox 重合/包含/对齐的旧图框几何（外框 + 内框 + 纸边外框），
+    返回删除数。覆盖四种旧框画法，避免残留（零误删前提下只删明确的框几何）：
+      (1) 闭合矩形外框 bbox 与检测框基本一致；
+      (2) 检测框完整落在矩形内部（纸边外框比检出子框大一圈，原逻辑漏删）；
+      (3) 矩形完整落在检测框内且面积 >= inner_ratio（内框/标题区划分隔线）；
+      (4) 矩形与检测框 >=2 条边重合（旧框内部分隔线，如标题栏与图框的中线），
+          仅对 图框层/0/默认层 生效，避免误删图内几何。
+    仅删明确框几何，绝不碰图内几何。
+    """
+    x0, y0, x1, y1 = frame_bbox
+    W = x1 - x0; H = y1 - y0
+    outer_area = max(W * H, 1e-9)
+    atol = max(tol, abs(W) * 0.02, abs(H) * 0.02, 50.0)
+    msp = doc.modelspace()
+    n = 0
+    cells = []
+    lines = []
+    for e in list(msp):
+        dt = e.dxftype()
+        if dt in ("LWPOLYLINE", "POLYLINE"):
+            try:
+                if dt == "LWPOLYLINE":
+                    pts = [(p[0], p[1]) for p in e.get_points()]
+                else:
+                    pts = [(v.dxf.location.x, v.dxf.location.y) for v in e.vertices()]
+            except Exception:
+                continue
+            if not pts:
+                continue
+            if not (_is_closed(e) or pts[0] == pts[-1]):
+                continue
+            xs = [p[0] for p in pts]
+            ys = [p[1] for p in pts]
+            r = (min(xs), min(ys), max(xs), max(ys))
+            layer = (e.dxf.layer or "").lower()
+            frameish = _rr._is_title_frame_layer(layer) or layer in ("0", "")
+            hit = False
+            rule_no = 0
+            # (1) 精确匹配
+            if (abs(r[0] - x0) < atol and abs(r[1] - y0) < atol and
+                    abs(r[2] - x1) < atol and abs(r[3] - y1) < atol):
                 hit = True
-        if hit:
-            msp.delete_entity(e)
-            n += 1
+                rule_no = 1
+            # (2) 检测框完整落在矩形内（纸边外框比检出子框大一圈）
+            if not hit and (r[0] <= x0 + atol and r[1] <= y0 + atol and
+                            r[2] >= x1 - atol and r[3] >= y1 - atol):
+                hit = True
+                rule_no = 2
+            # (3) 矩形完整落在检测框内且面积够大（内框）
+            if not hit and (r[0] >= x0 - atol and r[1] >= y0 - atol and
+                            r[2] <= x1 + atol and r[3] <= y1 + atol):
+                if (r[2] - r[0]) * (r[3] - r[1]) >= outer_area * inner_ratio:
+                    hit = True
+                    rule_no = 3
+            # (4) 与检测框 >=2 边重合（旧框内部分隔线）；或完全包含于检测框且
+            #     贴 >=1 条边（旧框内小分隔格，如标题栏单元格）。仅图框层/0/默认层，
+            #     避免误删图内几何。CNG 等内容矩形虽在框内但不贴框边 -> 不受影响。
+            if not hit and frameish and _intersect(r, (x0, y0, x1, y1)):
+                contained = (r[0] >= x0 - atol and r[1] >= y0 - atol and
+                             r[2] <= x1 + atol and r[3] <= y1 + atol)
+                align = (abs(r[0] - x0) < atol) + (abs(r[2] - x1) < atol) + \
+                        (abs(r[1] - y0) < atol) + (abs(r[3] - y1) < atol)
+                if align >= 2 or (contained and align >= 1):
+                    hit = True
+                    rule_no = 4
+            if hit:
+                msp.delete_entity(e); n += 1
+                # 墓碑记录（2026-08-31）：规则(3)(4)删掉的子矩形（面积<=0.2 当前框）
+                # 大概率是旧标题栏单元格/内分隔格。其内部的旧标题栏「值文本、格线、
+                # 符号块」不匹配 _TITLE_LABEL_RE，此前被守卫漏删，与新标题栏叠加
+                # （07a/07b 双份图名、从法兰 INSERT/HATCH 残留）。把墓碑 bbox 交给
+                # delete_title_strip 做几何定位清理——范围来自已删除的框几何，不靠
+                # 正则猜测，内容文本在墓碑之外不受影响。
+                # 注意：record_cells=False（并集外框趟）绝不记录——并集框面积巨大，
+                # 真实子框与并集共 2 边会被规则(4)删掉，若按并集面积记墓碑，整个
+                # 子框都被当「标题栏单元格」，CNG 实测误删 2109 个实体。
+                if record_cells and rule_no in (3, 4):
+                    area = (r[2] - r[0]) * (r[3] - r[1])
+                    if area <= outer_area * 0.2:
+                        pad = max(1.0, 0.01 * max(W, H))
+                        cells.append((r[0] - pad, r[1] - pad,
+                                      r[2] + pad, r[3] + pad))
+        elif dt == "LINE":
+            lines.append(e)
+    n += _delete_line_rect(msp, lines, frame_bbox, tol)
+    if cells:
+        try:
+            doc._title_cell_boxes.extend(cells)
+        except AttributeError:
+            doc._title_cell_boxes = cells
     return n
 
 
@@ -150,6 +233,111 @@ def delete_title_strip(doc, frame_bbox, strip_ratio=0.28):
     long_th = max(W, H) * 0.55
     msp = doc.modelspace()
     n = 0
+
+    def _ent_bbox(e):
+        try:
+            b = bbox_mod.extents([e])
+            if b and b.has_data:
+                return b
+        except Exception:
+            pass
+        return None
+
+    def _in_box(ip, box):
+        return (box[0] <= ip[0] <= box[2] and box[1] <= ip[1] <= box[3])
+
+    # ---- 标题区线簇盒（2026-08-31）----
+    # 16MW 'TABLE' 层、从法兰 '图框' 层的旧标题栏单元格不在 strip 的线类删除
+    # 范围内（层名不在 frameish 允许集 / 单元格越出 strip 边界）时，旧标题栏整簇
+    # 残留。这里把标题区内「非内容层、非 0/数字层」的闭合矩形/短格线聚成一个
+    # 联合盒 U（>=3 条才算簇），作为清理范围；U 内文本需有 >=2 个标题栏标签
+    # （图名/图号/比例…）作证据才放开删除，避免把图例框等当标题栏。
+    cluster_ents = []
+    # 角落锚定带（2026-08-31）：旧标题栏必然贴着图框右下角。落在标题带内但不贴角
+    # 的闭合矩形（如主接线图右下角的 EQUIP 设备框 (570,90)-(780,170)）不是标题栏
+    # 成员——收进簇会把簇盒撑大到覆盖内容区，标签证据再放开白名单就会误删内容
+    # （实测主接线图 EQUIP 框+3 条说明文本被误删）。
+    corner_band_x = fx1 - 0.02 * W   # 距右边界 2% 内
+    corner_band_y = fy0 + 0.02 * H   # 距下边界 2% 内
+    for e in msp:
+        dt = e.dxftype()
+        if dt not in ("LINE", "LWPOLYLINE", "POLYLINE"):
+            continue
+        layer = (e.dxf.layer or "").lower()
+        if layer in _rr._CONTENT_LAYER_HINTS or _rr._is_zero_layer(layer):
+            continue
+        b = _ent_bbox(e)
+        if not (b and _fully_in_zone(b, fx0, fy0, fx1, zy1, zx0)):
+            continue
+        if not (b.extmax.x >= corner_band_x or b.extmin.y <= corner_band_y):
+            continue  # 不贴右/下边界的实体不是标题栏成员
+        if dt != "LINE" and _is_closed(e):
+            cluster_ents.append((e, b))
+        elif _short_line_len(e, W, H) <= long_th:
+            cluster_ents.append((e, b))
+    cluster_box = None
+    cluster_labels = 0
+    if len(cluster_ents) >= 3:
+        ux0 = min(b.extmin.x for _, b in cluster_ents)
+        uy0 = min(b.extmin.y for _, b in cluster_ents)
+        ux1 = max(b.extmax.x for _, b in cluster_ents)
+        uy1 = max(b.extmax.y for _, b in cluster_ents)
+        cluster_box = (ux0, uy0, ux1, uy1)
+        for e in msp:
+            if e.dxftype() not in _TITLE_TEXT:
+                continue
+            try:
+                ip = e.dxf.insert
+            except Exception:
+                continue
+            if not _in_box((ip.x, ip.y), cluster_box):
+                continue
+            raw = e.text if e.dxftype() == "MTEXT" else (e.dxf.text or "")
+            txt = _rr._decode_mtext_mplus(raw or "")
+            txt = txt.replace(' ', '').replace('\t', '').replace('\n', '')
+            if _rr._TITLE_LABEL_RE.search(txt):
+                cluster_labels += 1
+
+    # 标签证据盒（2026-08-31）：旧标题栏网格线可能与表格共用图层（16MW 'TABLE'）、
+    # 或落在内容层白名单（'TEXT'）导致线簇聚合不出来。兜底改用「标签文本证据」：
+    # strip 区底部 18% 内命中 >=2 个标题栏标签（图名/图号/比例/阶段…，种子不限
+    # 图层），以这些标签的联合 bbox 外扩成盒。盒内文本删除（内容层白名单仅在
+    # 有标签证据时放开）；盒内非内容层短格线一并清理。
+    label_box = None
+    if cluster_box is None or cluster_labels < 2:
+        lab_bbs = []
+        for e in msp:
+            if e.dxftype() not in _TITLE_TEXT:
+                continue
+            try:
+                ip = e.dxf.insert
+            except Exception:
+                continue
+            if not (zx0 <= ip.x <= fx1 and fy0 <= ip.y <= fy0 + 0.18 * H):
+                continue
+            raw = e.text if e.dxftype() == "MTEXT" else (e.dxf.text or "")
+            txt = _rr._decode_mtext_mplus(raw or "")
+            txt = txt.replace(' ', '').replace('\t', '').replace('\n', '')
+            if _rr._TITLE_LABEL_RE.search(txt):
+                b = _ent_bbox(e)
+                if b is not None:
+                    lab_bbs.append(b)
+        if len(lab_bbs) >= 2:
+            lx0 = min(b.extmin.x for b in lab_bbs) - 0.02 * W
+            ly0 = min(b.extmin.y for b in lab_bbs) - 0.01 * H
+            lx1 = max(b.extmax.x for b in lab_bbs) + 0.02 * W
+            ly1 = max(b.extmax.y for b in lab_bbs) + 0.06 * H
+            label_box = (max(lx0, fx0), max(ly0, fy0),
+                         min(lx1, fx1), min(ly1, fy1))
+    relax_hints = (cluster_box is not None and cluster_labels >= 2) or \
+        (label_box is not None)
+
+    def _box_hit(b, box):
+        return (b is not None and
+                b.extmin.x <= box[2] and b.extmax.x >= box[0] and
+                b.extmin.y <= box[3] and b.extmax.y >= box[1])
+
+    # ---- 主循环 ----
     for e in list(msp):
         dt = e.dxftype()
         # 1) 文本类：插入点在标题区内 且 图层非内容层 → 删
@@ -191,9 +379,14 @@ def delete_title_strip(doc, frame_bbox, strip_ratio=0.28):
             continue
         # 3) 线类：只删闭合矩形(标题框)或短线段(格线)，长线跳过
         if dt in ("LINE", "LWPOLYLINE", "POLYLINE"):
-            # 图层感知：layer 0 / 数字层上的线类（设备材料表网格、真实几何）跳过，
-            # 不误删；旧标题栏框线在命名图框层，由 delete_old_frame_grid 清除。
-            if _rr._is_zero_layer((e.dxf.layer or "")):
+            layer = (e.dxf.layer or "").lower()
+            # 安全网（零误删红线）：标题区线类仅删「明确是旧图框/标题栏层」上的
+            # 闭合矩形或短格线；其余层（内容层 wall/axis/wire、0/数字层、以及
+            # 首层/D-1/DJ1/信箱 等项目层）一律保留。旧标题栏框线多在 图框/TK/
+            # PUB_TITLE/BORDER 等命名层，由本正向允许集覆盖；落在标题区的真实
+            # 墙/轴/标注线不再被当旧格线误删（实测 multi 模式曾多删 WALL 302/
+            # STAIR 118/WIRE 等共 540 条内容层实体）。
+            if not _rr._is_title_frame_layer(layer):
                 continue
             try:
                 b = bbox_mod.extents([e])
@@ -210,6 +403,116 @@ def delete_title_strip(doc, frame_bbox, strip_ratio=0.28):
             # else: 长线，跳过（疑似图内几何/尺寸线）
             continue
         # 4) 其它类型不处理
+
+    # ---- 墓碑 / 线簇盒清理（2026-08-31）----
+    # 墓碑 = delete_frame_border 规则(3)(4)删掉的标题栏单元格 bbox；其中残存的
+    # 旧标题栏值文本/格线/符号块不匹配标签正则，主循环删不到。线簇盒 = 标题区
+    # 内命名层格线的联合盒（16MW 'TABLE'、从法兰 '图框'）。两类盒内：
+    #   文本     非内容层即删（0/数字层仅墓碑盒内删；线簇盒需 >=2 标签证据），
+    #            内容层白名单仅在线簇盒有标签证据时放开（16MW 旧标题在 'TEXT' 层）
+    #   线类     图框层全删；0/数字层仅墓碑盒内且短线；内容层不删
+    #   INSERT/HATCH  图框层或 0/默认层且 bbox 在盒内；内容层不删
+    #   DIMENSION/LEADER 绝不删
+    boxes = [("tomb", bx) for bx in (getattr(doc, "_title_cell_boxes", None) or [])]
+    if cluster_box is not None and cluster_labels >= 2:
+        boxes.append(("cluster", cluster_box))
+    if label_box is not None:
+        boxes.append(("cluster", label_box))  # 标签证据盒与线簇盒同待遇
+    if not boxes:
+        return n
+    for e in list(msp):
+        dt = e.dxftype()
+        if dt in ("DIMENSION", "LEADER"):
+            continue
+        layer = (e.dxf.layer or "").lower()
+        if layer in _rr._CONTENT_LAYER_HINTS and not (
+                dt in _TITLE_TEXT and relax_hints):
+            continue  # 内容层白名单（有标签证据时对文本放开）
+        zero = _rr._is_zero_layer(layer)
+        frameish = _rr._is_title_frame_layer(layer)
+        if dt in _TITLE_TEXT:
+            try:
+                ip = e.dxf.insert
+            except Exception:
+                continue
+            for kind, box in boxes:
+                if _in_box((ip.x, ip.y), box):
+                    # 墓碑盒：几何上就是已删标题栏单元格内部，0 层值文本直接删；
+                    # 线簇/标签盒：需 >=2 标签证据（boxes 列表已把关），同样直接删。
+                    msp.delete_entity(e); n += 1
+                    break
+            continue
+        if dt in ("LINE", "LWPOLYLINE", "POLYLINE"):
+            b = _ent_bbox(e)
+            for kind, box in boxes:
+                hit = (_box_hit(b, box) if kind == "cluster"
+                       else b is not None and _in_box((b.extmin.x, b.extmin.y), box) and
+                       _in_box((b.extmax.x, b.extmax.y), box))
+                if not hit:
+                    continue
+                if frameish:
+                    msp.delete_entity(e); n += 1
+                elif zero and _short_line_len(e, W, H) <= long_th:
+                    msp.delete_entity(e); n += 1
+                elif relax_hints and layer not in _rr._CONTENT_LAYER_HINTS and \
+                        _short_line_len(e, W, H) <= long_th:
+                    # 线簇/标签盒内非内容层短格线（16MW 旧标题网格在 'TABLE' 层）
+                    msp.delete_entity(e); n += 1
+                break
+            continue
+        if dt in ("INSERT", "HATCH"):
+            b = _ent_bbox(e)
+            for kind, box in boxes:
+                hit = (_box_hit(b, box) if kind == "cluster"
+                       else b is not None and _in_box((b.extmin.x, b.extmin.y), box) and
+                       _in_box((b.extmax.x, b.extmax.y), box))
+                if not hit:
+                    continue
+                if frameish or (zero and kind == "tomb") or layer in ("", ):
+                    msp.delete_entity(e); n += 1
+                break
+            continue
+    return n
+
+
+def delete_frameish_leftovers(doc, frame_bbox, tol=1.0):
+    """删除标题区（右下 strip 带）内图框命名层（图框/TK/BORDER/图签…）的残体。
+
+    2026-08-31：multi 逐框路径的 delete_frame_border + delete_title_strip 只删
+    「几何上像框/格线」的实体，从法兰类 SW 图纸残留在标题区外（左侧装订边刻度、
+    竖排字段列 x<strip 左界、INSERT/HATCH 符号）的图框层实体删不到。最初的实现在
+    整 frame_bbox 内清，结果把装配体爆炸图 17 个 SW_NOTE 零件球标（散落在图面
+    y=80-265 的内容区，「图框」层上 SW 把它们放这）一并清了。现收敛到 strip
+    区（标题栏所在角落），从法兰标题栏角落的 INSERT×4 + HATCH×2 在带内被清，
+    散落在图面的球标全保留。
+    在 insert_template 之前调用（新框尚未插入，无误伤对象）。
+    """
+    fx0, fy0, fx1, fy1 = frame_bbox
+    W = fx1 - fx0
+    H = fy1 - fy0
+    zx0 = fx0 + 0.45 * W      # 与 delete_title_strip 标题区一致
+    zy1 = fy0 + 0.28 * H
+    msp = doc.modelspace()
+    n = 0
+    for e in list(msp):
+        layer = (e.dxf.layer or "").lower()
+        if not _rr._is_title_frame_layer(layer):
+            continue
+        dt = e.dxftype()
+        if dt in ("DIMENSION", "LEADER"):
+            continue
+        try:
+            b = bbox_mod.extents([e])
+            if not (b and b.has_data):
+                continue
+        except Exception:
+            continue
+        # 仅清理完全落在标题 strip 带内的图框层残体
+        if not (b.extmin.x >= zx0 - tol and b.extmax.x <= fx1 + tol and
+                b.extmin.y >= fy0 - tol and b.extmax.y <= zy1 + tol):
+            continue
+        msp.delete_entity(e)
+        n += 1
     return n
 
 

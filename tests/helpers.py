@@ -8,13 +8,14 @@ def new_doc():
     return ezdxf.new("R2010")
 
 
-def add_rect(msp, x0, y0, x1, y1, closed=True, dxftype="LWPOLYLINE"):
+def add_rect(msp, x0, y0, x1, y1, closed=True, dxftype="LWPOLYLINE", layer="0"):
     """在 modelspace 加一个轴对齐闭合矩形（旧图框/标题框）。"""
     if dxftype == "LWPOLYLINE":
         pts = [(x0, y0), (x1, y0), (x1, y1), (x0, y1), (x0, y0)]
-        return msp.add_lwpolyline(pts, close=closed)
+        return msp.add_lwpolyline(pts, close=closed, dxfattribs={"layer": layer})
     e = msp.add_polyline3d(
-        [(x0, y0, 0), (x1, y0, 0), (x1, y1, 0), (x0, y1, 0), (x0, y0, 0)]
+        [(x0, y0, 0), (x1, y0, 0), (x1, y1, 0), (x0, y1, 0), (x0, y0, 0)],
+        dxfattribs={"layer": layer},
     )
     e.close(True)
     return e

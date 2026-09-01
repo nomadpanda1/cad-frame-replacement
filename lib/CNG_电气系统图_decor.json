@@ -1,0 +1,17 @@
+{
+  "source": "CNG_电气系统图.dxf",
+  "strategy": "PUB_DIM 层 + 星欣/置欣/图库 INSERT 块 = 外部水印（CAD图库网站残留）",
+  "count": 1,
+  "layer": "PUB_DIM",
+  "block_marker": "星欣设计图库02",
+  "fingerprints": [
+    [
+      "INSERT",
+      "星欣设计图库02",
+      701658.8,
+      -136740.43,
+      701819.85,
+      -136668.49
+    ]
+  ]
+}

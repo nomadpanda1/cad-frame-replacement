@@ -216,6 +216,29 @@ def detect_frame_groups(doc, min_area_share=0.35, dedup_ratio=0.8,
     vedges = _axis_edges(segs, "v", coord_tol, bridge, min_side)
     hedges = _axis_edges(segs, "h", coord_tol, bridge, min_side)
     rects = _assemble_rects(vedges, hedges, coord_tol, min_side)
+    # 源图里真实绘制的闭合多段线矩形直接入池（2026-08-31）：
+    # 共边拼版的子框因「两竖边共端点」装配约束进不了候选池——07b_side_by_side
+    # 的 2×2 四个 400×300 子框共边后，竖边被合并成整条 [20,620]，子框角点不再
+    # 是边的端点，只剩两根 400×600 跨列合并矩形。把闭合 LWPOLYLINE/POLYLINE 的
+    # bbox 补进池子，下方「精确铺满拆分」才有真子框可用。
+    for e in msp:
+        dt = e.dxftype()
+        if dt == "LWPOLYLINE":
+            if not e.closed:
+                continue
+        elif dt != "POLYLINE":
+            continue
+        try:
+            b = bbox_mod.extents([e])
+            if not b.has_data:
+                continue
+            bw = b.extmax.x - b.extmin.x
+            bh = b.extmax.y - b.extmin.y
+        except Exception:
+            continue
+        if min(bw, bh) < min_side:
+            continue
+        rects.append((b.extmin.x, b.extmin.y, b.extmax.x, b.extmax.y))
     if not rects:
         return None, []
 
@@ -245,6 +268,10 @@ def detect_frame_groups(doc, min_area_share=0.35, dedup_ratio=0.8,
 
     # 拼版纸边：最外框内含 >=2 个互不重叠的子框且合计占其大半，则它是纸边，
     # 真正的替换目标是子框（对应 detect_frames_hierarchical 的 sheet 概念）。
+    # 2026-08-31 可比性门槛：子框尺寸必须彼此可比（每个 >= 最大子框的 25%）。
+    # 否则「整幅 A1 外框 + 一张大表格 + 右下角小标题栏格」也会命中该分支——
+    # 16MW 二次系统信号表即此情形：真外框被当成纸边拆掉、表格被当成图框，
+    # 下游删了表格边线（内容损伤）、真外框与旧标题栏反而残留。
     sheet = None
     if len(tops) == 1:
         kids = children_of(tops[0])
@@ -252,11 +279,37 @@ def detect_frame_groups(doc, min_area_share=0.35, dedup_ratio=0.8,
         for c in sorted(kids, key=lambda x: -_bbox_area(x)):
             if all(not _bbox_overlap(c, s, coord_tol) for s in sel):
                 sel.append(c)
+        if sel:
+            big = _bbox_area(sel[0])
+            sel = [c for c in sel if _bbox_area(c) >= 0.25 * big]
         if len(sel) >= 2 and \
                 sum(_bbox_area(c) for c in sel) >= split_cover * _bbox_area(tops[0]):
             sheet = tops[0]
             rects = [r for r in rects if r is not sheet]
             tops = tops_of(rects)
+
+    # 共享边拼版的拆分：多个子框共边排版时，装配会把「并排/叠放共享一条边的
+    # 子框」合并成一个跨列大矩形（07b_side_by_side 的 2×2 四个子框被装配成
+    # 两根 400×600 长框），真子框反而被当成 children 遮蔽。若一个 top 能被
+    # >=2 个互不重叠的子框**几乎精确铺满**（合计面积 >=95%），说明它只是
+    # 装配产物而非真实图框，应以子框为替换目标。
+    # 「精确铺满」门槛不会误伤正常图纸：表格+标题栏只占外框 ~60%，够不到 95%。
+    if len(tops) > 1:
+        expanded = []
+        for t in tops:
+            kids = [c for c in rects
+                    if c is not t and _bbox_contains(t, c, coord_tol) and
+                    _bbox_area(c) < 0.95 * _bbox_area(t)]
+            sel = []
+            for c in sorted(kids, key=lambda x: -_bbox_area(x)):
+                if all(not _bbox_overlap(c, s, coord_tol) for s in sel):
+                    sel.append(c)
+            if len(sel) >= 2 and \
+                    sum(_bbox_area(c) for c in sel) >= 0.95 * _bbox_area(t):
+                expanded.extend(sel)
+            else:
+                expanded.append(t)
+        tops = expanded
 
     if len(tops) > 1:
         max_area = max(_bbox_area(r) for r in tops)
@@ -466,7 +519,7 @@ def detect_titleblock(doc, outer):
     if anchor_source == "vocab":
         # vocab 路径信号强：扫描右下角区域内的所有文本，取最高一行的顶边（含图名行），
         # 避免截断图名（图名行可能在锚点上方）。
-        top_scan = yB + 0.50 * H
+        top_scan = yB + 0.30 * H
         top_y = maxy
         for e in msp:
             dt = e.dxftype()
@@ -485,7 +538,14 @@ def detect_titleblock(doc, outer):
             cy = (b.extmin.y + b.extmax.y) / 2
             if left - 4 <= cx <= xR + 4 and yB - 4 <= cy <= top_scan:
                 top_y = max(top_y, b.extmax.y)
-        top_y = min(top_y, top_scan)
+        top_y = max(maxy, min(top_y, top_scan))  # 扫描只允许抬升，不能压过锚点自身
+        # 2026-08-31 内容护栏：top_scan 允许把 tb 上界抬到 0.30H 内任一文本的顶边，
+        # 但 tb 上方紧邻的设备/图例内容框（主接线图 '二次及辅助系统' EQUIP 框的
+        # 3 条文本在 y115-159）会被圈进 tb —— delete_titleblock_grid/text 连框带
+        # 文本一起删，弱提取还把 '消防/HVAC/视频/门禁' 当 DWG_NO 写进新标题栏
+        # （16MW 信号表的表格行标签同理，tb 被撑到 y~295）。图名行必然紧贴
+        # 标签行上方，故上界最多抬到「锚点最高行 + 0.06H」。
+        top_y = min(top_y, maxy + 0.06 * H)
         # 小余量
         tb = (left, yB - 2.0, xR + 2.0, top_y + 4.0)
     else:
@@ -733,7 +793,7 @@ def _title_from_label(items):
                 continue
             if al in n and (":" in raw or "：" in raw):
                 val = re.split(r"[:：]", raw, maxsplit=1)[-1].strip()
-                if val and not _is_pure_label(val):
+                if val:
                     return val
     for cx, cy, raw, h in items:
         if _norm(raw) in [a for a in CONCEPT_ALIASES.get("TITLE", []) if a]:
@@ -747,7 +807,7 @@ def _title_from_label(items):
                     if dx < best_dx:
                         best_dx = dx
                         best = raw2
-            if best and not _is_pure_label(best):
+            if best:
                 return best
     return None
 
@@ -794,12 +854,8 @@ for _v in SW_TITLE_VOCAB:
 
 
 def _is_pure_label(raw):
-    """文本本身是否就是标题栏字段标签（列头），不应作为字段值。
-
-    2026-08-26 增强：先去冒号（「档案号:」→「档案号」）再比对，使带冒号的列头/
-    字段名标签也能被识别跳过（修复 STAGE 误抓「档案号:」等跨字段误判）。
-    """
-    s = _norm(raw).replace(":", "").replace("：", "")
+    """文本本身是否就是标题栏字段标签（列头），不应作为字段值。"""
+    s = _norm(raw)
     return s in _LABEL_NORM_SET
 
 
@@ -1084,17 +1140,12 @@ def find_titleblocks(doc, margin_ratio=0.02):
 
 _TB_COLHEAD = {
     "名称", "型号规格", "型号", "规格", "单位", "数量", "备注", "编号", "进线编号",
-    "共张", "第张", "共页", "第页", "共 张", "第 张",
     "进线回路编号", "出线回路编号", "回路编号", "配电箱编号", "低压配电柜编号",
     "低压配电柜型号", "配电箱型号及规格", "设备容量", "电缆型号及规格", "用途", "栋数",
     "档案号", "项目号", "室别", "比例", "阶段", "日期", "材料", "重量", "版本",
     "设计", "制图", "校对", "审核", "批准", "会签", "标准化", "图名", "图号",
 }
 _TB_LABEL_SET_V2 = set(_LABEL_NORM_SET) | {_norm(x) for x in _TB_COLHEAD}
-# 增强（2026-08-26）：v1 的 _is_pure_label 一并覆盖列头词，修复「列头/字段名当值」
-# 误判（CNG 类带材料表图：STAGE 误抓「档案号:」、TITLE 误抓「型号规格」列头）。
-# 仅扩展标签集合，不改 v1 的多级标题兜底与 ATTDEF 覆盖，92DZ1 等图不退化。
-_LABEL_NORM_SET |= {_norm(x) for x in _TB_COLHEAD}
 
 
 def _is_pure_label_v2(raw):

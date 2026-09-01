@@ -35,7 +35,11 @@ def _get_acad():
     让 --dwg 等需要 AutoCAD 的路径开箱即用（更“好用”）。
     """
     import time
-    import win32com.client
+    try:
+        import win32com.client
+    except ImportError:
+        # 非 Windows / 未装 pywin32（如 Linux 无头服务器）：无 AutoCAD COM，直接返回 None
+        return None
     # 1) 连已运行的实例
     try:
         return win32com.client.GetActiveObject("AutoCAD.Application")
@@ -80,6 +84,11 @@ def find_converter():
     lc = _which("librecad.exe") or _which("librecad")
     if lc:
         return ("LibreCAD", lc)
+
+    # 2.5) LibreDWG（dwg2dxf / dxf2dwg）—— Linux 无头服务器首选，Docker 镜像构建时编译安装
+    dwg2dxf = _which("dwg2dxf")
+    if dwg2dxf:
+        return ("libredwg", dwg2dxf)
 
     # 3) 默认安装父目录递归（ODA/LibreCAD 都装在这几个确定位置）
     for base in (r"C:\Program Files\ODA", r"C:\Program Files (x86)\ODA",
@@ -160,6 +169,17 @@ def dwg_to_dxf(src, dst):
             if f.lower().endswith(".dxf"):
                 shutil.copy(os.path.join(outdir, f), dst)
                 return True
+    if name == "libredwg":
+        # dwg2dxf 把结果写到「当前目录/<同名>.dxf」，且默认不覆盖已存在文件（需 -y）
+        work = os.path.dirname(os.path.abspath(dst))
+        base = os.path.splitext(os.path.basename(src))[0]
+        produced = os.path.join(work, base + ".dxf")
+        subprocess.run(["dwg2dxf", "-y", os.path.basename(src)],
+                       cwd=work, check=True,
+                       stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=120)
+        if produced != os.path.abspath(dst) and os.path.exists(produced):
+            os.replace(produced, os.path.abspath(dst))
+        return os.path.exists(dst)
     return False
 
 
@@ -181,4 +201,15 @@ def dxf_to_dwg(src, dst):
             if f.lower().endswith(".dwg"):
                 shutil.copy(os.path.join(outdir, f), dst)
                 return True
+    if name == "libredwg":
+        # dxf2dwg 把结果写到「当前目录/<同名>.dwg」，且默认不覆盖已存在文件（需 -y）
+        work = os.path.dirname(os.path.abspath(dst))
+        base = os.path.splitext(os.path.basename(src))[0]
+        produced = os.path.join(work, base + ".dwg")
+        subprocess.run(["dxf2dwg", "-y", os.path.basename(src)],
+                       cwd=work, check=True,
+                       stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=120)
+        if produced != os.path.abspath(dst) and os.path.exists(produced):
+            os.replace(produced, os.path.abspath(dst))
+        return os.path.exists(dst)
     return False

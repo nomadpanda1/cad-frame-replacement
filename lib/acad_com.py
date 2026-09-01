@@ -365,7 +365,7 @@ def _size_name_from_tpl(tpl_dwg):
     return base
 
 
-def insert_frame(msp, frame, tpl_dwg, fields, size_table=None, fit="max"):
+def insert_frame(msp, frame, tpl_dwg, fields, size_table=None, fit="min"):
     """在 frame 处插入公司图框块（tpl_dwg 为 prepare_templates 生成的 *.dwg），缩放并回填属性。
 
     双插法（外壳块导入 HH_FRAME_Ax 定义 → 按名插干净块 → 删外壳）同前。

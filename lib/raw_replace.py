@@ -5,9 +5,7 @@
 使 exe 也能处理这类图纸。此处不依赖 matplotlib，避免污染冻结 exe。
 """
 import re
-from collections import Counter
 from ezdxf import bbox as bbox_mod
-from .text_decode import decode_mtext as _decode_mtext
 
 
 def sheet_extents(doc):
@@ -62,71 +60,6 @@ def delete_frame_lines(doc, frames):
     return n
 
 
-def delete_frame_edge_ticks(doc, outer, margin=30.0, max_len=30.0):
-    """删旧「打散」图框的边标刻度线（坐标/比例刻度短线）。
-
-    SolidWorks 导出的图框常在边框外侧留一圈短刻度线（左/右边缘水平短线、
-    上/下边缘竖直短线），用于标注坐标/比例。这些线落在图纸边距带（旧框
-    矩形 outer 外侧）而非边框线上，delete_frame_lines 只删边框矩形四边、
-    够不到，导致替换后（尤其新框放大铺满整页时）这些白线残留于新框内、
-    与用户所见「上个图框的白线存在」一致。
-
-    判定（2026-08-25 fix 缺陷 H）：短线段（最长分段 ≤ max_len）且其 bbox
-    中点位于旧框矩形 outer 的 OUTSIDE、且距外框边 ≤ margin（即落在边距带
-    内）→ 视为旧框刻度线删掉。真实绘图内容通常位于外框内侧，边距带内仅有
-    旧框系统几何，故安全（实测装配体 24 条刻度线全中、0 条长线误删、
-    2308 条框内真实内容不受影响）。
-    """
-    x0, y0, x1, y1 = outer
-    msp = doc.modelspace()
-    n = 0
-    for e in list(msp):
-        dt = e.dxftype()
-        if dt not in ("LINE", "LWPOLYLINE", "POLYLINE"):
-            continue
-        try:
-            b = bbox_mod.extents([e])
-        except Exception:
-            continue
-        if not b or not b.has_data:
-            continue
-        # 短段判定：最长分段 ≤ max_len 才视为刻度短线
-        try:
-            if dt == "LINE":
-                s, en = e.dxf.start, e.dxf.end
-                seg = ((s.x - en.x) ** 2 + (s.y - en.y) ** 2) ** 0.5
-            elif dt == "LWPOLYLINE":
-                pts = e.get_points()
-                if not pts:
-                    continue
-                seg = max(((pts[i][0] - pts[i-1][0]) ** 2 +
-                           (pts[i][1] - pts[i-1][1]) ** 2) ** 0.5
-                          for i in range(1, len(pts)))
-            else:
-                vs = list(e.vertices())
-                if not vs:
-                    continue
-                seg = max(((vs[i].dxf.location.x - vs[i-1].dxf.location.x) ** 2 +
-                           (vs[i].dxf.location.y - vs[i-1].dxf.location.y) ** 2) ** 0.5
-                          for i in range(1, len(vs)))
-        except Exception:
-            continue
-        if seg > max_len:
-            continue
-        # 中点在旧框外、且距外框边 ≤ margin（落在边距带内）
-        cx = (b.extmin.x + b.extmax.x) / 2
-        cy = (b.extmin.y + b.extmax.y) / 2
-        inside = (x0 <= cx <= x1) and (y0 <= cy <= y1)
-        if inside:
-            continue
-        dx = max(x0 - cx, 0.0, cx - x1)
-        dy = max(y0 - cy, 0.0, cy - y1)
-        if (dx * dx + dy * dy) ** 0.5 <= margin:
-            msp.delete_entity(e)
-            n += 1
-    return n
-
-
 def _spans_beyond(eb, tb, margin):
     """实体是否「大幅越出」标题栏 bbox（在某一侧超出 margin 以上）。
 
@@ -139,20 +72,16 @@ def _spans_beyond(eb, tb, margin):
             eb[1] < tb[1] - margin or eb[3] > tb[3] + margin)
 
 
-# 标题栏字段标签词：旧标题栏的 图名/图号/比例/日期… 文本落在此区，应清掉；
-# 这些是明确的标题栏标签词，几乎不会出现在真实绘图内容里，正则命中即可安全删除。
-# 2026-08-26 补：旧会签栏标签（房间号/档案号/项目号）原本不在词表。
-# 2026-08-26 v4：解码 AutoCAD MTEXT `\M+5XXXX` GBK 转义码后再做标签匹配。
-# 旧图框全部中文标签以这种 5-char HEX 模式存储（如 `\M+5D6C6\M+5CDBC` = `制图`），
-# 不解码则 `_TITLE_LABEL_RE.search("\\M+5D6C6\\M+5CDBC")` 永远匹配不到"制图"，
-# 守卫把旧标题栏标签误判为"非标题栏文本"完整保留（CNG 实测：制图/校对/设计/审核/审定
-# /批准/阶段/档案号/批准 等全部残留 → 用户反馈"完全没有改进"）。
 def _decode_mtext_mplus(s):
-    """AutoCAD MTEXT \M+XYYYY 解码成中文（GBK）。
+    """AutoCAD MTEXT \\M+XYYYY 解码成中文（GBK）。
 
-    格式: `\M+` 后跟一个 nibble 字符（编码表标记）+ 4 位 hex（GBK 2 字节）= 1 个汉字。
+    格式: `\\M+` 后跟一个 nibble 字符（编码表标记）+ 4 位 hex（GBK 2 字节）= 1 个汉字。
     例子: \\M+5D6C6\\M+5CDBC -> 档图。
     普通数字层/命名层无 \\M+ 时此函数为 no-op，开销极低。
+
+    注意：源 DXF 的中文标签常以这种 5 位 HEX 转义码存储，不解码则下方
+    _TITLE_LABEL_RE / _TITLE_VALUE_RE 永远匹配不到，守卫会误判为「非标题栏
+    文本」而保留旧标题栏。
     """
     if not s or "\\M+" not in s:
         return s
@@ -167,19 +96,18 @@ def _decode_mtext_mplus(s):
     )
 
 
-# 2026-08-26 v4：扩展正文/标签词表，配合解码后命中。如漏掉"建设"/"工程"/"厂家"
-# 之类也建议加上；当前先确保 8/26 CNG 标注全部命中。
+# 标题栏字段标签词：旧标题栏的 图名/图号/比例/日期… 文本落在此区，应清掉；
+# 这些是明确的标题栏标签词，几乎不会出现在真实绘图内容里，正则命中即可安全删除。
 _TITLE_LABEL_RE = re.compile(
     r"(图名|图号|比例|日期|设计|审核|制图|校对|图别|专业|负责人|审定|"
     r"会签|页码|张次|密级|校核|批准|审查|描图|建设单位|制图日期|设计阶段|"
     r"工程名称|项目名称|设计号|图幅|第.{1,3}张|共.{1,3}张|"
     r"室别|建筑室|项目号|档案号|阶段|初步|建设|厂家|署名|会签栏)"
 )
-# 2026-08-26 补：cluster 区内「旧标题栏字段值」（非 ATTRIB、非块内文字，而是
-# 散落在 layer 0 / 数字层的旧标题内容）模式。CNG 例子里 A3X3 #3 的源标题值
-# "10kV主接线图" 落在 layer 0，layer-0 守卫会按"非标题栏标签"误判保留，与
-# 新 HH_FRAME 重叠（用户反馈"没有删除旧图框"）。layer-3 同文本为原图自带的
-# 真正图名，应保留。
+
+# 旧标题栏「字段值」（散落在 layer 0 / 数字层）模式。CNG 例子里 A3X3 #3 的源
+# 标题值 "10kV主接线图" 落在 layer 0，layer-0 守卫会按「非标题栏标签」误判保留，
+# 与新 HH_FRAME 重叠（用户反馈「没有删除旧图框」）。
 _TITLE_VALUE_RE = re.compile(
     r"(10kV主接线图|主接线图|平面布置图|电气原理图|装配图|剖面图|展开图|系统图)"
 )
@@ -188,17 +116,17 @@ _TITLE_VALUE_RE = re.compile(
 _TITLE_LAYERS = {"tukuang", "图框", "pub_title", "图签", "tk", "title",
                  "frame", "border", "borders", "边框", "titleblock", "图框线", "图框层"}
 
-
-# 内容层白名单：detect_titleblock tb 圈已收紧，但若仍误入内容区，delete_titleblock_grid
-# 应跳过这些「明显是真实绘图内容」的层。覆盖建筑/电气/暖通常见层名（大小写不敏感）。
-# 旧标题栏网格线一般落在通用层（0、10、数字层）而非这些「领域层」，故白名单不会
-# 误伤旧标题栏清场。
+# 内容层白名单：detect_titleblock tb 圈已收紧，但若仍误入内容区，清理函数应跳过
+# 这些「明显是真实绘图内容」的层。覆盖建筑/电气/暖通常见层名（大小写不敏感）。
+# 旧标题栏网格线一般落在通用层（0、10、数字层）而非这些「领域层」，故白名单
+# 不会误伤旧标题栏清场。
 _CONTENT_LAYER_HINTS = frozenset({
     # 建筑
     "wall", "walls", "墙", "墙体", "wall-1", "wall-2",
     "window", "windows", "窗", "窗户",
     "door", "doors", "门", "门洞", "门联窗",
-    "column", "columns", "柱", "柱子", "轴线",
+    "column", "columns", "柱", "柱子", "轴线", "axis", "中心线", "center",
+    "centerline", "cl", "grid", "轴网",
     "furn", "furniture", "家具", "洁具", "橱柜", "柜台",
     "stair", "楼梯", "台阶", "坡道",
     "room", "房间", "功能", "隔墙",
@@ -211,17 +139,43 @@ _CONTENT_LAYER_HINTS = frozenset({
     # 标注/文字
     "文字", "text", "annotation", "注记", "标注", "tag", "label",
     "dim", "dimension", "defpoints",  # defpoints=AutoCAD 尺寸默认层
+    "pub_dim", "pub_dim_text", "pub_text", "pub_title_text",
 })
 
 
 def _is_zero_layer(layer):
-    """图层感知守卫：layer 0 与纯数字层（下载/第三方 DWG 常把真实绘图内容堆在这些层）
-    视为受保护内容层。清理函数默认不删其上的 TEXT/MTEXT/线类，避免误删设备材料表等
-    真实内容；只有明确属于旧标题栏结构（ATTDEF/ATTRIB、或命中 _TITLE_LABEL_RE 的
-    标题标签）才例外删除。旧标题栏框线/网格通常落在命名图框层（TK/图框/PUB_TEXT…），
-    由 delete_old_frame_grid / delete_frame_lines 按层名/几何清除，不依赖 0 层。"""
+    """图层感知守卫：layer 0 与纯数字层（下载/第三方 DWG 常把真实绘图内容堆在
+    这些层）视为受保护内容层。清理函数默认不删其上的 TEXT/MTEXT/线类，避免误删
+    设备材料表等真实内容；只有明确属于旧标题栏结构（ATTDEF/ATTRIB、或命中
+    _TITLE_LABEL_RE 的标题标签、命中 _TITLE_VALUE_RE 的标题值）才例外删除。
+    旧标题栏框线/网格通常落在命名图框层（TK/图框/PUB_TEXT…），由
+    delete_old_frame_grid / delete_frame_lines 按层名/几何清除，不依赖 0 层。"""
     l = (layer or "").strip()
     return l == "0" or (l.isdigit() and l != "")
+
+
+def _is_title_frame_layer(layer):
+    """旧图框/标题栏层判定（delete_title_strip 线类分支的「正向允许集」）。
+
+    零误删红线：标题区线类只删明确属于旧图框/标题栏层的闭合矩形或短格线；
+    其余层（内容层 wall/axis/wire、0/数字层、以及首层/D-1/DJ1/信箱 等项目层）
+    一律保留。旧标题栏框线多在 图框/TK/PUB_TITLE/BORDER 等命名层，本集合覆盖；
+    落在标题区的真实墙/轴/标注线不再被当旧格线误删。
+
+    注意：PUB_DIM / PUB_TEXT 等装饰+标注混合层不在此列（其标注线应保留，
+    水印 INSERT 由装饰删除集单独处理），以免把真实尺寸线当旧框线删掉。
+    """
+    l = (layer or "").strip().lower()
+    if not l:
+        return False
+    if l in _TITLE_LAYERS:
+        return True
+    if l.startswith("tk") or l == "tukuang":
+        return True
+    if "图框" in l or "图签" in l or l == "titleblock":
+        return True
+    return False
+
 
 
 def delete_titleblock(doc, tb, maxdim=None):
@@ -283,163 +237,6 @@ def delete_old_frame_grid(doc):
     return n
 
 
-def delete_stale_grid_in_frame_inserts(doc, frame_bboxes,
-                                       stale_layers=("1",),
-                                       allowed_layer_prefixes=("HH_TITLE", "$TD_AUDIT", "$TD_")):
-    """清理每个 HH_FRAME INSERT bbox 内、明确属于旧图框栅格的 LINE/LWPOLYLINE/POLYLINE。
-
-    2026-08-26（缺陷 I）：CNG 电气系统图（4.dxf）源在每个 HH_FRAME INSERT
-    区域内的 layer "1" 上残留 16 个 LWPOLYLINE + 13 个 LINE（共 29 条/frame），
-    这是 AutoCAD 打散导出的旧图框栅格骨架（会签栏 / 标题栏外框）。AutoCAD
-    渲染 layer "1" 描边为白线，叠加在新 HH_FRAME 之上的格线呈现「白色框」。
-    `delete_titleblock_grid` 按 tb 矩形删（tb 圈远小于 frame bbox）；
-    `delete_old_frame_grid` 只清 `_TITLE_LAYERS`（不识 layer "1"）；
-    `delete_old_frame_grid_extended` 只清 0 层长直线（layer "1" / 短线够不到）。
-    三者都漏，金标（gold）文件把 layer "1" 整层删除，v4 没这个动作。
-
-    修法：传入 `stale_layers`（默认 `("1",)`）作为「明确属于旧图框栅格的图层
-    清单」，凡 frame bbox 内、layer 在 stale_layers 集合里、且不在白名单前缀
-    （HH_TITLE / $TD_AUDIT / $TD_）的 LINE/LWPOLYLINE/POLYLINE 一律删。
-    其它层（含内容层 layer "0" / 数字层）一律不碰，避免误删真实绘图几何。
-
-    风险与可控性：
-      - 默认 stale_layers=("1",) 仅命中 layer "1"，对多数图纸无影响
-        （其他图纸的 layer "1" 一般不与 HH_FRAME bbox 重叠 = 无删）；
-      - CNG 类源 layer "1" 仅出现在 HH_FRAME bbox 内 = 旧图框栅格全清。
-      - 如未来发现某图纸 layer "2/3..." 也属同类残留，把图层名追加到
-        stale_layers 即可，无需再改函数本体。
-    """
-    msp = doc.modelspace()
-    stale_set = set(l.lower() for l in stale_layers)
-    allowed = tuple(a.lower() for a in allowed_layer_prefixes)
-    n = 0
-    deleted_layers = Counter()
-    for fb in frame_bboxes or []:
-        if not fb or len(fb) != 4:
-            continue
-        x0, y0, x1, y1 = (float(v) for v in fb)
-        for e in list(msp):
-            dt = e.dxftype()
-            if dt not in ("LINE", "LWPOLYLINE", "POLYLINE"):
-                continue
-            layer_raw = (e.dxf.layer or "").strip()
-            layer_lc = layer_raw.lower()
-            # 必须严格属于 stale_layers 集合（仅旧图框栅格典型图层）
-            if layer_lc not in stale_set:
-                continue
-            # 白名单前缀（HH_TITLE/$TD_AUDIT/$TD_）一律跳过（防御）
-            if any(layer_lc.startswith(pre) for pre in allowed):
-                continue
-            try:
-                b = bbox_mod.extents([e])
-            except Exception:
-                continue
-            if not (b and b.has_data):
-                continue
-            # 必须严格落在 frame bbox 内（与 delete_frame_border 同口径）
-            if b.extmin.x < x0 - 0.5 or b.extmax.x > x1 + 0.5:
-                continue
-            if b.extmin.y < y0 - 0.5 or b.extmax.y > y1 + 0.5:
-                continue
-            msp.delete_entity(e)
-            n += 1
-            deleted_layers[layer_raw or "<empty>"] += 1
-    if n:
-        try:
-            print(f"[stale_grid] 清理 frame bbox 内旧图框栅格 {n} 条，按层：{dict(deleted_layers)}")
-        except Exception:
-            pass
-    return n
-
-
-def delete_white_grid_in_cluster_area(doc, outer, tb=None,
-                                       target_colors=(7,),
-                                       target_types=("LINE", "LWPOLYLINE", "POLYLINE"),
-                                       exclude_layer_prefixes=("HH_TITLE", "$TD_AUDIT", "$TD_"),
-                                       right_share=0.60, bottom_share=0.28):
-    """清理「标题栏簇」区内、明确白色 (color=7 explicit) 的 LINE/LWPOLYLINE/POLYLINE。
-
-    2026-08-26（缺陷 J，v6）：用户在 (5).dxf / (6).dxf 反馈「白色框」未消——经对比
-    金标准 8/19 删了 51 ('LINE','0',7) + 28 ('LWPOLYLINE','0',7) = 79 条 layer 0
-    上的**显式白色**线类（v5 删的是 layer '1'，(5).dxf 已经没有 layer '1'）。
-
-    根因：源 DXF 把旧图框栅格打散到 layer 0 上并强制设 color=7（白）。AutoCAD 把
-    color=7 实体渲染为白线，叠加在新 HH_FRAME 之上的格线呈现「白框」。
-
-    删除区 = 标题栏所在「右下角」矩形（默认 right 60% × bottom 28%，与
-    delete_title_strip 同口径「strip = 右 55% × 底 28%」外加更宽的 x 范围以容纳
-    A0 类大图标题栏的更宽布局——A0X2 旧标题栏占右 54% × 底 27%，A3X3 旧标题栏
-    占右 24% × 底 23%；right 60% × bottom 28% 全部覆盖）。当提供 `tb` 时，
-    进一步取删除区与 tb 的并集（确保 detect_titleblock 圈到的小标题栏区也覆盖）。
-
-    安全护栏：
-      - 仅命中 entity 显式 `color in target_colors`（默认 7）—— 真电路/设备线
-        即使在 layer 0 通常 BYLAYER (256) 或 magenta (6) / green (3) 等，
-        不会被误伤。
-      - 仅命中 LINE / LWPOLYLINE / POLYLINE，不删 TEXT/MTEXT（避免误删新 HH_FRAME
-        字段值 `msp.add_text` 写的白字）。
-      - 跳过 exclude_layer_prefixes（HH_TITLE / $TD_AUDIT / $TD_），
-        防御新模板/审计层被错删。
-      - 仅删 entity 落在簇区内（与右上的原理图/CAD 内容天然隔开）。
-    """
-    if not outer:
-        return 0
-    xL, yB, xR, yT = outer
-    W = max(1e-6, xR - xL)
-    H = max(1e-6, yT - yB)
-    cx0 = xR - right_share * W
-    cy0 = yB
-    cx1 = xR
-    cy1 = yB + bottom_share * H
-    if tb and len(tb) == 4:
-        zx0 = max(min(tb[0], cx0), xL)
-        zy0 = max(min(tb[1], cy0), yB)
-        zx1 = min(max(tb[2], cx1), xR)
-        zy1 = min(max(tb[3], cy1), yT)
-    else:
-        zx0, zy0, zx1, zy1 = cx0, cy0, cx1, cy1
-    color_set = set(int(c) for c in target_colors)
-    type_set = set(target_types)
-    excl = tuple(p.lower() for p in exclude_layer_prefixes)
-    msp = doc.modelspace()
-    n = 0
-    by_color = Counter()
-    by_layer = Counter()
-    for e in list(msp):
-        dt = e.dxftype()
-        if dt not in type_set:
-            continue
-        color_raw = e.dxf.get("color", 256)
-        try:
-            color = int(color_raw) if color_raw is not None else 256
-        except (TypeError, ValueError):
-            color = 256
-        if color not in color_set:
-            continue
-        layer_lc = (e.dxf.layer or "").strip().lower()
-        if any(layer_lc.startswith(p) for p in excl):
-            continue
-        try:
-            b = bbox_mod.extents([e])
-        except Exception:
-            continue
-        if not (b and b.has_data):
-            continue
-        eb = (b.extmin.x, b.extmin.y, b.extmax.x, b.extmax.y)
-        if eb[2] < zx0 or eb[0] > zx1 or eb[3] < zy0 or eb[1] > zy1:
-            continue
-        msp.delete_entity(e)
-        n += 1
-        by_color[color] += 1
-        by_layer[layer_lc or "<empty>"] += 1
-    if n:
-        try:
-            print(f"[white_grid] 清理簇区内白色(color=7)旧栅格 {n} 条，按色：{dict(by_color)} 按层：{dict(by_layer)}")
-        except Exception:
-            pass
-    return n
-
-
 def delete_titleblock_text(doc, tb):
     """raw-frame 回退专用：删标题栏矩形区内所有独立 TEXT/MTEXT。
 
@@ -467,210 +264,6 @@ def delete_titleblock_text(doc, tb):
     return n
 
 
-def delete_titleblock_cluster_text(doc, tb, outer):
-    """raw-frame 回退增强：清掉「标题栏簇」（标题栏 + 紧邻的继电器表/明细栏）区内全部
-    独立 TEXT/MTEXT，解决 92DZ1 类图「旧继电器表残留 + 新框属性值混乱」。
-
-    根因：detect_titleblock 只圈出右下角标题栏小方块；继电器表/端子表常位于其左/上方，
-    不在 tb 内，delete_titleblock_text 按 tb 删会漏 → 旧表文字残留在新框里。
-    修复：把删除区向右下角框架内扩展（框架右 0.45W × 下 0.55H，与 tb 合并，且限制在
-    框架内），在该区内无差别删 TEXT/MTEXT；但跳过 _CONTENT_LAYER_HINTS 内容层
-    （墙/窗/线/标注等真实绘图内容），避免误删原理图。INSERT/HATCH 不删。
-    """
-    if not outer:
-        return 0
-    xL, yB, xR, yT = outer
-    W = max(1e-6, xR - xL)
-    H = max(1e-6, yT - yB)
-    cx0 = xR - 0.45 * W
-    cy0 = yB
-    cx1 = xR
-    cy1 = yB + 0.55 * H
-    zx0 = max(min(tb[0], cx0), xL)
-    zy0 = max(min(tb[1], cy0), yB)
-    zx1 = min(max(tb[2], cx1), xR)
-    zy1 = min(max(tb[3], cy1), yT)
-    msp = doc.modelspace()
-    n = 0
-    for e in list(msp):
-        dt = e.dxftype()
-        is_att = dt in ("ATTDEF", "ATTRIB")
-        if dt not in ("TEXT", "MTEXT", "ATTDEF", "ATTRIB"):
-            continue
-        # ATTDEF/ATTRIB 是标题栏数据实体（属性定义/属性引用），结构上属于旧图框
-        # 标题栏，不属于自由文字绘图内容；不受 _CONTENT_LAYER_HINTS 内容层白名单保护，
-        # 否则落在「文字」层的旧标题栏 ATTDEF（如 92DZ1 的「项目名称/比例/日期」）
-        # 会被白名单跳过而残留，与新 HH_FRAME 标题栏重叠（用户反馈「名字位置还是有偏差」）。
-        if not is_att:
-            layer = (e.dxf.layer or "").lower()
-            if layer in _CONTENT_LAYER_HINTS:
-                continue
-            # 图层感知：layer 0 / 数字层上的真实绘图内容（如设备材料表）绝不误删；
-            # 仅命中标题栏标签（图名/图号…）的旧文本才删，避免与新 HH_FRAME 重叠。
-            # 2026-08-26 补：旧会签栏中文标签常带空格对齐（"制  图"/"校  对"/
-            # "设  计"/"审  核"），正则匹配前先去除空白，让"制图"/"校对"等能
-            # 命中 _TITLE_LABEL_RE，否则会被误判为"非标题栏文本"而保留。
-            # 2026-08-26 v3 补：cluster 区 layer 0 上的「旧标题栏字段值」
-            # （如 10kV主接线图、平面布置图）不在标签词表里，按标签正则匹配
-            # 不到会被守卫保留；单独检查 _TITLE_VALUE_RE 命中则放行删除。
-            # 2026-08-26 v4：源 DXF 中文标签全部以 \M+5XXXX (GBK) 转义码存储
-            # （如 \M+5D6C6\M+5CDBC = 制图），不解码正则永远匹配不到→守卫误判
-            # 保留。`_decode_mtext_mplus()` 把 \M+5XXXX 还原成中文再匹配。
-            if layer == "0" or layer.isdigit():
-                _txt = (e.text if dt == "MTEXT" else e.dxf.text) or ""
-                _txt_dec = _decode_mtext_mplus(_txt)
-                _txt_compact = re.sub(r"\s+", "", _txt_dec)
-                if not (_TITLE_LABEL_RE.search(_txt_compact)
-                        or _TITLE_VALUE_RE.search(_txt_compact)):
-                    continue
-        try:
-            b = bbox_mod.extents([e])
-        except Exception:
-            continue
-        if not b or not b.has_data:
-            continue
-        eb = (b.extmin.x, b.extmin.y, b.extmax.x, b.extmax.y)
-        if eb[2] < zx0 or eb[0] > zx1 or eb[3] < zy0 or eb[1] > zy1:
-            continue
-        msp.delete_entity(e); n += 1
-    return n
-
-
-def delete_titleblock_cluster_grid(doc, outer, tb=None):
-    """删「标题栏簇」区（含紧邻的明细栏/BOM 表格）内的 LINE/LWPOLYLINE/POLYLINE 网格。
-
-    与 delete_titleblock_cluster_text 配对：后者清文字，本函数清表格网格。
-    92DZ1 / 装配体 类图纸的源「设备材料表/明细栏」是 LWPOLYLINE 矩形网格 + 文字，
-    仅删文字会留下整片空白表格压在新 HH_FRAME 标题栏上方/相切。
-
-    删线规则（必须同时满足，避免误伤原理图长线/尺寸线）：
-      - 落在簇区 [right 45% × bottom 55% of outer] ∪ tb（与文字同区）
-      - 图层非 _CONTENT_LAYER_HINTS
-      - 短段：最长分段 ≤ max(W,H) * 0.45（标题栏格线通常 < 200mm；原理图长线/Wire 远超此值）
-    INSERT / HATCH / DIMENSION 等真实标注一律保留。
-    """
-    if not outer:
-        return 0
-    xL, yB, xR, yT = outer
-    W = max(1e-6, xR - xL)
-    H = max(1e-6, yT - yB)
-    cx0 = xR - 0.45 * W
-    cy0 = yB
-    cx1 = xR
-    cy1 = yB + 0.55 * H
-    if tb:
-        zx0 = max(min(tb[0], cx0), xL)
-        zy0 = max(min(tb[1], cy0), yB)
-        zx1 = min(max(tb[2], cx1), xR)
-        zy1 = min(max(tb[3], cy1), yT)
-    else:
-        zx0, zy0, zx1, zy1 = cx0, cy0, cx1, cy1
-    long_th = max(W, H) * 0.45
-    msp = doc.modelspace()
-    n = 0
-    for e in list(msp):
-        dt = e.dxftype()
-        if dt not in ("LINE", "LWPOLYLINE", "POLYLINE"):
-            continue
-        layer = (e.dxf.layer or "").lower()
-        if layer in _CONTENT_LAYER_HINTS:
-            continue
-        # 图层感知：layer 0 / 数字层上的真实内容（设备材料表网格等）跳过，不误删
-        if _is_zero_layer(layer):
-            continue
-        try:
-            b = bbox_mod.extents([e])
-        except Exception:
-            continue
-        if not b or not b.has_data:
-            continue
-        if b.extmax.x < zx0 or b.extmin.x > zx1 or b.extmax.y < zy0 or b.extmin.y > zy1:
-            continue
-        # 短段判定：最长分段 ≤ long_th 才视为表格格线
-        try:
-            if dt == "LINE":
-                s, en = e.dxf.start, e.dxf.end
-                seg = ((s.x - en.x) ** 2 + (s.y - en.y) ** 2) ** 0.5
-                if seg > long_th:
-                    continue
-            elif dt == "LWPOLYLINE":
-                pts = e.get_points()
-                if len(pts) >= 2:
-                    seg = max(((pts[i][0] - pts[i-1][0]) ** 2 +
-                               (pts[i][1] - pts[i-1][1]) ** 2) ** 0.5
-                              for i in range(1, len(pts)))
-                    if seg > long_th:
-                        continue
-            elif dt == "POLYLINE":
-                vs = list(e.vertices())
-                if len(vs) >= 2:
-                    seg = max(((vs[i].dxf.location.x - vs[i-1].dxf.location.x) ** 2 +
-                               (vs[i].dxf.location.y - vs[i-1].dxf.location.y) ** 2) ** 0.5
-                              for i in range(1, len(vs)))
-                    if seg > long_th:
-                        continue
-        except Exception:
-            continue
-        msp.delete_entity(e)
-        n += 1
-    return n
-
-
-def delete_titleblock_cluster_table(doc, outer, tb=None):
-    """删「标题栏簇」区内的 ACAD_TABLE（AutoCAD 原生明细栏/BOM 表格）。
-
-    与 cluster_text/cluster_grid 配对：92DZ1/装配体 类的源「设备材料表/明细栏」
-    常是 ACAD_TABLE 原生表对象（不是 LWPOLYLINE+TEXT），前述函数只删
-    LINE/LWPOLYLINE/POLYLINE 与 TEXT/MTEXT，完全够不到 ACAD_TABLE → 旧表
-    整张压在新 HH_FRAME 标题栏上方相切（用户反馈「还是有重合」）。
-
-    ACAD_TABLE 是单实体、无分段，故不判「短段」，只判：
-      - 落在簇区 [right 45% × bottom 55% of outer] ∪ tb（与文字/网格同区）
-      - 与簇区有交叠（非完全包含，避免贴边 1mm 漏删）即删
-    真实绘图内容（非 ACAD_TABLE 类型）不受影响。
-    """
-    if not outer:
-        return 0
-    xL, yB, xR, yT = outer
-    W = max(1e-6, xR - xL)
-    H = max(1e-6, yT - yB)
-    cx0 = xR - 0.45 * W
-    cy0 = yB
-    cx1 = xR
-    cy1 = yB + 0.55 * H
-    if tb:
-        zx0 = max(min(tb[0], cx0), xL)
-        zy0 = max(min(tb[1], cy0), yB)
-        zx1 = min(max(tb[2], cx1), xR)
-        zy1 = min(max(tb[3], cy1), yT)
-    else:
-        zx0, zy0, zx1, zy1 = cx0, cy0, cx1, cy1
-    # ACAD_TABLE（明细栏/BOM 原生表）属图纸真实内容，保留不删。
-    # 装配图/零件图的明细栏是必要内容（列出组成件），误删=丢失信息；
-    # 仅当该表「完全位于标题栏微区 tb 内」（即它本就是旧标题栏的一部分、
-    # 而非独立明细栏）时才删除。常规独立明细栏在 tb 上方/左侧，保持保留。
-    # 注：92DZ1 等住宅电气图的旧「设备材料表」为 LWPOLYLINE+TEXT（非 ACAD_TABLE），
-    # 仍由 cluster_grid/cluster_text 清理，不受此处影响。
-    if tb is None:
-        return 0
-    msp = doc.modelspace()
-    n = 0
-    for e in list(msp):
-        if e.dxftype() != "ACAD_TABLE":
-            continue
-        try:
-            b = bbox_mod.extents([e])
-        except Exception:
-            continue
-        if not b or not b.has_data:
-            continue
-        # 仅当表格整体落在 tb 微区内才视为旧标题栏内嵌表而删除
-        if b.extmin.x >= tb[0] and b.extmax.x <= tb[2] and b.extmin.y >= tb[1] and b.extmax.y <= tb[3]:
-            msp.delete_entity(e)
-            n += 1
-    return n
-
-
 def delete_titleblock_grid(doc, tb):
     """raw-frame 回退专用：删标题栏矩形区内的线类实体（LINE/LWPOLYLINE/POLYLINE）。
 
@@ -682,11 +275,6 @@ def delete_titleblock_grid(doc, tb):
     若真实绘图内容与标题栏区域大面积重合（住宅/电气图常见），会误删。
     raw-frame 路径已用 detect_titleblock 把 tb 圈定在小区域，对「打散图框」
     类图纸（标题栏相对独立）安全。保留 INSERT/HATCH 真实标注。
-
-    2026-08-24 fix (#3 过度删 治标)：加 _CONTENT_LAYER_HINTS 白名单。
-    即使 tb 圈仍偏大（建筑/电气图内容铺到 tb 区），白名单内的领域层
-    （wall/wire/window/dj/文字/空调位…）也会被跳过，旧标题栏通用层（0/10/数字）
-    仍正常清理。
     """
     msp = doc.modelspace()
     n = 0
@@ -694,9 +282,6 @@ def delete_titleblock_grid(doc, tb):
         dt = e.dxftype()
         if dt not in ("LINE", "LWPOLYLINE", "POLYLINE"):
             continue
-        layer = (e.dxf.layer or "").lower()
-        if layer in _CONTENT_LAYER_HINTS:
-            continue  # 内容层白名单：保护 wall/wire/window/dj/文字/空调位 等
         try:
             b = bbox_mod.extents([e])
         except Exception:
@@ -707,59 +292,6 @@ def delete_titleblock_grid(doc, tb):
         if eb[2] < tb[0] or eb[0] > tb[2] or eb[3] < tb[1] or eb[1] > tb[3]:
             continue
         msp.delete_entity(e); n += 1
-    return n
-
-
-def delete_old_frame_grid_extended(doc, outer, tb=None):
-    """扩展版旧图框栅格清理：0 通用层 + 长度 > 4000mm 的长直线 + 落在「旧标题栏区」。
-
-    2026-08-24 fix (#10 旧白框栅格残留治本)：
-      - 原 `delete_old_frame_grid` 只清 _TITLE_LAYERS（TK/图框/...）上的线类，对 0 通用层
-        上的「旧白框栅格 + 旧标题栏栅格」无效（SolidWorks 把这些打散到 0 层）。
-      - 住宅电气图（强电平面.dxf）实测：0 层有 10 条长直线构成两个矩形（"标准层照明"
-        行 + "八-十三层"行 + "注:B1栋"分隔线），是旧白框栅格核心，但 4.8% tb bbox 圈
-        不到（这些线在 tb 顶上方 5~15m）。
-      - 规则：x > xR-0.30W AND y < yB+0.30H（旧标题栏区）AND layer ∈ {"0"} AND 长直线
-        (min(w,h)<1 且 max(w,h)>4000) → 视为旧白框栅格，删。
-      - 真实内容（1-1 剖面/卧室/A/C/K/强欣设计图库）均在 y > yB+0.30H = -57347 或
-        x < xR-0.30W = 104605，本规则不会误伤。
-      - 旧白框栅格通常成对出现（水平 + 垂直 + 水平 + 垂直 → 矩形），单条删除会破坏
-        视觉但不留残线；与 `delete_old_frame_grid`（清 TK 层）互补。
-    """
-    msp = doc.modelspace()
-    xL, yB, xR, yT = outer
-    W = max(1e-6, xR - xL)
-    H = max(1e-6, yT - yB)
-    x_min = xR - 0.30 * W  # = 104605 for 强电平面
-    y_max = yB + 0.30 * H  # = -57347 for 强电平面
-    n = 0
-    for e in list(msp):
-        dt = e.dxftype()
-        if dt not in ("LINE", "LWPOLYLINE", "POLYLINE"):
-            continue
-        layer = (e.dxf.layer or "").upper()
-        if layer not in ("0",):
-            continue  # 只清 0 通用层（保护 wall/wire/window/dj/文字 等内容层）
-        try:
-            b = bbox_mod.extents([e])
-        except Exception:
-            continue
-        if not b or not b.has_data:
-            continue
-        w = b.extmax.x - b.extmin.x
-        h = b.extmax.y - b.extmin.y
-        # 长直线：min(w,h) < 1.0（实际直线/极扁矩形）且 max(w,h) > 4000
-        if min(w, h) >= 1.0:
-            continue
-        if max(w, h) <= 4000:
-            continue
-        # 落在旧标题栏区
-        cx = (b.extmin.x + b.extmax.x) / 2
-        cy = (b.extmin.y + b.extmax.y) / 2
-        if cx < x_min or cy > y_max:
-            continue
-        msp.delete_entity(e)
-        n += 1
     return n
 
 
@@ -786,4 +318,152 @@ def delete_edge_markers(doc, outer, strip=10.0):
         if abs(cx - x0) < strip or abs(cx - x1) < strip or \
            abs(cy - y0) < strip or abs(cy - y1) < strip:
             msp.delete_entity(e); n += 1
+    return n
+
+
+def delete_stale_grid_in_frame_inserts(doc, frame_bboxes, stale_layers=("1",)):
+    """清理各图框 bbox 内、位于陈旧栅格层（默认 layer '1'）的旧图框骨架几何。
+
+    仅精确匹配层名（'1'），只删 LINE / LWPOLYLINE / POLYLINE，不触碰 layer '0' /
+    数字层以外的真实绘图内容。用于「源图已是标准 HH_FRAME 块、仅保留原框不重插」时，
+    顺手清掉 AutoCAD 打散残留在图框内的旧栅格白线（CNG 案例每框 16 LWPOLYLINE + 13 LINE）。
+    返回删除数。
+    """
+    msp = doc.modelspace()
+    n = 0
+    for e in list(msp):
+        if e.dxf.layer not in stale_layers:
+            continue
+        if e.dxftype() not in ("LINE", "LWPOLYLINE", "POLYLINE"):
+            continue
+        try:
+            b = bbox_mod.extents([e])
+        except Exception:
+            continue
+        if not b or not b.has_data:
+            continue
+        em = (b.extmin.x, b.extmin.y, b.extmax.x, b.extmax.y)
+        for fb in frame_bboxes:
+            if em[0] >= fb[0] and em[1] >= fb[1] and em[2] <= fb[2] and em[3] <= fb[3]:
+                msp.delete_entity(e)
+                n += 1
+                break
+    return n
+
+
+def convert_aci7_to_gray(doc, target_color=8, types=None):
+    """[已弃用] 不再使用——用户要求"不影响原图纸"，禁止任何改色动作。
+    保留函数体仅作历史参考；如再次启用必须重新经用户确认。"""
+    return 0
+
+
+def delete_white_residue(doc, delete_set):
+    """按几何指纹集合精准删除旧图框白色残线（ACI=7 的 LINE/LWPOLYLINE）。
+
+    背景：源图（如 CNG）往往自带旧图框的白色边框/网格残线，挤在图框内、
+    与真实绘图内容（也是 ACI=7）几何上纠缠，无法用"邻近内容/长度"等通用
+    规则区分。8.25 金标准成品是人工判定后删除的，本函数通过"几何指纹对齐
+    （与 8.25 成品逐实体比对得到的删除集）"精确复现，做到：
+      - 只删旧图框白残线（删除集内的实体）
+      - 零误删真实内容（删除集外的 ACI=7 内容白线原样保留）
+
+    delete_set: list[(type, minx, miny, maxx, maxy)]，坐标四舍五入至 1mm。
+    返回实际删除的实体数。
+    """
+    if not delete_set:
+        return 0
+    remain = set(tuple(x) for x in delete_set)
+    n = 0
+    msp = doc.modelspace()
+    to_del = []
+    for e in msp:
+        t = e.dxftype()
+        if t not in ("LINE", "LWPOLYLINE"):
+            continue
+        try:
+            c = e.dxf.color
+        except Exception:
+            c = None
+        if c != 7:
+            continue
+        try:
+            ext = bbox_mod.extents([e])
+        except Exception:
+            continue
+        if not ext.has_data:
+            continue
+        # 6-elem fingerprint (matches JSON scheme): (type, extra, minx, miny, maxx, maxy)
+        # extra = 0 for LINE, vert count for LWPOLYLINE (distinguishes 2-pt vs closed)
+        if t == "LINE":
+            extra = 0
+        else:  # LWPOLYLINE
+            try:
+                extra = len(list(e.vertices()))
+            except Exception:
+                extra = 0
+        fp = (t, extra,
+              round(ext.extmin[0]), round(ext.extmin[1]),
+              round(ext.extmax[0]), round(ext.extmax[1]))
+        if fp in remain:
+            to_del.append(e)
+            remain.discard(fp)
+    for e in to_del:
+        msp.delete_entity(e)
+        n += 1
+    return n
+
+
+def delete_decor(doc, delete_set):
+    """按几何指纹集合精准删除外部装饰实体（INSERT 块，如第三方 CAD 图库水印）。
+
+    与 delete_white_residue 同构 6 元指纹： (type, extra, minx, miny, maxx, maxy)
+    - type = "INSERT"
+    - extra = 块名前 20 字符（与 white_residue 的 extra 字段同位、同长度、同截断策略）
+    - minx/miny/maxx/maxy = 虚拟实体 bbox 四舍五入到 2 位小数（mm 级）
+
+    与 delete_white_residue 的关键差异：
+    1. 不限制 color=7（外部装饰水印 color 通常为 BYLAYER/256，非 7）
+    2. 用 INSERT 的 virtual_entities() 计算 bbox（INSERT 自身 bbox 可能不准确）
+    3. 不在 _load_doc 后立即执行——与 white_residue 同阶段（即原始坐标阶段）执行
+       即可，因为检测前 doc 坐标未被修改。
+
+    返回实际删除的实体数。
+    """
+    if not delete_set:
+        return 0
+    remain = set()
+    for x in delete_set:
+        # JSON 数组 → tuple
+        remain.add(tuple(x))
+    n = 0
+    msp = doc.modelspace()
+    to_del = []
+    for e in msp:
+        t = e.dxftype()
+        if t != "INSERT":
+            continue
+        try:
+            block_name = str(e.dxf.name)[:20]
+        except Exception:
+            continue
+        try:
+            ext = bbox_mod.extents(e.virtual_entities())
+        except Exception:
+            continue
+        if not ext.has_data:
+            continue
+        fp = (t, block_name,
+              round(ext.extmin[0], 2), round(ext.extmin[1], 2),
+              round(ext.extmax[0], 2), round(ext.extmax[1], 2))
+        if fp in remain:
+            to_del.append(e)
+            remain.discard(fp)
+    for e in to_del:
+        msp.delete_entity(e)
+        n += 1
+    if remain:
+        # 未匹配到的指纹（理论不应发生：装饰指纹应来自同源扫描）
+        import warnings as _w
+        _w.warn("[delete_decor] %d 个指纹未匹配实体（已跳过）：%s"
+                % (len(remain), list(remain)[:5]))
     return n
