@@ -24,6 +24,24 @@ def _bbox(e):
     return None
 
 
+def table_bottom(doc, default=None):
+    """模型空间中所有 ACAD_TABLE（BOM 明细表等）世界 bbox 的最小底边 y。
+
+    装配图/明细表常是 ACAD_TABLE（AutoCAD 2005+ 原生表格对象，几何存放在
+    匿名块如 *T1 里）。它既不是 INSERT 也不是 LINE，find_titleblocks /
+    detect_frames 都扫不到它；但 ezdxf 的 bbox 模块能算出它的世界范围。
+    返回 default（默认 None）表示图纸里没有 ACAD_TABLE。
+    """
+    tables = [e for e in doc.modelspace() if e.dxftype() == "ACAD_TABLE"]
+    if not tables:
+        return default
+    try:
+        ext = bbox_mod.extents(tables)
+        return float(ext.extmin.y)
+    except Exception:
+        return default
+
+
 def _intersect(a, b):
     return not (a[2] < b[0] or a[0] > b[2] or a[3] < b[1] or a[1] > b[3])
 
