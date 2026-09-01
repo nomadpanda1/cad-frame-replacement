@@ -35,6 +35,27 @@ def _count_entities(doc):
     return n
 
 
+def _title_block_top(tpl):
+    """模板局部坐标系下标题栏顶边 y（用于方案A净距计算）。
+
+    读模板 DXF，用 frame_gen.title_rect 识别标题栏矩形（贴右下角、面积<半幅
+    的最大闭合矩形）。公司标准模板标题栏恒为 y∈[6,62]（高 56），retarget 只
+    平移不缩放标题栏，故直接取 title_rect 的顶边。识别失败返回 None（跳过）。
+    """
+    if not tpl:
+        return None
+    try:
+        _src = ezdxf.readfile(tpl["src_path"])
+        _blk = _src.blocks[tpl["block_name"]]
+        _paper = frame_gen.paper_rect(_blk)
+        _tr = frame_gen.title_rect(_blk, _paper)
+        if _tr:
+            return float(_tr[3])
+    except Exception:
+        pass
+    return None
+
+
 def _sanitize_blocks(doc):
     """删除无名(空名)块：源图里中文命名的匿名块（HATCH / 标注边界等）被 ezdxf 按
     UTF-8 误读（源图实为 GBK 等其他编码）后，块名可能变成空串，写出
@@ -637,6 +658,41 @@ def main():
                         tpl, spec = tplctx.template_for(list(frame_box), no_frame=no_frame)
                         if spec is not None:
                             tplctx.note(list(frame_box), spec, (spec.width, spec.height))
+                        # —— 方案A（2026-09-01）：ACAD_TABLE（BOM 明细表）底部 = 标题栏禁入区 ——
+                        # 装配图 BOM 明细表是 ACAD_TABLE（AutoCAD 原生表格，几何存放在匿名块
+                        # *T* 里），find_titleblocks / detect_frames 都不扫它。fit=max 时新模板
+                        # 标题栏顶 = iy + title_top*s，会顶到 BOM 表底。检出 ACAD_TABLE 且标题栏
+                        # 越界时，把 frame_box 底边下移，迭代 8 次逼近「标题栏顶 = BOM 底 - 净距
+                        # (8mm)」；守卫：新框底不低于内容底-25mm，避免压到旧框外的真实内容。
+                        # 8mm 而非 5mm 是用户 09-01 AutoCAD 验收反馈：5mm 在屏幕缩放下「挨着
+                        # 看」像重合；8mm 是工程图框与表格的安全间距惯例（GB/T 14689 也建议≥5mm
+                        # 留白，实测 8mm 视觉舒服）。
+                        _tb_bottom = block_replace.table_bottom(doc)
+                        _tb_top = _title_block_top(tpl) if tpl else None
+                        if _tb_bottom is not None and _tb_top is not None and not no_frame:
+                            _r0 = {"bbox": list(frame_box), "confidence": 1.0,
+                                   "method": "frame", "source": "sheet", "entity": None}
+                            for _i in range(8):
+                                _s, _ix, _iy = block_replace._compute_transform(
+                                    tpl, _r0, args.fit or "max")
+                                if _iy + _tb_top * _s <= _tb_bottom - 8.0:
+                                    break
+                                _r0["bbox"][1] = _tb_bottom - 8.0 - (_tb_top - tpl["bbox"][1]) * _s
+                            if _r0["bbox"][1] < frame_box[1] - 1e-9:
+                                try:
+                                    from ezdxf import bbox as _eb
+                                    _cmin = _eb.extents(doc.modelspace()).extmin.y
+                                except Exception:
+                                    _cmin = frame_box[1]
+                                if _r0["bbox"][1] < _cmin - 25.0:
+                                    _r0["bbox"][1] = _cmin - 25.0
+                                print("   方案A：检出 ACAD_TABLE 明细表（底 y=%.1f），标题栏顶 "
+                                      "y=%.1f 越界 → 图框底边 %.1f→%.1f，标题栏顶降至 y=%.1f（净距8mm）"
+                                      % (_tb_bottom,
+                                         frame_box[1] + (_tb_top - tpl["bbox"][1]) * _s,
+                                         frame_box[1], _r0["bbox"][1],
+                                         _r0["bbox"][1] + (_tb_top - tpl["bbox"][1]) * _s))
+                                frame_box[1] = _r0["bbox"][1]
                         # 弱提取（extract：SW 单元式标题栏友好，正确抓 材料/比例/图名）
                         old = extract.extract_fields(doc, {"bbox": tb, "method": "keyword", "entity": None})
                         # 强提取（finder：冒号式标题栏友好，补 DWG_NO/STAGE/DATE/DESIGN）
