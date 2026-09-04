@@ -56,6 +56,86 @@ def _title_block_top(tpl):
     return None
 
 
+def _title_block_rect(tpl):
+    """模板局部坐标系下标题栏完整矩形 (x0,y0,x1,y1)，识别失败返回 None。"""
+    if not tpl:
+        return None
+    try:
+        _src = ezdxf.readfile(tpl["src_path"])
+        _blk = _src.blocks[tpl["block_name"]]
+        _paper = frame_gen.paper_rect(_blk)
+        _tr = frame_gen.title_rect(_blk, _paper)
+        if _tr:
+            return tuple(float(v) for v in _tr)
+    except Exception:
+        pass
+    return None
+
+
+def _avoid_titlebar_overlap(doc, tpl, frame_box, fit="max",
+                            margin=8.0, kmax=2.5):
+    """标题栏遮挡规避（2026-09-04，35kV 全页图用户反馈）。
+
+    内容铺满整页时，新标题栏（贴新框右下角）必然压在内容上。把 frame_box 以
+    左下角为锚按比例 k 放大（幅面宽高比不变，已 retarget 的模板仍精确适配，
+    fit=max 下新框尺寸即模板块实际占位），让标题栏随框移到右下空白区；
+    无遮挡时 k=1 原样返回。k 上限 2.5，仍避不开则保持原样（宁勿过度放大）。
+    """
+    tbr = _title_block_rect(tpl)
+    if tbr is None:
+        return frame_box
+    try:
+        from ezdxf import bbox as _eb
+        _ext = _eb.extents(doc.modelspace())
+    except Exception:
+        return frame_box
+    if not _ext or not _ext.has_data:
+        return frame_box
+    C = (_ext.extmin.x, _ext.extmin.y, _ext.extmax.x, _ext.extmax.y)
+    tx0, ty0, tx1, ty1 = tpl["bbox"]
+    tw = max(1e-6, tx1 - tx0)
+    th = max(1e-6, ty1 - ty0)
+    x0, y0, x1, y1 = frame_box
+    FW = x1 - x0
+    FH = y1 - y0
+    if FW <= 0 or FH <= 0:
+        return frame_box
+
+    def _tb_rect(k):
+        """frame_box 放大 k 倍（左下角锚定）后，新标题栏的物理矩形。"""
+        rw, rh = FW * k, FH * k
+        if fit == "max":
+            s = max(rw / tw, rh / th)
+        elif fit == "min":
+            s = min(rw / tw, rh / th)
+        elif fit == "width":
+            s = rw / tw
+        else:
+            s = rh / th
+        ix = x0 + (rw - tw * s) / 2 - tx0 * s
+        iy = y0 + (rh - th * s) / 2 - ty0 * s
+        return (ix + tbr[0] * s, iy + tbr[1] * s,
+                ix + tbr[2] * s, iy + tbr[3] * s)
+
+    def _hit(r):
+        return not (r[2] < C[0] - margin or r[0] > C[2] + margin or
+                    r[3] < C[1] - margin or r[1] > C[3] + margin)
+
+    if not _hit(_tb_rect(1.0)):
+        return frame_box
+    k = 1.0
+    while k < kmax:
+        k = round(k + 0.05, 2)
+        if not _hit(_tb_rect(k)):
+            _nb = (x0, y0, x0 + FW * k, y0 + FH * k)
+            print("   遮挡规避：新标题栏与内容相交 → 图框按比例放大 k=%.2f，"
+                  "frame_box (%.0f,%.0f)-(%.0f,%.0f)→(%.0f,%.0f)-(%.0f,%.0f)"
+                  % (k, x0, y0, x1, y1, _nb[0], _nb[1], _nb[2], _nb[3]))
+            return _nb
+    print("   遮挡规避：放大 %.1f 倍仍避不开内容 → 保持原 frame_box" % kmax)
+    return frame_box
+
+
 def _sanitize_blocks(doc):
     """删除无名(空名)块：源图里中文命名的匿名块（HATCH / 标注边界等）被 ezdxf 按
     UTF-8 误读（源图实为 GBK 等其他编码）后，块名可能变成空串，写出
@@ -754,6 +834,12 @@ def main():
                             n_fb = block_replace.delete_frame_border(doc, tuple(outer), tb=tb if tb_ok else None)
                             n_strip = block_replace.delete_title_strip(doc, tuple(outer))
                             n_left = block_replace.delete_frameish_leftovers(doc, tuple(outer))
+                            # —— 遮挡规避（2026-09-04，35kV 用户反馈）：内容铺满整页时
+                            #    新标题栏必然压在内容上。旧框已删，msp 剩余即真实内容
+                            #    包络；新标题栏与之相交时按比例放大 frame_box（左下角
+                            #    锚定，幅面比例不变，模板仍精确适配），让标题栏移到空白区。
+                            frame_box = _avoid_titlebar_overlap(
+                                doc, tpl, list(frame_box), fit=args.fit or "max")
                             region = {"bbox": frame_box, "confidence": 1.0, "method": "frame",
                                       "source": "sheet", "entity": None}
                             # #3：尊重 GUI「缩放」选择（args.fit），不再写死 "max"
