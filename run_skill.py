@@ -153,8 +153,8 @@ def _titlebar_real_hits(doc, tb_rect, min_olap=1.0):
 
 
 def _avoid_titlebar_overlap(doc, tpl, frame_box, fit="max",
-                            margin=8.0, kmax=2.0):
-    """标题栏遮挡规避——加长图幅式，仅真实重叠时触发（2026-09-04 三修）。
+                            margin=8.0, kmax=2.0, tplctx=None, no_frame=False):
+    """标题栏遮挡规避——纵向优先、横向兜底（2026-09-04 四修）。
 
     二修用「全内容大包围盒」判相交——任何图的新标题栏矩形都必然落在内容
     包围盒内，判定恒真 → **所有 raw-frame 图全部加长**（用户否决："不能
@@ -162,11 +162,16 @@ def _avoid_titlebar_overlap(doc, tpl, frame_box, fit="max",
     （_titlebar_real_hits）：删除管线执行完、旧标题栏清干净之后，与新标题栏
     物理矩形**真实重叠**（重叠区 >1mm）的内容实体存在才加长；贯穿线与
     擦边不算。装配体图纸由此回到 09-01 验收效果（C429X297 同比例定制，
-    零图幅变化）；35kV 这类标题栏区真压内容（设备表）的才触发加长。
-    只向右加长、高度不动——内容保持原大小在左侧，新标题栏（标准尺寸
-    不随幅面缩放）随右框边移到加长出的空白区。调用方在加长后须用 tplctx
-    按新宽高比重新 retarget 模板（自定义 C<w>X<h>）。
-    需要加长超过 kmax 倍仍避不开时放弃（保持原框，宁重叠勿畸形）。
+    零图幅变化）。
+
+    四修（35kV 变电站定向）：真重叠时**先试纵向加长**——宽度不变、高度扩到
+    √2 标准比例并垂直居中，标题栏随框底下移进内容下方的空白带，宽度不膨胀
+    （用户：「不是横向加长，而是纵向加长、比例要合适」）。仅当框比 √2 扁
+    （纵向有加长空间）且按加长后幅面重定向的模板算出零真实重叠才采纳；
+    否则回退原横向加长（只向右、高度不动，kmax 上限不变）。
+
+    返回 (frame_box, elongated)；加长后调用方须用 tplctx 按新宽高比重新
+    retarget 模板。需要加长超过 kmax 倍仍避不开时放弃（宁重叠勿畸形）。
     """
     tbr = _title_block_rect(tpl)
     if tbr is None:
@@ -185,6 +190,30 @@ def _avoid_titlebar_overlap(doc, tpl, frame_box, fit="max",
     hits = _titlebar_real_hits(doc, tb_cur, min_olap=1.0)
     if not hits:
         return frame_box, False
+
+    # —— 纵向加长候选（四修）：宽度不变，高度 = 宽/√2，垂直居中。用按候选
+    #    幅面重定向后的模板算标题栏物理矩形，重叠归零才采纳。
+    if tplctx is not None and FW / FH > sheet.SQRT2 * 1.02:
+        nh_v = FW / sheet.SQRT2
+        yc = (y0 + y1) / 2.0
+        box_v = [x0, yc - nh_v / 2.0, x1, yc + nh_v / 2.0]
+        try:
+            tpl_v, _spec_v = tplctx.template_for(list(box_v), no_frame=no_frame)
+        except Exception:
+            tpl_v = None
+        if tpl_v is not None:
+            tbr_v = _title_block_rect(tpl_v)
+            if tbr_v is not None:
+                s_v, ix_v, iy_v = block_replace._compute_transform(
+                    tpl_v, {"bbox": list(box_v)}, fit)
+                tb_v = (ix_v + tbr_v[0] * s_v, iy_v + tbr_v[1] * s_v,
+                        ix_v + tbr_v[2] * s_v, iy_v + tbr_v[3] * s_v)
+                if not _titlebar_real_hits(doc, tb_v, min_olap=1.0):
+                    print("   遮挡规避：纵向加长优先——框高 %.0f→%.0f (比例 √2, 垂直居中)，"
+                          "标题栏随框底下移出内容区，宽度不膨胀"
+                          % (FH, nh_v))
+                    return list(box_v), True
+
     try:
         from ezdxf import bbox as _eb
         _ext = _eb.extents(doc.modelspace())
@@ -373,7 +402,10 @@ def _process_multiframe(doc, template, targets, override, fit, tplctx=None):
         # 残留横跨左侧装订边（strip 区之外），按层名正向允许集整层清。
         ndel += block_replace.delete_frameish_leftovers(doc, fb)
         total_del += ndel
-        region = {"bbox": fb, "confidence": 1.0, "method": "frame",
+        # 标准比例加长（2026-09-04）：插入区域扩展到 spec 比例，删除范围
+        # 保持原检出框 fb 不变（扩大删除范围会在多框图里吃到邻框）。
+        ins_bbox = sheet.fit_box_to_spec(list(fb), spec) if spec is not None else list(fb)
+        region = {"bbox": ins_bbox, "confidence": 1.0, "method": "frame",
                   "source": "multiframe", "entity": None}
         _, written = block_replace.insert_template(doc, tpl, region, values, fit=fit)
         all_written += written
@@ -466,9 +498,15 @@ class TemplateCtx(object):
         rec["frame_size"] = [round(w, 1), round(h, 1)]
         rec["tpl_size"] = [round(size[0], 2), round(size[1], 2)]
         self.log.append(rec)
+        if spec.exact:
+            tail = "  出图比例 1:%g" % spec.plot_scale
+        else:
+            sr = spec.width / spec.height if spec.height else 0.0
+            br = w / h if h else 0.0
+            tail = ("  [非标，标准比例√2加长]" if sr and abs(sr - br) / sr > 0.02
+                    else "  [非标，按精确比例定制]")
         print("   幅面判定: 旧框 %.0fx%.0f (比例 %.3f) -> %s %.0fx%.0f%s" % (
-            w, h, w / h if h else 0, spec.name, size[0], size[1],
-            "  出图比例 1:%g" % spec.plot_scale if spec.exact else "  [非标，按精确比例定制]"))
+            w, h, w / h if h else 0, spec.name, size[0], size[1], tail))
 
 
 def _values_to_fields(template_fields, values):
@@ -518,6 +556,9 @@ def _process_one_acad(app, src, doc, args, template, override, tplctx):
             fb_f = [float(v) for v in fb]
             tpl_dwg, tpl_size, spec = tplctx.for_frame(
                 fb_f, inner[0] if inner else None)
+            # 已知差异：超扁/超长非标框在 guess_sheet 已改判 √2 比例，但 COM plan
+            # 不做 fit_box_to_spec 调框——fit=max（默认）居中插入自纠偏，fit=min 会
+            # 偏小。COM --dwg 路径验收以 ezdxf/线上 API 为准。
             tplctx.note(fb_f, spec, tpl_size)
             plan["frames"].append({
                 "frame": fb_f,
@@ -805,6 +846,13 @@ def main():
                         tpl, spec = tplctx.template_for(list(frame_box), no_frame=no_frame)
                         if spec is not None:
                             tplctx.note(list(frame_box), spec, (spec.width, spec.height))
+                        # —— 标准比例加长（2026-09-04）：超扁/超长非标框在 guess_sheet
+                        #    里已改判 √2 比例，spec 与旧框不再同比例。插入前把 frame_box
+                        #    同步扩展到 spec 比例（宽度不变、高度垂直居中补齐），否则
+                        #    fit=min 会把新框缩得比内容还小。删除管线用的是 outer，
+                        #    不受 frame_box 扩展影响。
+                        if spec is not None and not no_frame:
+                            frame_box = sheet.fit_box_to_spec(frame_box, spec)
                         # —— 方案A（2026-09-01）：ACAD_TABLE（BOM 明细表）底部 = 标题栏禁入区 ——
                         # 装配图 BOM 明细表是 ACAD_TABLE（AutoCAD 原生表格，几何存放在匿名块
                         # *T* 里），find_titleblocks / detect_frames 都不扫它。fit=max 时新模板
@@ -905,13 +953,16 @@ def main():
                             n_fb = block_replace.delete_frame_border(doc, tuple(outer), tb=tb if tb_ok else None)
                             n_strip = block_replace.delete_title_strip(doc, tuple(outer))
                             n_left = block_replace.delete_frameish_leftovers(doc, tuple(outer))
-                            # —— 遮挡规避（2026-09-04 二修）：新标题栏压内容时按
-                            #    GB 加长幅面式**只向右加长、高度不动**（第一版等比
-                            #    放大 k=1.85 被用户否决：内容反衬极小、比例失真）。
-                            #    加长后须按新宽高比重新 retarget 模板（自定义
-                            #    C<w>X<h>），标题栏保持标准尺寸随右框边移到空白区。
+                            # —— 遮挡规避（2026-09-04 四修）：真重叠时先试纵向
+                            #    加长（宽度不变、高度扩到 √2 垂直居中，标题栏随框底
+                            #    下移出内容区），避不开再横向加长（只向右、高度不动）。
+                            #    第一版等比放大 k=1.85 被用户否决（内容反衬极小、
+                            #    比例失真）；横向加长对超宽图被用户否决（"不要横向
+                            #    加长，纵向加长、比例要合适"）。加长后按新宽高比
+                            #    重新 retarget 模板，标题栏保持标准尺寸。
                             frame_box, _elongated = _avoid_titlebar_overlap(
-                                doc, tpl, list(frame_box), fit=args.fit or "max")
+                                doc, tpl, list(frame_box), fit=args.fit or "max",
+                                tplctx=tplctx, no_frame=no_frame)
                             if _elongated and tplctx is not None and not no_frame:
                                 tpl, spec = tplctx.template_for(list(frame_box), no_frame=no_frame)
                                 if spec is not None:
@@ -996,7 +1047,12 @@ def main():
 
                 ndel = block_replace.delete_old(doc, r, margin=args.margin)
                 total_del += ndel
-                _, written = block_replace.insert_template(doc, tpl, r, values, fit=args.fit)
+                # 标准比例加长（2026-09-04）：插入区域扩展到 spec 比例，
+                # 提取/删除仍用原检出框。
+                ins_region = dict(r)
+                if spec is not None:
+                    ins_region["bbox"] = sheet.fit_box_to_spec(r["bbox"], spec)
+                _, written = block_replace.insert_template(doc, tpl, ins_region, values, fit=args.fit)
                 all_written += written
                 print("   替换: 删 %d 旧实体, 回填 %d 字段 -> %s" % (ndel, len(written), written))
 

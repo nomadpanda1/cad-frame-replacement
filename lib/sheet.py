@@ -16,8 +16,10 @@
   84100 / 100 = 841, 59400 / 100 = 594  ->  A1 横版，出图比例 1:100
 
 匹配不上任何标准幅面时（真非标图幅），返回 exact=False 的自定义幅面：
-保留旧框的**精确长宽比**，短边归一到最接近的标准短边，这样后续重定向出来的
-模板既能严丝合缝套住旧框，标题栏占比又是正常的。
+比例在 2:1 保护带内时保留旧框的**精确长宽比**，短边归一到最接近的标准短边；
+超出 2:1 的超扁/超长框（比任何 GB 幅面都畸形）则改按标准 √2 比例「贴边加长」
+（宽度贴合内容纵向加长 / 高度贴合内容横向加长，2026-09-04 用户需求
+「纵向加长、比例要合适」），调用方须用 fit_box_to_spec 同步扩展检出框。
 """
 
 from __future__ import annotations
@@ -58,6 +60,17 @@ STD_SHORT = [210.0, 297.0, 420.0, 594.0, 841.0, 1189.0]
 # 被吸成 A3X3（比例 2.121），fit=max 保模板比例导致新框比检出框宽 6%、插入框
 # 与邻框重叠/外扩（用户验收反馈「图框比例问题」）。收紧到 0.02 后，这类非标
 # 幅面走 custom C<w>X<h> 分支，比例精确保留；真标准幅面（误差 <1%）不受影响。
+EXACT_TOL = 0.02
+
+# 标准比例（√2）与超扁/超长判定的保护带（2026-09-04）。
+# 非标幅面比例落在 [FLAT_RATIO_LO, FLAT_RATIO_HI] 内保留同比例定制
+# （装配体 C429X297 比例 1.444、建筑 1051×594 比例 1.769 等已验收形态不变）；
+# 超出视为超扁（横版）或超长竖条（竖版），改按 √2 标准比例贴边加长——
+# 35kV 变电站 1930x833（比例 2.317）定制出 C977X420 比任何 GB 幅面都扁，
+# 用户反馈「不是横向加长，而是纵向加长、比例要合适」。
+SQRT2 = 1.4142135623730951
+FLAT_RATIO_HI = 2.0
+FLAT_RATIO_LO = 0.5
 EXACT_TOL = 0.02
 
 # 无真框判定阈值（图形单位面积）：检出框面积超过 2×A0 且无非块式标题栏时，
@@ -242,8 +255,25 @@ def guess_sheet(width, height, scale_hint=None, no_frame=False):
     if no_frame:
         return _guess_frameless(w, h, scale_hint)
 
-    # 非标幅面：保留精确比例
-    if scale_hint:
+    # 非标幅面（2026-09-04 二次演进）：比例在 2:1 保护带内仍保留精确比例定制；
+    # 超出 2:1 的超扁/超长框不再跟着内容拖出定制扁幅面，改按标准 √2 比例贴边加长：
+    #   * 超扁（ratio > FLAT_RATIO_HI）：宽度定纸面，高 = 宽/√2 —— 纵向加长；
+    #   * 超长竖条（ratio < FLAT_RATIO_LO）：高度定纸面，宽 = 高/√2 —— 横向加长。
+    # 此时 spec 比例 != 检出框比例，调用方必须用 fit_box_to_spec 把检出框同步
+    # 扩展到 spec 比例后再计算插入 transform，否则 fit=min / COM insert_frame
+    # 按 min(W/tw, H/th) 缩放会把新框缩得比内容还小（内容溢出框外）。
+    if ratio > FLAT_RATIO_HI or ratio < FLAT_RATIO_LO:
+        if scale_hint:
+            scale = float(scale_hint)
+        else:
+            scale, _short_mm = _normalize_short(min(w, h))
+        if ratio > FLAT_RATIO_HI:
+            out_w = w / scale
+            out_h = out_w / SQRT2            # 纵向加长：宽度贴合内容
+        else:
+            out_h = h / scale
+            out_w = out_h / SQRT2            # 横向加长：高度贴合内容
+    elif scale_hint:
         # 有可靠比例时直接按「图形单位 / 比例」定纸面，标题栏在纸面上就是标准大小
         scale = float(scale_hint)
         out_w, out_h = w / scale, h / scale
@@ -256,7 +286,7 @@ def guess_sheet(width, height, scale_hint=None, no_frame=False):
         else:
             out_w, out_h = short_mm, short_mm / ratio
     name = "C%dX%d" % (int(round(out_w)), int(round(out_h)))
-    return SheetSpec(name, out_w, out_h, scale, False, ratio)
+    return SheetSpec(name, out_w, out_h, scale, False, out_w / out_h)
 
 
 def _normalize_short(short_du):
@@ -271,6 +301,42 @@ def _normalize_short(short_du):
                 best_err = err
                 best = (s, std)
     return best
+
+
+def fit_box_to_spec(box, spec, tol=0.05):
+    """把检出框调整为与 spec 一致的宽高比（2026-09-04 标准比例加长配套）。
+
+    guess_sheet 对超扁/超长非标框改判 √2 标准比例后，模板比例与检出框不再
+    一致——fit=min 与 COM insert_frame 按 min(W/tw, H/th) 缩放，会把新框缩得
+    比内容还小（内容溢出框外）。调用方须在 retarget 出 spec 之后、计算插入
+    transform 之前用本函数扩展检出框：
+
+      * 框比 spec 扁（如 2.317 vs 1.414）：宽度不变，高度差垂直居中补齐
+        （纵向加长）。内容原本大致占满旧框，对称扩展让上下留白均衡，且
+        标题栏随框底下移，不会压到贴底的内容；
+      * 框比 spec 方/长（超长竖条）：高度不变，宽度差水平居中补齐（横向加长）。
+
+    框比例与 spec 偏差在 tol 内（标准幅面 / 同比例定制幅面）原样返回。
+    """
+    x0, y0, x1, y1 = [float(v) for v in box]
+    w = x1 - x0
+    h = y1 - y0
+    if spec is None or w <= 0 or h <= 0:
+        return [x0, y0, x1, y1]
+    sr = spec.width / spec.height if spec.height else 0.0
+    if sr <= 0 or abs((w / h) - sr) / sr <= tol:
+        return [x0, y0, x1, y1]
+    if (w / h) > sr:                       # 超扁 -> 纵向加长（高度居中补齐）
+        nh = w / sr
+        yc = (y0 + y1) / 2.0
+        print("   幅面加长: 框 %.0fx%.0f (比例 %.3f) -> 高度扩至 %.0f (比例 %.3f, 垂直居中)"
+              % (w, h, w / h, nh, sr))
+        return [x0, yc - nh / 2.0, x1, yc + nh / 2.0]
+    nw = h * sr                            # 超长/超方 -> 横向加长（宽度居中补齐）
+    xc = (x0 + x1) / 2.0
+    print("   幅面加长: 框 %.0fx%.0f (比例 %.3f) -> 宽度扩至 %.0f (比例 %.3f, 水平居中)"
+          % (w, h, w / h, nw, sr))
+    return [xc - nw / 2.0, y0, xc + nw / 2.0, y1]
 
 
 def _guess_frameless(width, height, scale_hint):

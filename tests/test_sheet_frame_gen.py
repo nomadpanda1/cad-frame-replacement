@@ -81,6 +81,50 @@ def test_degenerate_input_does_not_crash():
         assert sheet.guess_sheet(w, h).name
 
 
+def test_superflat_custom_becomes_sqrt2_vertical():
+    """超扁非标框（比例>2，35kV 变电站 1930x833=2.317）改按 √2 标准比例纵向加长。
+
+    2026-09-04 用户反馈：超宽内容跟着定制出 C977X420 扁幅面比任何 GB 幅面都扁，
+    应「宽度贴合内容、纵向加长、比例要合适」。
+    """
+    spec = sheet.guess_sheet(1930.0, 833.0)
+    assert not spec.exact
+    assert spec.width / spec.height == pytest.approx(2 ** 0.5, rel=1e-6)
+    assert spec.width == pytest.approx(965.0)      # 宽度贴合旧框（短边 833→420@1:2）
+    assert spec.name == "C965X682"
+
+
+def test_supertall_custom_extends_horizontally():
+    """超长竖条（比例<0.5）高度贴合内容、横向加长到 √2 标准比例。"""
+    spec = sheet.guess_sheet(450.0, 1000.0)
+    assert not spec.exact
+    assert spec.width / spec.height == pytest.approx(2 ** -0.5, rel=1e-6)  # 竖版保持竖版
+    assert spec.height == pytest.approx(1000.0)
+
+
+def test_mild_custom_keeps_exact_ratio():
+    """2:1 保护带内的非标比例仍保留同比例定制（装配体 1.444、加长 1.769 不回归）。"""
+    for w, h in [(429.0, 297.0), (1051.0, 594.0), (118800.0, 99782.0)]:
+        spec = sheet.guess_sheet(w, h)
+        assert spec.width / spec.height == pytest.approx(w / h, rel=1e-6)
+
+
+def test_fit_box_to_spec_extends_vertically_centered():
+    """fit_box_to_spec：宽度不变、高度垂直居中扩到 spec 比例；标准框原样返回。"""
+    spec = sheet.guess_sheet(1930.0, 833.0)
+    box = [15.0, 13.5, 1945.3, 846.5]
+    out = sheet.fit_box_to_spec(box, spec)
+    w = out[2] - out[0]
+    h = out[3] - out[1]
+    assert w == pytest.approx(1930.3)              # 宽度严格不变
+    assert w / h == pytest.approx(2 ** 0.5, rel=1e-6)
+    assert out[1] < box[1] and out[3] > box[3]     # 垂直居中双向扩展
+    # 标准幅面（比例一致）不受影响
+    assert sheet.fit_box_to_spec(
+        [0.0, 0.0, 841.0, 594.0], sheet.guess_sheet(841.0, 594.0)) == \
+        [0.0, 0.0, 841.0, 594.0]
+
+
 # --------------------------------------------------------------------------
 # 2. 模板重定向：黄金对照
 # --------------------------------------------------------------------------
