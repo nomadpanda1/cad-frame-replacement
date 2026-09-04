@@ -125,20 +125,65 @@ def _tight_titlebar_rect(doc, tb, outer):
     return best
 
 
+def _titlebar_real_hits(doc, tb_rect, min_olap=1.0):
+    """标题栏物理矩形内的真实重叠实体（实体级精确判定，2026-09-04 三修）。
+
+    只统计与新标题栏矩形**真实重叠**（重叠区 x/y 双向均 >min_olap mm）的
+    模型空间实体。贯穿线（水平/垂直，bbox 宽或高为 0 → 重叠量 0）与
+    仅靠近不重叠（负重叠 = 在 margin 之外）的实体不算——标题栏压到一条
+    贯穿中心线属于可接受的制图常态，不值得为此改变整幅图幅。
+    排除 HH_FRAME 模板自身。"""
+    from ezdxf import bbox as _eb
+    hits = []
+    tx0, ty0, tx1, ty1 = tb_rect
+    for e in doc.modelspace():
+        if e.dxftype() == "INSERT" and e.dxf.name.startswith("HH_FRAME"):
+            continue
+        try:
+            b = _eb.extents([e])
+        except Exception:
+            continue
+        if not b or not b.has_data:
+            continue
+        ox = min(b.extmax.x, tx1) - max(b.extmin.x, tx0)
+        oy = min(b.extmax.y, ty1) - max(b.extmin.y, ty0)
+        if ox > min_olap and oy > min_olap:
+            hits.append(e)
+    return hits
+
+
 def _avoid_titlebar_overlap(doc, tpl, frame_box, fit="max",
                             margin=8.0, kmax=2.0):
-    """标题栏遮挡规避——加长图幅式（2026-09-04，用户反馈二修）。
+    """标题栏遮挡规避——加长图幅式，仅真实重叠时触发（2026-09-04 三修）。
 
-    第一版用「等比放大」避让（35kV k=1.15 尚可，但装配体图纸 k=1.85 把图框
-    放大近一倍，内容反衬得极小，用户反馈"比例出了问题"）。改为 GB 加长幅面
-    式：**只向右加长、高度不动**——内容保持原大小在左侧，新标题栏（标准尺寸
-    不随幅面缩放）随右框边移到加长出的空白区。打印比例关系不变。
-    返回 (新frame_box, 是否加长)。调用方在加长后须用 tplctx 按 新宽高比
-    重新 retarget 模板（自定义 C<w>X<h>），否则 fit=max 会因比例失配溢出。
+    二修用「全内容大包围盒」判相交——任何图的新标题栏矩形都必然落在内容
+    包围盒内，判定恒真 → **所有 raw-frame 图全部加长**（用户否决："不能
+    所有的图纸都用这种修复方式"）。三修改为实体级精确判定
+    （_titlebar_real_hits）：删除管线执行完、旧标题栏清干净之后，与新标题栏
+    物理矩形**真实重叠**（重叠区 >1mm）的内容实体存在才加长；贯穿线与
+    擦边不算。装配体图纸由此回到 09-01 验收效果（C429X297 同比例定制，
+    零图幅变化）；35kV 这类标题栏区真压内容（设备表）的才触发加长。
+    只向右加长、高度不动——内容保持原大小在左侧，新标题栏（标准尺寸
+    不随幅面缩放）随右框边移到加长出的空白区。调用方在加长后须用 tplctx
+    按新宽高比重新 retarget 模板（自定义 C<w>X<h>）。
     需要加长超过 kmax 倍仍避不开时放弃（保持原框，宁重叠勿畸形）。
     """
     tbr = _title_block_rect(tpl)
     if tbr is None:
+        return frame_box, False
+    x0, y0, x1, y1 = frame_box
+    FW = x1 - x0
+    FH = y1 - y0
+    if FW <= 0 or FH <= 0:
+        return frame_box, False
+
+    # 当前插入下的标题栏物理矩形与物理宽度
+    _r0 = {"bbox": list(frame_box)}
+    s_cur, ix_cur, iy_cur = block_replace._compute_transform(tpl, _r0, fit)
+    tb_cur = (ix_cur + tbr[0] * s_cur, iy_cur + tbr[1] * s_cur,
+              ix_cur + tbr[2] * s_cur, iy_cur + tbr[3] * s_cur)
+    hits = _titlebar_real_hits(doc, tb_cur, min_olap=1.0)
+    if not hits:
         return frame_box, False
     try:
         from ezdxf import bbox as _eb
@@ -147,32 +192,14 @@ def _avoid_titlebar_overlap(doc, tpl, frame_box, fit="max",
         return frame_box, False
     if not _ext or not _ext.has_data:
         return frame_box, False
-    C = (_ext.extmin.x, _ext.extmin.y, _ext.extmax.x, _ext.extmax.y)
-    x0, y0, x1, y1 = frame_box
-    FW = x1 - x0
-    FH = y1 - y0
-    if FW <= 0 or FH <= 0:
-        return frame_box, False
-
-    def _hit(r):
-        return not (r[2] < C[0] - margin or r[0] > C[2] + margin or
-                    r[3] < C[1] - margin or r[1] > C[3] + margin)
-
-    # 当前插入下的标题栏物理矩形与物理宽度
-    _r0 = {"bbox": list(frame_box)}
-    s_cur, ix_cur, iy_cur = block_replace._compute_transform(tpl, _r0, fit)
-    tb_cur = (ix_cur + tbr[0] * s_cur, iy_cur + tbr[1] * s_cur,
-              ix_cur + tbr[2] * s_cur, iy_cur + tbr[3] * s_cur)
-    if not _hit(tb_cur):
-        return frame_box, False
     tbw = (tbr[2] - tbr[0]) * s_cur
-    x1_new = C[2] + margin + tbw
+    x1_new = _ext.extmax.x + margin + tbw
     if (x1_new - x0) > FW * kmax or x1_new <= x1:
         print("   遮挡规避：需加长超过 %.1f 倍仍避不开内容 → 保持原 frame_box" % kmax)
         return frame_box, False
-    print("   遮挡规避：新标题栏与内容相交 → 图幅向右加长 %.0fmm（高度不变），"
+    print("   遮挡规避：新标题栏与 %d 个内容实体真实重叠 → 图幅向右加长 %.0fmm（高度不变），"
           "frame_box (%.0f,%.0f)-(%.0f,%.0f)→(%.0f,%.0f)-(%.0f,%.0f)"
-          % (x1_new - x1, x0, y0, x1, y1, x0, y0, x1_new, y1))
+          % (len(hits), x1_new - x1, x0, y0, x1, y1, x0, y0, x1_new, y1))
     return (x0, y0, x1_new, y1), True
 
 
