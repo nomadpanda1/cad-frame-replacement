@@ -126,67 +126,54 @@ def _tight_titlebar_rect(doc, tb, outer):
 
 
 def _avoid_titlebar_overlap(doc, tpl, frame_box, fit="max",
-                            margin=8.0, kmax=2.5):
-    """标题栏遮挡规避（2026-09-04，35kV 全页图用户反馈）。
+                            margin=8.0, kmax=2.0):
+    """标题栏遮挡规避——加长图幅式（2026-09-04，用户反馈二修）。
 
-    内容铺满整页时，新标题栏（贴新框右下角）必然压在内容上。把 frame_box 以
-    左下角为锚按比例 k 放大（幅面宽高比不变，已 retarget 的模板仍精确适配，
-    fit=max 下新框尺寸即模板块实际占位），让标题栏随框移到右下空白区；
-    无遮挡时 k=1 原样返回。k 上限 2.5，仍避不开则保持原样（宁勿过度放大）。
+    第一版用「等比放大」避让（35kV k=1.15 尚可，但装配体图纸 k=1.85 把图框
+    放大近一倍，内容反衬得极小，用户反馈"比例出了问题"）。改为 GB 加长幅面
+    式：**只向右加长、高度不动**——内容保持原大小在左侧，新标题栏（标准尺寸
+    不随幅面缩放）随右框边移到加长出的空白区。打印比例关系不变。
+    返回 (新frame_box, 是否加长)。调用方在加长后须用 tplctx 按 新宽高比
+    重新 retarget 模板（自定义 C<w>X<h>），否则 fit=max 会因比例失配溢出。
+    需要加长超过 kmax 倍仍避不开时放弃（保持原框，宁重叠勿畸形）。
     """
     tbr = _title_block_rect(tpl)
     if tbr is None:
-        return frame_box
+        return frame_box, False
     try:
         from ezdxf import bbox as _eb
         _ext = _eb.extents(doc.modelspace())
     except Exception:
-        return frame_box
+        return frame_box, False
     if not _ext or not _ext.has_data:
-        return frame_box
+        return frame_box, False
     C = (_ext.extmin.x, _ext.extmin.y, _ext.extmax.x, _ext.extmax.y)
-    tx0, ty0, tx1, ty1 = tpl["bbox"]
-    tw = max(1e-6, tx1 - tx0)
-    th = max(1e-6, ty1 - ty0)
     x0, y0, x1, y1 = frame_box
     FW = x1 - x0
     FH = y1 - y0
     if FW <= 0 or FH <= 0:
-        return frame_box
-
-    def _tb_rect(k):
-        """frame_box 放大 k 倍（左下角锚定）后，新标题栏的物理矩形。"""
-        rw, rh = FW * k, FH * k
-        if fit == "max":
-            s = max(rw / tw, rh / th)
-        elif fit == "min":
-            s = min(rw / tw, rh / th)
-        elif fit == "width":
-            s = rw / tw
-        else:
-            s = rh / th
-        ix = x0 + (rw - tw * s) / 2 - tx0 * s
-        iy = y0 + (rh - th * s) / 2 - ty0 * s
-        return (ix + tbr[0] * s, iy + tbr[1] * s,
-                ix + tbr[2] * s, iy + tbr[3] * s)
+        return frame_box, False
 
     def _hit(r):
         return not (r[2] < C[0] - margin or r[0] > C[2] + margin or
                     r[3] < C[1] - margin or r[1] > C[3] + margin)
 
-    if not _hit(_tb_rect(1.0)):
-        return frame_box
-    k = 1.0
-    while k < kmax:
-        k = round(k + 0.05, 2)
-        if not _hit(_tb_rect(k)):
-            _nb = (x0, y0, x0 + FW * k, y0 + FH * k)
-            print("   遮挡规避：新标题栏与内容相交 → 图框按比例放大 k=%.2f，"
-                  "frame_box (%.0f,%.0f)-(%.0f,%.0f)→(%.0f,%.0f)-(%.0f,%.0f)"
-                  % (k, x0, y0, x1, y1, _nb[0], _nb[1], _nb[2], _nb[3]))
-            return _nb
-    print("   遮挡规避：放大 %.1f 倍仍避不开内容 → 保持原 frame_box" % kmax)
-    return frame_box
+    # 当前插入下的标题栏物理矩形与物理宽度
+    _r0 = {"bbox": list(frame_box)}
+    s_cur, ix_cur, iy_cur = block_replace._compute_transform(tpl, _r0, fit)
+    tb_cur = (ix_cur + tbr[0] * s_cur, iy_cur + tbr[1] * s_cur,
+              ix_cur + tbr[2] * s_cur, iy_cur + tbr[3] * s_cur)
+    if not _hit(tb_cur):
+        return frame_box, False
+    tbw = (tbr[2] - tbr[0]) * s_cur
+    x1_new = C[2] + margin + tbw
+    if (x1_new - x0) > FW * kmax or x1_new <= x1:
+        print("   遮挡规避：需加长超过 %.1f 倍仍避不开内容 → 保持原 frame_box" % kmax)
+        return frame_box, False
+    print("   遮挡规避：新标题栏与内容相交 → 图幅向右加长 %.0fmm（高度不变），"
+          "frame_box (%.0f,%.0f)-(%.0f,%.0f)→(%.0f,%.0f)-(%.0f,%.0f)"
+          % (x1_new - x1, x0, y0, x1, y1, x0, y0, x1_new, y1))
+    return (x0, y0, x1_new, y1), True
 
 
 def _sanitize_blocks(doc):
@@ -891,12 +878,17 @@ def main():
                             n_fb = block_replace.delete_frame_border(doc, tuple(outer), tb=tb if tb_ok else None)
                             n_strip = block_replace.delete_title_strip(doc, tuple(outer))
                             n_left = block_replace.delete_frameish_leftovers(doc, tuple(outer))
-                            # —— 遮挡规避（2026-09-04，35kV 用户反馈）：内容铺满整页时
-                            #    新标题栏必然压在内容上。旧框已删，msp 剩余即真实内容
-                            #    包络；新标题栏与之相交时按比例放大 frame_box（左下角
-                            #    锚定，幅面比例不变，模板仍精确适配），让标题栏移到空白区。
-                            frame_box = _avoid_titlebar_overlap(
+                            # —— 遮挡规避（2026-09-04 二修）：新标题栏压内容时按
+                            #    GB 加长幅面式**只向右加长、高度不动**（第一版等比
+                            #    放大 k=1.85 被用户否决：内容反衬极小、比例失真）。
+                            #    加长后须按新宽高比重新 retarget 模板（自定义
+                            #    C<w>X<h>），标题栏保持标准尺寸随右框边移到空白区。
+                            frame_box, _elongated = _avoid_titlebar_overlap(
                                 doc, tpl, list(frame_box), fit=args.fit or "max")
+                            if _elongated and tplctx is not None and not no_frame:
+                                tpl, spec = tplctx.template_for(list(frame_box), no_frame=no_frame)
+                                if spec is not None:
+                                    tplctx.note(list(frame_box), spec, (spec.width, spec.height))
                             region = {"bbox": frame_box, "confidence": 1.0, "method": "frame",
                                       "source": "sheet", "entity": None}
                             # #3：尊重 GUI「缩放」选择（args.fit），不再写死 "max"
