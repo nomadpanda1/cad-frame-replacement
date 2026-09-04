@@ -728,12 +728,16 @@ def main():
                                          tb[0] >= outer[0] + 0.30 * _fw and
                                          (tb[3] - tb[1]) <= 0.35 * _fh and
                                          (tb[2] - tb[0]) <= 0.65 * _fw)
-                            n_tb = raw_replace.delete_titleblock(doc, tb, maxdim) if tb_ok else 0
+                            n_tb = raw_replace.delete_titleblock(doc, tb, maxdim, outer=outer) if tb_ok else 0
                             # #7：清旧「打散」图框层残留（标题栏网格+字段标签）——这些常落在
                             #     tb 之外（左栏 x<111、页中分隔线 y=105/155），delete_titleblock
                             #     按 tb 区域删会漏，导致替换后残留横线。图框层只承载旧框几何，
-                            #     新 HH_FRAME 在 HH_TITLE/0 层，整层清残留安全；INSERT/HATCH 保留。
-                            n_grid = raw_replace.delete_old_frame_grid(doc)
+                            #     新 HH_FRAME 在 HH_TITLE/0 层。
+                            #     2026-09-01 收紧（35kV 全页误删修复）：CADDesigner 等生成器把
+                            #     真实内容（设备表/母线/柜阵列）也画在 FRAME 层，「整层清空」误删
+                            #     103 条。现只删外框环带(20mm)内 + 检测到的旧 tb 区域内的图框层
+                            #     实体，其余保留。multi 路径（line 211）保持整层清理不动。
+                            n_grid = raw_replace.delete_old_frame_grid(doc, outer=outer, tb=tb if tb_ok else None)
                             # #8：清掉旧标题栏字段值（如 layer 0 上的“法兰”“PLA”），它们已
                             #     被提取回填到新模板 ATTRIB，不删会与新标题栏文字重叠。
                             n_txt = raw_replace.delete_titleblock_text(doc, tb) if tb_ok else 0
@@ -747,7 +751,7 @@ def main():
                             # 2026-08-31 补新核心清理：逐框 4 规则删旧框 + 标题带/标签证据
                             # 盒清旧标题栏值（单帧路径此前漏删 layer 0 的旧图名/比例值，
                             # 如从法兰 “从动轮法兰”/“2:1”）+ 图框命名层整层残体
-                            n_fb = block_replace.delete_frame_border(doc, tuple(outer))
+                            n_fb = block_replace.delete_frame_border(doc, tuple(outer), tb=tb if tb_ok else None)
                             n_strip = block_replace.delete_title_strip(doc, tuple(outer))
                             n_left = block_replace.delete_frameish_leftovers(doc, tuple(outer))
                             region = {"bbox": frame_box, "confidence": 1.0, "method": "frame",

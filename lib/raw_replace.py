@@ -178,7 +178,80 @@ def _is_title_frame_layer(layer):
 
 
 
-def delete_titleblock(doc, tb, maxdim=None):
+def frame_geo_hit(eb, frame_bbox, tb=None, band=20.0):
+    """几何判据：实体是否属旧框几何（35kV 全页误删修复的统一判据）。
+
+    满足其一即判为旧框几何：
+      1) bbox 与外框环带（frame_bbox 四边各 band 深的边带）相交——真实旧框线/
+         刻度/区号必然贴边；
+      2) bbox 中心落在 tb 内——旧标题栏网格/字段的中心必然在标题栏区域里。
+    tb 为 None 时用右下角伪 tb（x 右半 × y 下 30%）近似。图框层上的内容实体
+    （设备表/柜阵列/母线竖线等）两者皆不满足，从而与旧框几何区分开。
+    """
+    x0, y0, x1, y1 = [float(v) for v in frame_bbox]
+    if tb is None:
+        tb = (x0 + 0.5 * (x1 - x0), y0, x1, y0 + 0.3 * (y1 - y0))
+    ex0, ey0, ex1, ey1 = eb
+    strips = (
+        (x0 - band, y0 - band, x1 + band, y0 + band),  # 下
+        (x0 - band, y1 - band, x1 + band, y1 + band),  # 上
+        (x0 - band, y0 - band, x0 + band, y1 + band),  # 左
+        (x1 - band, y0 - band, x1 + band, y1 + band),  # 右
+    )
+    for sx0, sy0, sx1, sy1 in strips:
+        if ex0 <= sx1 and ex1 >= sx0 and ey0 <= sy1 and ey1 >= sy0:
+            return True
+    cx, cy = (ex0 + ex1) / 2.0, (ey0 + ey1) / 2.0
+    return tb[0] <= cx <= tb[2] and tb[1] <= cy <= tb[3]
+
+
+def title_layer_purity(doc, frame_bbox, tb=None, band=20.0, thresh=0.9):
+    """统计各图框命名层的「纯净度」：层上与本图框区域相关的线/文本实体中，
+    满足 frame_geo_hit 的比例。
+
+    >= thresh（默认 0.9）判为纯净层——层上几乎只有旧框几何（SolidWorks 打散
+    图框层），可保留「区域内按层名自由删」的旧特权；否则为混合层（CADDesigner
+    等生成器把真实内容也画在 FRAME 层），调用方必须收回层特权、仅按几何删除。
+    结果按 (frame_bbox, tb) 缓存在 doc 上，避免重复扫描。"""
+    key = (tuple(round(float(v), 1) for v in frame_bbox),
+           None if tb is None else tuple(round(float(v), 1) for v in tb))
+    cache = getattr(doc, "_title_layer_purity_cache", None)
+    if cache is None:
+        cache = {}
+        doc._title_layer_purity_cache = cache
+    if key in cache:
+        return cache[key]
+    x0, y0, x1, y1 = [float(v) for v in frame_bbox]
+    if tb is None:
+        tb = (x0 + 0.5 * (x1 - x0), y0, x1, y0 + 0.3 * (y1 - y0))
+    stats = {}
+    for e in doc.modelspace():
+        layer = (e.dxf.layer or "").strip().lower()
+        if not _is_title_frame_layer(layer):
+            continue
+        if e.dxftype() not in ("LINE", "LWPOLYLINE", "POLYLINE", "TEXT", "MTEXT"):
+            continue
+        try:
+            b = bbox_mod.extents([e])
+        except Exception:
+            continue
+        if not b or not b.has_data:
+            continue
+        eb = (b.extmin.x, b.extmin.y, b.extmax.x, b.extmax.y)
+        if (eb[0] > x1 + band or eb[2] < x0 - band or
+                eb[1] > y1 + band or eb[3] < y0 - band):
+            continue  # 与本图框无关（多框图纸的其他帧实体）
+        st = stats.setdefault(layer, [0, 0])
+        st[1] += 1
+        if frame_geo_hit(eb, frame_bbox, tb, band):
+            st[0] += 1
+    purity = {layer: (tot == 0 or cnt / float(tot) >= thresh)
+              for layer, (cnt, tot) in stats.items()}
+    cache[key] = purity
+    return purity
+
+
+def delete_titleblock(doc, tb, maxdim=None, outer=None):
     """删标题栏区域内「旧标题栏自身」实体，保留真实绘图内容。
 
     住宅电气图等内容铺满全图的图纸，标题栏区域（右下约 14%）与绘图内容大面积重合，
@@ -205,6 +278,15 @@ def delete_titleblock(doc, tb, maxdim=None):
             continue
         layer = (e.dxf.layer or "").lower()
         if layer in _TITLE_LAYERS or layer.startswith("tukuang"):
+            # 2026-09-01（35kV 修复）：混合图框层（层上混有真实内容）的实体
+            # 不再凭「与 tb 相交」就删——只删中心落在 tb 内的（旧标题栏自身）；
+            # 纯净图框层（SW 打散图框）保持旧的相交口径。
+            if outer is not None:
+                pur = title_layer_purity(doc, outer, tb=tb)
+                if not pur.get(layer, True):
+                    cx, cy = (eb[0] + eb[2]) / 2.0, (eb[1] + eb[3]) / 2.0
+                    if not (tb[0] <= cx <= tb[2] and tb[1] <= cy <= tb[3]):
+                        continue
             msp.delete_entity(e); n += 1; continue
         if dt in ("TEXT", "MTEXT"):
             txt = (e.text if dt == "MTEXT" else e.dxf.text) or ""
@@ -213,27 +295,64 @@ def delete_titleblock(doc, tb, maxdim=None):
     return n
 
 
-def delete_old_frame_grid(doc):
+def delete_old_frame_grid(doc, outer=None, tb=None, band=20.0):
     """raw-frame 回退专用：清掉旧「打散」图框层残留的标题栏网格与字段标签。
 
     适用场景：SolidWorks 导出的图框打散成线段落在专门的图框层（图框/tukuang…），
     该层只承载旧图框/标题栏几何，真实绘图内容在 0/粗实线层。
-    新公司图框（HH_FRAME_*）插入在 HH_TITLE/0 层，与本层无交集，故可整层清残留。
+    新公司图框（HH_FRAME_*）插入在 HH_TITLE/0 层，与本层无交集，故可清残留。
+
+    2026-09-01 收紧（35kV 全页误删修复）：CADDesigner 等生成器会把真实内容
+    （设备表网格/母线/柜阵列/变压器符号框）也画在 FRAME 图框层上，「整层清空」
+    的设计假设（图框层只承载旧框几何）被打破，实测误删 103 条 FRAME 层内容。
+    收紧为：outer 给定时，图框层实体只删以下两类——
+      1) bbox 完全落在 outer 外框环带（四条 band 深的边带）内 → 旧框线/刻度/区号；
+      2) bbox 与检测到的旧标题栏 tb 相交 → 旧标题栏网格+字段（含 tb 外扩一点）。
+    其余图框层实体（内容网格/母线/符号框等）一律保留。outer=None 时保持旧的
+    整层清理行为（multi 路径从法兰修复依赖它，且该路径无逐框 tb 可用）。
 
     删除：图框层上的 LINE/LWPOLYLINE/POLYLINE（框线/标题栏网格）+ TEXT/MTEXT（旧字段标签）。
     保留：INSERT（SW 中心标记等符号块）与 HATCH（剖面线）等真实标注，绝不误删。
     """
     msp = doc.modelspace()
     n = 0
+    strips = None
+    if outer is not None:
+        x0, y0, x1, y1 = outer
+        strips = [
+            (x0 - band, y0 - band, x1 + band, y0 + band),  # 下边带
+            (x0 - band, y1 - band, x1 + band, y1 + band),  # 上边带
+            (x0 - band, y0 - band, x0 + band, y1 + band),  # 左边带
+            (x1 - band, y0 - band, x1 + band, y1 + band),  # 右边带
+        ]
     for e in list(msp):
         dt = e.dxftype()
         layer = (e.dxf.layer or "").lower()
         on_title = layer in _TITLE_LAYERS or layer.startswith("tukuang")
         if not on_title:
             continue
-        if dt in ("LINE", "LWPOLYLINE", "POLYLINE", "TEXT", "MTEXT"):
-            msp.delete_entity(e); n += 1
-        # INSERT / HATCH / DIMENSION 等真实标注一律保留
+        if dt not in ("LINE", "LWPOLYLINE", "POLYLINE", "TEXT", "MTEXT"):
+            continue  # INSERT / HATCH / DIMENSION 等真实标注一律保留
+        if strips is not None:
+            try:
+                b = bbox_mod.extents([e])
+            except Exception:
+                continue
+            if not b or not b.has_data:
+                continue
+            eb = (b.extmin.x, b.extmin.y, b.extmax.x, b.extmax.y)
+            in_band = any(eb[0] >= s[0] and eb[1] >= s[1] and
+                          eb[2] <= s[2] and eb[3] <= s[3] for s in strips)
+            in_tb = False
+            if tb is not None:
+                # 中心点判定（35kV 复核收紧）：仅「相交」会把只伸进 tb 一角的
+                # 大型内容框（设备表 520..1075×55..441 与比例尺线）也删掉；
+                # 旧标题栏自身网格的中心必然落在 tb 内。
+                cx, cy = (eb[0] + eb[2]) / 2.0, (eb[1] + eb[3]) / 2.0
+                in_tb = tb[0] <= cx <= tb[2] and tb[1] <= cy <= tb[3]
+            if not (in_band or in_tb):
+                continue  # 图框层上的真实内容（表格/母线/符号框）→ 保留
+        msp.delete_entity(e); n += 1
     return n
 
 
@@ -244,6 +363,10 @@ def delete_titleblock_text(doc, tb):
     而非图框层。这些值已被提取并回填到新 HH_FRAME 的 ATTRIB 中，若不清理会与新
     标题栏重叠。新模板以 INSERT 块形式插入，其字段是块内 ATTRIB，不在 msp 顶层，
     因此删除顶层 TEXT/MTEXT 不会误伤新模板。
+
+    2026-09-01 加内容层白名单守卫：tb 可能被内容撑大（35kV 图实测），区域内
+    内容层（_CONTENT_LAYER_HINTS）上的文字一律保留；0/数字层文字仍删（SW 旧
+    标题栏字段值常落在通用层，这正是本函数用途）。
     """
     msp = doc.modelspace()
     n = 0
@@ -251,6 +374,9 @@ def delete_titleblock_text(doc, tb):
         dt = e.dxftype()
         if dt not in ("TEXT", "MTEXT"):
             continue
+        layer = (e.dxf.layer or "").strip().lower()
+        if layer in _CONTENT_LAYER_HINTS:
+            continue  # 内容层白名单守卫：真实标注文字一律保留
         try:
             b = bbox_mod.extents([e])
         except Exception:
@@ -275,6 +401,13 @@ def delete_titleblock_grid(doc, tb):
     若真实绘图内容与标题栏区域大面积重合（住宅/电气图常见），会误删。
     raw-frame 路径已用 detect_titleblock 把 tb 圈定在小区域，对「打散图框」
     类图纸（标题栏相对独立）安全。保留 INSERT/HATCH 真实标注。
+
+    2026-09-01 加内容层白名单守卫（35kV 全页误删修复）：detect_titleblock 的 tb
+    可能被内容虚线网格撑大（实测 35kV 图 tb 膨胀到 (944,8)-(1172,90)，把右下角
+    WIRE 层内容网格圈了进去），按区域无差别删线会误删 27 条 WIRE 内容。现跳过
+    _CONTENT_LAYER_HINTS 内容层（wire/墙/轴线/标注等）上的线类；0/数字层不加
+    守卫——SW 旧标题栏网格本来就常在通用层，那是本函数的核心用途（宁漏勿误：
+    内容层残留旧标题栏的概率远低于内容层本身是真实内容的概率）。
     """
     msp = doc.modelspace()
     n = 0
@@ -282,6 +415,9 @@ def delete_titleblock_grid(doc, tb):
         dt = e.dxftype()
         if dt not in ("LINE", "LWPOLYLINE", "POLYLINE"):
             continue
+        layer = (e.dxf.layer or "").strip().lower()
+        if layer in _CONTENT_LAYER_HINTS:
+            continue  # 内容层白名单守卫：真实绘图内容一律保留
         try:
             b = bbox_mod.extents([e])
         except Exception:
@@ -290,6 +426,12 @@ def delete_titleblock_grid(doc, tb):
             continue
         eb = (b.extmin.x, b.extmin.y, b.extmax.x, b.extmax.y)
         if eb[2] < tb[0] or eb[0] > tb[2] or eb[3] < tb[1] or eb[1] > tb[3]:
+            continue
+        # 中心点判定（35kV 复核收紧）：仅「相交」会把只伸进 tb 一角的内容
+        # （设备表大框/比例尺线/外框整框 LWPOLYLINE）也删掉；SW 旧标题栏
+        # 网格是短格线，中心必然落在 tb 内。
+        cx, cy = (eb[0] + eb[2]) / 2.0, (eb[1] + eb[3]) / 2.0
+        if not (tb[0] <= cx <= tb[2] and tb[1] <= cy <= tb[3]):
             continue
         msp.delete_entity(e); n += 1
     return n

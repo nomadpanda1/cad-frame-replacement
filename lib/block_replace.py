@@ -89,8 +89,22 @@ def _delete_line_rect(msp, lines, frame_bbox, tol=2.5):
     return 0
 
 
+def _mixed_title_layers(doc, frame_bbox):
+    """返回「混合」图框命名层集合（2026-09-01，35kV 全页误删修复）。
+
+    CADDesigner 等生成器把真实内容（设备表/柜阵列/母线/符号框）也画在 FRAME
+    图框层上，本模块对图框命名层的「区域内按层名自由删」特权会大面积误删。
+    以 raw_replace.title_layer_purity（阈值 0.9）判定：层上实体几乎全是旧框
+    几何（SW 打散图框层）才保留特权，混合层一律收回。"""
+    try:
+        pur = _rr.title_layer_purity(doc, frame_bbox)
+    except Exception:
+        return set()
+    return {lay for lay, p in pur.items() if not p}
+
+
 def delete_frame_border(doc, frame_bbox, tol=2.5, inner_ratio=0.8,
-                        record_cells=True):
+                        record_cells=True, tb=None):
     """删除与 frame_bbox 重合/包含/对齐的旧图框几何（外框 + 内框 + 纸边外框），
     返回删除数。覆盖四种旧框画法，避免残留（零误删前提下只删明确的框几何）：
       (1) 闭合矩形外框 bbox 与检测框基本一致；
@@ -148,12 +162,33 @@ def delete_frame_border(doc, frame_bbox, tol=2.5, inner_ratio=0.8,
             # (4) 与检测框 >=2 边重合（旧框内部分隔线）；或完全包含于检测框且
             #     贴 >=1 条边（旧框内小分隔格，如标题栏单元格）。仅图框层/0/默认层，
             #     避免误删图内几何。CNG 等内容矩形虽在框内但不贴框边 -> 不受影响。
-            if not hit and frameish and _intersect(r, (x0, y0, x1, y1)):
+            #     2026-09-01（35kV 修复）：图框命名层还须满足几何判据——
+            #     align>=2（贯穿分隔线）用「与外框环带相交」；contained+align>=1
+            #     （标题栏单元格）用「中心在 tb 内」（tb 缺省时退化右下角伪 tb）。
+            #     atol 下限 50mm 使「贴边」口径过宽，设备表外框（左缘距框边
+            #     34mm）、上子面板（顶缘距框边 14.5mm）等内容矩形被误判为旧框
+            #     分隔线，还会被记成墓碑盒引发 delete_title_strip 级联误删。
+            #     0/默认层维持原口径不动。
+            if not hit and _intersect(r, (x0, y0, x1, y1)):
                 contained = (r[0] >= x0 - atol and r[1] >= y0 - atol and
                              r[2] <= x1 + atol and r[3] <= y1 + atol)
                 align = (abs(r[0] - x0) < atol) + (abs(r[2] - x1) < atol) + \
                         (abs(r[1] - y0) < atol) + (abs(r[3] - y1) < atol)
-                if align >= 2 or (contained and align >= 1):
+                frameish_ok = False
+                if layer in ("0", ""):
+                    frameish_ok = True
+                elif _rr._is_title_frame_layer(layer):
+                    if align >= 2:
+                        frameish_ok = _rr.frame_geo_hit(
+                            (r[0], r[1], r[2], r[3]), frame_bbox,
+                            tb=None if tb is not None else (0, 0, -1, -1))
+                        # frame_geo_hit 含伪 tb 中心分支，align>=2 只看环带：
+                        # 上面传空 tb 使中心分支恒 False，仅环带生效
+                    elif contained and align >= 1:
+                        frameish_ok = _rr.frame_geo_hit(
+                            (r[0], r[1], r[2], r[3]), frame_bbox, tb=tb,
+                            band=0.0)  # band=0 禁用环带分支，仅中心在 tb 内
+                if frameish_ok and (align >= 2 or (contained and align >= 1)):
                     hit = True
                     rule_no = 4
             if hit:
@@ -245,6 +280,8 @@ def delete_title_strip(doc, frame_bbox, strip_ratio=0.28):
     fx0, fy0, fx1, fy1 = frame_bbox
     W = fx1 - fx0
     H = fy1 - fy0
+    # 2026-09-01（35kV 修复）：混合图框层收回「区域内按层名自由删」特权
+    mixed_layers = _mixed_title_layers(doc, frame_bbox)
     zx0 = fx0 + 0.45 * W      # 标题区左界（右 55%）
     zy1 = fy0 + strip_ratio * H  # 标题区上界（底 strip_ratio）
     # 长线阈值：超过此长度视为"几何/尺寸线"而非标题栏格线
@@ -406,6 +443,8 @@ def delete_title_strip(doc, frame_bbox, strip_ratio=0.28):
             # STAIR 118/WIRE 等共 540 条内容层实体）。
             if not _rr._is_title_frame_layer(layer):
                 continue
+            if layer in mixed_layers:
+                continue  # 混合图框层：内容与旧框混居，宁漏勿误
             try:
                 b = bbox_mod.extents([e])
             except Exception:
@@ -447,7 +486,7 @@ def delete_title_strip(doc, frame_bbox, strip_ratio=0.28):
                 dt in _TITLE_TEXT and relax_hints):
             continue  # 内容层白名单（有标签证据时对文本放开）
         zero = _rr._is_zero_layer(layer)
-        frameish = _rr._is_title_frame_layer(layer)
+        frameish = _rr._is_title_frame_layer(layer) and layer not in mixed_layers
         if dt in _TITLE_TEXT:
             try:
                 ip = e.dxf.insert
@@ -508,6 +547,8 @@ def delete_frameish_leftovers(doc, frame_bbox, tol=1.0):
     fx0, fy0, fx1, fy1 = frame_bbox
     W = fx1 - fx0
     H = fy1 - fy0
+    # 2026-09-01（35kV 修复）：混合图框层收回特权
+    mixed_layers = _mixed_title_layers(doc, frame_bbox)
     zx0 = fx0 + 0.45 * W      # 与 delete_title_strip 标题区一致
     zy1 = fy0 + 0.28 * H
     msp = doc.modelspace()
@@ -516,6 +557,8 @@ def delete_frameish_leftovers(doc, frame_bbox, tol=1.0):
         layer = (e.dxf.layer or "").lower()
         if not _rr._is_title_frame_layer(layer):
             continue
+        if layer in mixed_layers:
+            continue  # 混合图框层：内容与旧框混居，宁漏勿误
         dt = e.dxftype()
         if dt in ("DIMENSION", "LEADER"):
             continue
