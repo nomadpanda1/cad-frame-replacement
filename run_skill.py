@@ -72,6 +72,59 @@ def _title_block_rect(tpl):
     return None
 
 
+def _tight_titlebar_rect(doc, tb, outer):
+    """在检测框 tb 内找真实旧标题栏的紧凑矩形（字段提取用，2026-09-04）。
+
+    detect_titleblock 的 tb 可能被内容网格撑大（35kV 图 tb 顶被虚线网格顶到
+    y=90，把 y=79 的「站内道路（宽 4.0m）」内容文本圈进来，误提取成图名）。
+    旧标题栏自身是一个贴 tb 右下角的闭合矩形，这里取 tb 内最大的、贴右/下边
+    （20mm 内）的闭合矩形作为紧凑提取框；找不到则原样返回 tb。
+    仅用于字段提取，不影响删除守卫的 tb。"""
+    if not tb:
+        return tb
+    from ezdxf import bbox as _eb
+    msp = doc.modelspace()
+    best, best_area = None, 0.0
+    for e in msp:
+        if e.dxftype() not in ("LINE", "LWPOLYLINE", "POLYLINE"):
+            continue
+        try:
+            if e.dxftype() == "LWPOLYLINE":
+                closed = bool(e.dxf.flags & 1)
+                if not closed and len(e) >= 3:
+                    _p0, _p1 = e[0], e[-1]
+                    closed = (abs(float(_p0[0]) - float(_p1[0])) < 1e-6 and
+                              abs(float(_p0[1]) - float(_p1[1])) < 1e-6)
+            elif e.dxftype() == "POLYLINE":
+                closed = bool(e.is_closed)
+            else:
+                continue
+        except Exception:
+            continue
+        if not closed:
+            continue
+        try:
+            b = _eb.extents([e])
+        except Exception:
+            continue
+        if not b or not b.has_data:
+            continue
+        r = (b.extmin.x, b.extmin.y, b.extmax.x, b.extmax.y)
+        # 完全落在 tb 内（留 12mm 容差——tb 由文本锚点撑出，四边本就有几 mm 偏差），
+        # 且贴 tb 右边或下边 20mm 内
+        if (r[0] < tb[0] - 12 or r[1] < tb[1] - 12 or
+                r[2] > tb[2] + 12 or r[3] > tb[3] + 12):
+            continue
+        if not (abs(r[2] - tb[2]) < 20 or abs(r[1] - tb[1]) < 20):
+            continue
+        area = (r[2] - r[0]) * (r[3] - r[1])
+        if area > best_area and area < (tb[2] - tb[0]) * (tb[3] - tb[1]) * 0.95:
+            best, best_area = r, area
+    if best is None:
+        return tb
+    return best
+
+
 def _avoid_titlebar_overlap(doc, tpl, frame_box, fit="max",
                             margin=8.0, kmax=2.5):
     """标题栏遮挡规避（2026-09-04，35kV 全页图用户反馈）。
@@ -774,7 +827,11 @@ def main():
                                          _r0["bbox"][1] + (_tb_top - tpl["bbox"][1]) * _s))
                                 frame_box[1] = _r0["bbox"][1]
                         # 弱提取（extract：SW 单元式标题栏友好，正确抓 材料/比例/图名）
-                        old = extract.extract_fields(doc, {"bbox": tb, "method": "keyword", "entity": None})
+                        # 2026-09-04：tb 可能被内容撑大（35kV 图 y=79 的内容文本被圈进
+                        # tb 误提取成图名）——先收紧到 tb 内贴右/下角的最大闭合矩形
+                        # （真实旧标题栏自身），再提取。
+                        _tb_ex = _tight_titlebar_rect(doc, tb, outer) if tb else tb
+                        old = extract.extract_fields(doc, {"bbox": _tb_ex, "method": "keyword", "entity": None})
                         # 强提取（finder：冒号式标题栏友好，补 DWG_NO/STAGE/DATE/DESIGN）
                         # —— 高召回融合：弱为基础，强仅在弱未覆盖的概念上补充，避免强覆盖弱的正确值
                         try:

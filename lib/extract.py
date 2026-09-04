@@ -46,11 +46,20 @@ _CJK_RE = re.compile(r"[一-鿿]")
 
 # 图号（装配图编号，如 1-1 / 2-3）
 _DWGNO_RE = re.compile(r"^\d+-\d+$")
+# 日期（如 2026-09 / 2026.9.3 / 2026-09-04）——与装配图编号 \d+-\d+ 冲突，
+# 年份形态的优先按日期处理（2026-09-04，35kV 图日期值被误当日志号修复）
+_DATE_RE = re.compile(r"^(?:19|20)\d{2}[-/.]\d{1,2}(?:[-/.]\d{1,2})?$")
 # 重量（带小数的千克值，如 0.681；排除版本号 0.001 这类 <0.1 的小数）
 _WEIGHT_RE = re.compile(r"^\d+\.\d+$")
 
 
+def _is_date(txt):
+    return bool(_DATE_RE.match(txt.strip()))
+
+
 def _is_dwgno(txt):
+    if _is_date(txt):
+        return False  # 2026-09 这类年份形态是日期，不是装配图编号
     return bool(_DWGNO_RE.match(txt.strip()))
 
 
@@ -100,6 +109,27 @@ def _is_zone_mark(raw):
     return bool(re.fullmatch(r"[A-Za-z0-9]{1,2}", raw.strip()))
 
 
+def _split_label_value(raw):
+    """标签串里内嵌的值拆出来（2026-09-04，35kV 图修复）。
+
+    SolidWorks/CADDesigner 旧标题栏常把标签和值写在同一个 TEXT 里
+    （如 '图号 35kV-DB-02'、'比例 1:100'），整串被判成标签后值就丢了，
+    贪心配对只好拿邻近内容文本凑数。这里把首个概念别名剥掉，剩余部分
+    作为值候选。无剩余返回 None。"""
+    from .concepts import CONCEPT_ALIASES
+    aliases = sorted({a for al in CONCEPT_ALIASES.values() for a in al},
+                     key=len, reverse=True)
+    rem = raw.strip()
+    low = rem.lower()
+    for a in aliases:
+        idx = low.find(a)
+        if idx >= 0:
+            rem = rem[:idx] + rem[idx + len(a):]
+            break
+    rem = rem.strip(" ：:、.,=-_()")
+    return rem or None
+
+
 def _extract_from_text(doc, bbox):
     msp = doc.modelspace()
     items = []  # (norm_text, concept, raw, bb, is_field_label, is_struct_label)
@@ -127,6 +157,12 @@ def _extract_from_text(doc, bbox):
         is_field_label = concept is not None
         is_struct = (not is_field_label) and any(v in n for v in SW_TITLE_VOCAB)
         items.append((n, concept, raw, eb, is_field_label, is_struct))
+        if is_field_label:
+            # 标签内嵌值拆分（'图号 35kV-DB-02' → 值 '35kV-DB-02'）：
+            # 与标签同 bbox 的伪值条目，供下方值类型预路由/贪心配对使用
+            _sv = _split_label_value(raw)
+            if _sv and not _is_zone_mark(_sv):
+                items.append((n, None, _sv, eb, False, False))
 
     labels = [it for it in items if it[4]]
     values = [it for it in items if (not it[4]) and (not it[5]) and not _is_zone_mark(it[2])]
@@ -135,6 +171,7 @@ def _extract_from_text(doc, bbox):
     # 避免比例/材料码/图号/重量/图名被贪心匹配误派给相邻标签。
     ratio_vals = [v for v in values if _is_ratio(v[2])]
     mat_vals = [v for v in values if _looks_material(v[2])]
+    date_vals = [v for v in values if _is_date(v[2])]
     dwgno_vals = [v for v in values if _is_dwgno(v[2])]
     weight_vals = [v for v in values if _is_weight(v[2])]
     name_vals = [v for v in values if _looks_name(v[2])]
@@ -150,6 +187,7 @@ def _extract_from_text(doc, bbox):
 
     routed_ids = (set(id(v) for v in ratio_vals) |
                   set(id(v) for v in mat_vals) |
+                  set(id(v) for v in date_vals) |
                   set(id(v) for v in dwgno_vals) |
                   set(id(v) for v in weight_vals) |
                   (set([id(title_val)]) if title_val else set()))
@@ -161,6 +199,8 @@ def _extract_from_text(doc, bbox):
         reserved.add("SCALE")
     if mat_vals:
         reserved.add("MATERIAL")
+    if date_vals:
+        reserved.add("DATE")
     if dwgno_vals:
         reserved.add("DWG_NO")
     if weight_vals:
@@ -201,6 +241,8 @@ def _extract_from_text(doc, bbox):
         out["SCALE"] = ratio_vals[0][2]
     if mat_vals:
         out["MATERIAL"] = mat_vals[0][2]
+    if date_vals:
+        out["DATE"] = date_vals[0][2]
     if dwgno_vals:
         out["DWG_NO"] = dwgno_vals[0][2]
     if weight_vals:
